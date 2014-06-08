@@ -12,7 +12,7 @@ var flags = {
 	errors		:	true,//a flag for watching common errors
 	files		:	false,//a flag for watching file i/o
 	log			:	log,//a function to place logs into current log file
-	logging		:	true,//a flag for writing the log to a file
+	logging		:	false,//a flag for writing the log to a file
 	port		:	80,//the port the server will be listening on
 	socketIO 	:	false,//a flag for watching socket.io messages
 	sockets		:	true,//a flag for watching socket events

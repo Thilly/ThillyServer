@@ -18,13 +18,14 @@ sockets.on('connection', function(socket){
 
 <pre>
 
-//how the 'first' module gets the second module
+//how the 'second' module gets the 'first' module
+//from inside of the first module ('thillyLogging')
 var files = require('./thillyFiles.js');
 	files = new files(this);
 //that's half of what's needed to break the circular dependency in this file
 	
 	
-//inside of the 'first' module
+//inside of the 'second' module
 module.exports = function(logObject)
 {//dependency injected from thillyLogging to prevent circular dependency
 

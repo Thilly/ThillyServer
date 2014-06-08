@@ -23,6 +23,7 @@ module.exports = function(logObject)
 };//end of module.export
 
 /** errorHandle
+ *	takes care of error logging, displaying and general error stuff quickly
  *	@private 
  */
 function errorHandle(error, callback)
@@ -138,29 +139,29 @@ function readFile(fileName, callback)
 			if(error)//log any error
 				errorHandle({errno:1, errmsg:'File ' + fileName + ' not found.'}, callback);	
 			else
-			files.fstat(fd, function(error, stats){//get the stats
-				if(logging.files)//log them if need be
-					logging.log('fd: ' + fd + ' size: ' + stats.size);
-				if(stats.size == 0)
-					errorHandle({errno:2, errmsg:'File ' + fileName + ' is empty.'}, callback);
-				else
-				files.read(fd, new Buffer(stats.size), 0, stats.size, 0, function(error, bytesRead, bufferRead){//read the file
-					if(error)//log any error
-						errorHandle({errno:3, errmsg:'File ' + fileName + ' error during read.'}, callback);
-					else//no error
-						files.close(fd, function(){//close the file
-							if(logging.files)
-							{
-								logging.log('fileName: ' + fileName + ' closed');
-								logging.log('read: ' + bytesRead + ' bytes');
-							}
-						});
-						if(typeof(callback) == 'function')
-							callback(error, bufferRead);
-						else
-							return(error)?error:bufferRead.toString();
-				});
-			});	
+				files.fstat(fd, function(error, stats){//get the stats
+					if(logging.files)//log them if need be
+						logging.log('fd: ' + fd + ' size: ' + stats.size);
+					if(stats.size == 0)
+						errorHandle({errno:2, errmsg:'File ' + fileName + ' is empty.'}, callback);
+					else
+					files.read(fd, new Buffer(stats.size), 0, stats.size, 0, function(error, bytesRead, bufferRead){//read the file
+						if(error)//log any error
+							errorHandle({errno:3, errmsg:'File ' + fileName + ' error during read.'}, callback);
+						else//no error
+							files.close(fd, function(){//close the file
+								if(logging.files)
+								{
+									logging.log('fileName: ' + fileName + ' closed');
+									logging.log('read: ' + bytesRead + ' bytes');
+								}
+							});
+							if(typeof(callback) == 'function')
+								callback(error, bufferRead);
+							else
+								return(error)?error:bufferRead.toString();
+					});
+				});	
 		});
 	}
 	catch(error)
