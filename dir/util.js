@@ -9,7 +9,7 @@ function UtilityException(msg)
 /** */
 function getFile(filename, callBack)
 {//acquiring a new file from the server and appending it to the head
-	var type = filename.substring(filename.indexOf('.'));
+	var type = filename.substring(filename.indexOf('.'));//get file extension
 	if(filename.indexOf('.js') >= 0)//if plan on adding JS
 		type = 'script';
 	else if(filename.indexOf('.css') >= 0)//if plan on adding CSS
@@ -51,6 +51,7 @@ function getFile(filename, callBack)
 				
 			newNode.onload = function(){
 				clearTimeout(serverTimer);
+				callBack();
 			};			
 		}
 	});
