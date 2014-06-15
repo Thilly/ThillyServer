@@ -5,8 +5,10 @@ var logging = require('./ServerPKGs/thillyLogging.js');
 var Exception = require('./ServerPKGs/thillyExceptions.js');
 
 /** */
-var files = require('./ServerPKGs/thillyFiles.js');
-files = new files(logging);
+var files = new require('./ServerPKGs/thillyFiles.js')(logging);
+
+/** */
+var mongo = new require('./ServerPKGs/thillyMongo.js')(logging);
 
 /** */
 var server = require('http').createServer(files.fileHandler).listen(logging.port);
@@ -14,14 +16,6 @@ var server = require('http').createServer(files.fileHandler).listen(logging.port
 /** */
 var sockets = require('socket.io').listen(server, {log: logging.socketIO});
 
-/** */
-var mongo = requier('mongodb').MongoClient;
-mongo.connect('mongodb://localHost:27017/thillyNet', function(error, db){
-	if(error)
-		console.log('error connecting to thillyNet DB:' + error);
-	else
-		mongo = db;
-});
 
 console.log('Potential web server started on port: ' + logging.port);
 
@@ -80,6 +74,7 @@ function actionCommand(data, socket, functionMap)
 	functionMap[data.command](data.value, socket, Exception.ErrorHandle);
 }
 
+
 /*
 	BEGIN webServiceFunctionMap definitions
 */
@@ -89,7 +84,7 @@ function updatePage(data, socket, exception)
 {
 	if(logging.trace)
 		logging.log('In updatePage');
-	files.readFile('./dir/' + data, function(error, returnValue){
+	files.readFile('./client/' + data, function(error, returnValue){
 		if(error)
 		{
 			if(logging.error)

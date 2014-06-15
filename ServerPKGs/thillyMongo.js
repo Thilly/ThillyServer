@@ -1,25 +1,94 @@
-/** thillyFiles.js
+/** thillyMongo.js
  * @module thillyMongo
- * @author Thilly
- * @description My personal library for eventually managing mongo stuff related to thilly.net v5
+ * @author Nicholas 'Thilly' Evans
+ * @description My personal library for eventually managing mongo stuff related to thilly.net
  */
 
-var mongo = require('mongodb').MongoClient;
-var logging;
-var dataBase = false;
+/** */
+var mongo;
 
-var contentCollection;
-var commentCollection;
-var userCollection;
+/** */ 
+var logging;
 
 /** */
-module.exports = function(logObject){
-	
+var contentCollection;
+
+/** */
+var commentCollection;
+
+/** */
+var userCollection;
+
+var toExport = {
+	'getUserVotes'		:	getUserVotes,
+	'getUserComments'	:	getUserComments,
+	'getPageComments'	:	getPageComments,
+	'getUser'			:	getUser,
+	'getPages'			:	getPages,
+	'addUser'			:	addUser,
+	'addComment'		:	addComment,
+	'addArticle'		:	addArticle
+};
+
+/** */
+module.exports = function(logObject, callBack){
+	mongo = require('mongodb').MongoClient;
 	logging = logObject;
-	
+	init(callBack);
+	return toExport;
+};
+
+/** */
+function init(callBack){
+	if(logging.trace)
+		logging.log('in init');
+
+	mongo.connect('mongodb://localHost:27017/thillyNet', function(error, dataBase){
+		if(logging.mongo)
+		{
+			if(error)
+				logging.log('not connected to thillyNet: ' + error);
+			else
+				logging.log('connected to thillyNet');
+		}
+		if(error)
+			new DBException(error, callBack);
+		else
+		{
+			contentCollection = dataBase.content;
+			commentCollection = dataBase.comment;
+			userCollection = dataBase.user;
+			mongo = dataBase;
+			if(typeof(callBack) == 'function')
+				callBack();
+		}
+	});
 }
 
+/** */
+function getUserVotes(){
+	console.log('not implemented yet');
+}
 
+/** */
+function getUserComments(){
+	console.log('not implemented yet');
+}
+
+/** */
+function getPageComments(){
+	console.log('not implemented yet');
+}
+
+/** */
+function getUser(){
+	console.log('not implemented yet');
+}
+
+/** */
+function getPages(){
+	console.log('not implemented yet');
+}
 
 /** */
 function addUser(userObj, callBack){
@@ -167,34 +236,31 @@ function dateTimeStamp(type){
 	return dateString;
 }
 
-/*
+/* thillyNet schema
 
-thillyNet schema (maybe?)
-
-thillyNet{//database
-	content{//collection
-		_pageID: number,			(date time stamp: 201406140)	
-		content: bigText,			(html of article)
-		pictures: imgSrc[],			(array of sources: [img1.png, img2.png, ... ])
-	},
-	comment{//collection
-	//	_commentID: number,			(auto applied comment _id)
-		pageID: number,				(date time stamp of page comment is on: 201406140)
-		commentText: bigText,		(plain text of article)
-		date: text, 				(date time stamp of comment: 14 June 2014 : 21:13PM)
-		replyTO: number,			(0: root comment to article; other: nested comment)
-		points: number,				(total of votes on comment)	
-		userID: text,				(submitter)
-	},
-	user{//collection
-		_userID: text,				(user choice, 'Some Random' for guest)
-		password: text,				(password, hashed)
-		votes: {commentID, vote}[],	(array of votes: [{commentID, 1}, {commentID, -1}, ... ])
-		points: number				(total comment points user earned)
+	thillyNet{//database
+		content{//collection
+		//	_id: number,				(auto applied page _id)
+			pageID: number,				(date time stamp: 201406140)	
+			content: bigText,			(html of article)
+			pictures: imgSrc[],			(array of sources: [img1.png, img2.png, ... ])
+		},
+		comment{//collection
+		//	_id: number,				(auto applied comment _id)
+			pageID: number,				(date time stamp of page comment is on: 201406140)
+			commentText: bigText,		(plain text of article)
+			date: text, 				(date time stamp of comment: 14 June 2014 : 21:13PM)
+			replyTO: number,			(0: root comment to article; other: nested comment)
+			points: number,				(total of votes on comment)	
+			userID: text,				(submitter)
+		},
+		user{//collection
+		//	_id: number,				(auto applied user _id)
+			userID: text,				(user choice, 'Some Random' for guest)
+			password: text,				(password, hashed)
+			votes: {commentID, vote}[],	(array of votes: [{commentID, 1}, {commentID, -1}, ... ])
+			points: number				(total comment points user earned)
+		}
 	}
-}
-
-
-
 */
 

@@ -47,10 +47,10 @@ function fileHandler(req, res)
 		logging.log('In fileHandler');
 	var filePath = req.url;
 	if(filePath == '/')//if first request
-		filePath = './dir/index.html';
+		filePath = './client/index.html';
 		//give main page
 	else	//otherwise
-		filePath = './dir' + req.url;	
+		filePath = './client' + req.url;	
 			//go into shared directory and get the thing requested
 	if(logging.files)	
 		logging.log('Retrieving: ' + filePath);//log thing gotten
@@ -63,12 +63,12 @@ function fileHandler(req, res)
 	var path = require('path');
 	switch(path.extname(filePath))//what is extension of file?
 	{
-		case '.js'://if JS
+		case '.js':
 		{
 			contentType = 'application/javascript';
 			break
 		}
-		case '.css'://if CSS
+		case '.css':
 		{
 			contentType = 'text/css';
 			break;
