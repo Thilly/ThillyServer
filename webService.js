@@ -9,7 +9,7 @@ var files = new require('./ServerPKGs/thillyFiles.js')(logging);
 
 /** */
 var mongo = new require('./ServerPKGs/thillyMongo.js')(logging, function(){
-	console.log('MongoDB has started');
+	console.log('MongoDB has started\n');
 });
 
 /** */
@@ -19,12 +19,15 @@ var server = require('http').createServer(files.fileHandler).listen(logging.port
 var sockets = require('socket.io').listen(server, {log: logging.socketIO});
 
 
-console.log('WebService has started on port: ' + logging.port);
+console.log('WebService has started on port: ' + logging.port + '\n');
 
 /** */
-var webServiceFunctionMap = {//will be a require to a different file for each 'state'
-	test 			:	function(data){console.log('test is working');},
+var webServiceMap = {//will be a require to a different file for each 'state'
+	test 			:	function(data){console.log('test is working\n');},
+	updatePage 		:	function(data, socket, exception){ updatePage(data, socket, exception);},
 	
+	
+//move to mongoMap	
 	addArticle 		:	function(data, socket, exception){addArticle(data, socket, exception);},
 	addUser 		:	function(data, socket, exception){addUser(data, socket, exception);},
 	addComment		:	function(data, socket, exception){addComment(data, socket, exception);},
@@ -33,9 +36,9 @@ var webServiceFunctionMap = {//will be a require to a different file for each 's
 	getUserComments	:	function(data, socket, exception){getUserComments(data, socket, exception);},
 	getPageComments	:	function(data, socket, exception){getPageComments(data, socket, exception);},
 	getUser			:	function(data, socket, exception){getUser(data, socket, exception);},
-	getPages		:	function(data, socket, exception){getPages(data, socket, exception);},
+	getPages		:	function(data, socket, exception){getPages(data, socket, exception);}
 	
-	updatePage 		:	function(data, socket, exception){ updatePage(data, socket, exception);}
+
 };
 
 /** */
@@ -54,7 +57,7 @@ sockets.on('connection', function(socket){
 		if(logging.sockets)
 			logging.log('Recieved data from socket: ' + JSON.stringify(data));
 			
-		actionCommand(data, socket, webServiceFunctionMap);
+		actionCommand(data, socket, webServiceMap);
 	});
 	
 	/** */
@@ -86,7 +89,7 @@ function actionCommand(data, socket, functionMap)
 
 
 /*
-	BEGIN webServiceFunctionMap definitions
+	BEGIN webServiceMap definitions
 */
 
 /** */
@@ -107,28 +110,65 @@ function updatePage(data, socket, exception)
 }
 
 
+/*
+	BEGIN mongoMap definitions
+*/
 
-
+/** */
 function getUserVotes(data, socket, exception){
-}
-function getUserComments(data, socket, exception){
-}
-function getPageComments(data, socket, exception){
-}
-function getUser(data, socket, exception){
-}
-function getPages(data, socket, exception){
-	mongo.getPages(0, 5, function(err, result){
-		if(err)
-			console.log(err)
+	mongo.getUserVotes(data.userName, function(error, result){
+		if(error)
+			logging.log('error in get userVotes: ' + error)
 		else
-		{
-			socket.sendCommand('getPages', result);
-			console.log('sent command getPages');
-		}
+			socket.sendCommand('getUserVotes', result);
+	});
+
+}
+
+/** */
+function getUserComments(data, socket, exception){
+	mongo.getUserComments(data.userName, function(error, result){
+		if(error)
+			logging.log('error in getUserComments: ' + error)
+		else
+			socket.sendCommand('getUserComments', result);
+		
+	});
+
+}
+
+/** */
+function getPageComments(data, socket, exception){
+	mongo.getPageComments(data.pageID, function(error, result){
+		if(error)
+			logging.log('error in getPageComments: ' + error)
+		else
+			socket.sendCommand('getPageComments', result);
 	});
 }
 
+/** */
+function getUser(data, socket, exception){
+	mongo.getUser(data.userName, function(error, result){
+		if(error)
+			logging.log('error in getUser: ' + error);
+		else
+			socket.sendCommand('getUser', result);
+	});
+
+}
+
+/** */
+function getPages(data, socket, exception){
+	mongo.getPages(data.from, data.to, function(error, result){
+		if(error)
+			logging.log('error in getPages: ' + error);
+		else
+		{
+			socket.sendCommand('getPages', result);
+		}
+	});
+}
 
 /** */
 function addArticle(data, socket, exception){
@@ -144,7 +184,6 @@ function addArticle(data, socket, exception){
 		else
 			socket.sendCommand('addArticle', {'value':result.toString()});
 	});
-
 }
 
 /** */

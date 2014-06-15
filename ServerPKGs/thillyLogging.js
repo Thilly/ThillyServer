@@ -36,7 +36,7 @@ if(flags.logging)
 function log(logString)
 {
 	if(this.display)
-		console.log(logString);
+		console.log(logString + '\n');
 	if(this.logging)
 		files.appendLog(fileName, '\n' + getTimeStamp() + '\t' + logString);
 }

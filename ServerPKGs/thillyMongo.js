@@ -37,6 +37,9 @@ module.exports = function(logObject, callBack){
 	init(callBack);
 	return toExport;
 };
+/*
+	Public
+*/
 
 /** */
 function getUserVotes(userName, callBack){
@@ -128,7 +131,7 @@ function getPages(from, to, callBack){
 			if(error)
 				logging.log('error in getPages: ' + error);
 			else
-				logging.log('getPages completed: ' + result);
+				logging.log('getPages completed: ' + result.length);
 		}
 		if(error)
 			new DBException(error, callBack);
@@ -234,7 +237,9 @@ function addArticle(contents, pictures, date, callBack){
 	);
 }
 
-
+/*
+	Private
+*/
 
 /** */
 function init(callBack){

@@ -7,7 +7,8 @@ I can and did, it's wonderful to see the pieces fall into place.
 
 	webService.js:
 		refactoring the function map for the mongo hooks, will move to their own file/map
-	
+		finished writing the general mongo functions, not finished but good enough to move on
+		
 	toDo:
 		extend fileHandler to account for streams and any other file types that come up
 		create supervisory process to 'watch' webService, contest, and other node processes
