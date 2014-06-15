@@ -14,6 +14,15 @@ var server = require('http').createServer(files.fileHandler).listen(logging.port
 /** */
 var sockets = require('socket.io').listen(server, {log: logging.socketIO});
 
+/** */
+var mongo = requier('mongodb').MongoClient;
+mongo.connect('mongodb://localHost:27017/thillyNet', function(error, db){
+	if(error)
+		console.log('error connecting to thillyNet DB:' + error);
+	else
+		mongo = db;
+});
+
 console.log('Potential web server started on port: ' + logging.port);
 
 /** */

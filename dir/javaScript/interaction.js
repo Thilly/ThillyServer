@@ -20,6 +20,9 @@ window.thillyInteraction = {};
 	var bodyArray = [];
 	
 	/** */
+	var articleTimeout = true;
+	
+	/** */
 	var leftBar = document.getElementById('leftBar');
 	
 	/** */
@@ -97,7 +100,7 @@ window.thillyInteraction = {};
 		aSpacer.className = 'spacer';	
 		aSpacer.id = newID;
 		if(newID == 'bottomSpacer')
-			aSpacer.appendChild(newBox('Bottom', 'Add more articles'));
+			aSpacer.appendChild(newBox('Bottom', 'Click to add more articles'));
 			
 		return aSpacer;
 	}	
@@ -111,7 +114,7 @@ window.thillyInteraction = {};
 		aBox.id = 'aBox' + boxIndex;
 		aBox.title = title;
 		aBox.style.backgroundImage = img;
-		aBox.innerHTML = boxIndex;
+		aBox.innerHTML = title;
 		aBox.onclick = function(){
 			if(debug.trace)
 				console.log('in aBox.onclick');
@@ -122,8 +125,9 @@ window.thillyInteraction = {};
 					scrollToArticle(this.id);
 					leftBar.scrollTop = this.offsetTop - window.innerHeight/2;
 				}
-				else{}
-					//getMoreArticlesFunction(addArticle);//make sure I work
+				else{
+					thillyUtil.getMoreArticles(5);
+				}
 			}
 		};
 		return aBox;
@@ -162,7 +166,7 @@ window.thillyInteraction = {};
 	function checkSticky(){
 		if(debug.trace)
 			console.log('in checkSticky');
-		if(window.pageYOffset >= 941)
+		if(window.pageYOffset >= document.getElementsByClassName('pageTopper')[0].offsetHeight)
 			stickyBar.className = 'navBar Stuck';
 		else
 			stickyBar.className = 'navBar';
@@ -173,13 +177,26 @@ window.thillyInteraction = {};
 		if(debug.trace)
 			console.log('in normalizeArticlesToMiniMap: ' + mapDist);
 		leftBar.scrollTop = mapDist;
-		var articleNumber = Math.floor(leftBar.scrollTop/110);
-		var percentThrough = (leftBar.scrollTop%110)/100;
+		var aBoxHeight = document.getElementById('aBoxBottom');
+		aBoxHeight = aBoxHeight.offsetHeight + getStyle(aBoxHeight, 'margin-bottom');
+		var articleNumber = Math.floor(leftBar.scrollTop/aBoxHeight);
+		console.log(articleNumber);
+		var percentThrough = (leftBar.scrollTop%aBoxHeight)/100;
 		var articleToRead = document.getElementById('article' + articleNumber);
-		var articlePercent = (articleToRead.offsetHeight * percentThrough);
-		window.scrollTo(0, articleToRead.offsetTop + articlePercent - 300);
-		if(debug.movement)
-			console.log(articleToRead.offsetTop + articlePercent - 300);
+		if(articleToRead)
+		{
+			var articlePercent = (articleToRead.offsetHeight * percentThrough);
+			window.scrollTo(0, articleToRead.offsetTop + articlePercent - 300);
+			if(debug.movement)
+				console.log(articleToRead.offsetTop + articlePercent - 300);
+		}
+		else if(articleTimeout)
+		{
+			articleTimeout = false;
+			thillyUtil.getMoreArticles(5, function(){
+				setTimeout(function(){articleTimeout=true;},500);
+			});
+		}
 	}
 
 	/** */
@@ -201,9 +218,14 @@ window.thillyInteraction = {};
 			console.log(scrollHeight);
 			var mapIcon = document.getElementById('aBox' + elem);
 			var percent = (scrollHeight/(bodyArray[elem] + contentMargin)) * 100;
-			leftBar.scrollTop = (mapIcon.offsetTop - window.innerHeight/2) + percent;
-			if(debug.movement)
-				console.log((mapIcon.offsetTop - window.innerHeight/2) + percent);	
+			if(mapIcon)
+			{
+				leftBar.scrollTop = (mapIcon.offsetTop - window.innerHeight/2) + percent;
+				if(debug.movement)
+					console.log((mapIcon.offsetTop - window.innerHeight/2) + percent);	
+			}
+			else
+				thillyUtil.getMoreArticles(5);
 		}
 	}
 

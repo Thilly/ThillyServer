@@ -146,7 +146,7 @@ window.thillyUtil = {};
 			else
 				return new this.utilityException('Socket has not been instantiated yet, cannot updateHTML');
 		}
-		else if(!socketToListenOn.socket.connected)
+		else if(!socketToListenOn.connected)
 		{
 			if(typeof(callBack) == 'function')
 			{
@@ -208,4 +208,11 @@ window.thillyUtil = {};
 		}
 	}
 
+	/** */
+	this.getMoreArticles = function(numberArticles, callBack){
+		console.log('"getting" ' + numberArticles + ' more articles');
+		if(typeof(callBack) == 'function')
+			callBack();
+	};
+	
 }).apply(window.thillyUtil, [window.thillyLogging]);
