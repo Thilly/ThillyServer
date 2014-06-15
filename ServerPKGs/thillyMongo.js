@@ -39,55 +39,102 @@ module.exports = function(logObject, callBack){
 };
 
 /** */
-function init(callBack){
+function getUserVotes(userName, callBack){
 	if(logging.trace)
-		logging.log('in init');
-
-	mongo.connect('mongodb://localHost:27017/thillyNet', function(error, dataBase){
+		logging.log('in getUserVotes');
+	userCollection.find({'userID':userName}, {'votes': 1}, function(error, cursor){
 		if(logging.mongo)
 		{
 			if(error)
-				logging.log('not connected to thillyNet: ' + error);
+				logging.log('error in getUserVotes: ' + error);
 			else
-				logging.log('connected to thillyNet');
+				logging.log('getUserVotes completed: ' + cursor);
 		}
 		if(error)
 			new DBException(error, callBack);
-		else
-		{
-			contentCollection = dataBase.content;
-			commentCollection = dataBase.comment;
-			userCollection = dataBase.user;
-			mongo = dataBase;
-			if(typeof(callBack) == 'function')
-				callBack();
-		}
+		else if(cursor)
+			cursor.toArray(callBack);
 	});
 }
 
 /** */
-function getUserVotes(){
-	console.log('not implemented yet');
+function getUserComments(userName, callBack){
+	if(logging.trace)
+		logging.log('in getUserComments');
+	commentCollection.find({'userID':userName}, function(error, cursor){
+		if(logging.mongo)
+		{
+			if(error)
+				logging.log('error in getUserComments: ' + error);
+			else
+				logging.log('getUserComments completed: ' + cursor);
+		}
+		if(error)
+			new DBException(error, callBack);
+		else if(cursor)
+			cursor.toArray(callBack);
+	});
 }
 
 /** */
-function getUserComments(){
-	console.log('not implemented yet');
+function getPageComments(page, callBack){
+	if(logging.trace)
+		logging.log('in getPageComments');
+	commentCollection.find({'pageID': page}, function(error, cursor){
+		if(logging.mongo)
+		{
+			if(error)
+				logging.log('error in getPageComments: ' + error);
+			else
+				logging.log('getPageComments completed: ' + cursor);
+		}
+		if(error)
+			new DBException(error, callBack);
+		else if(cursor)
+			cursor.toArray(callBack);
+	});
 }
 
 /** */
-function getPageComments(){
-	console.log('not implemented yet');
+function getUser(userName, callBack){
+	if(logging.trace)
+		logging.log('in getUser');
+	userCollection.find({'userID':userName}, function(error, cursor){
+		if(logging.mongo)
+		{
+			if(error)
+				logging.log('error in getUser: ' + error);
+			else
+				logging.log('getUser completed: ' + cursor);
+		}
+		if(error)
+			new DBException(error, callBack);
+		else if(cursor)
+			cursor.toArray(callBack);
+	});
 }
 
 /** */
-function getUser(){
-	console.log('not implemented yet');
-}
-
-/** */
-function getPages(){
-	console.log('not implemented yet');
+function getPages(from, to, callBack){		
+	if(logging.trace)
+		logging.log('in getPages');
+	 
+	from = from || 0;
+	to = to || 5;
+	
+	contentCollection.find().sort({'pageID': -1}).skip(from).limit(to-from).toArray(function(error, result){
+		if(logging.mongo)
+		{
+			if(error)
+				logging.log('error in getPages: ' + error);
+			else
+				logging.log('getPages completed: ' + result);
+		}
+		if(error)
+			new DBException(error, callBack);
+		else if(result)
+			callBack(error, result);	
+	});
 }
 
 /** */
@@ -157,14 +204,14 @@ function addComment(commentObj, callBack){
 }
 
 /** */
-function addArticle(contents, pictures, callBack){
+function addArticle(contents, pictures, date, callBack){
 	if(logging.trace)
 		logging.log('in addArticle');
 		
 	contentCollection.insert(
 		{
 			//_id		:	auto applied,
-			'pageID'	: 	dateTimeStamp(),
+			'pageID'	: 	date || dateTimeStamp(),
 			'content'	: 	contents,
 			'pics'		:	pictures
 		},
@@ -187,6 +234,40 @@ function addArticle(contents, pictures, callBack){
 	);
 }
 
+
+
+/** */
+function init(callBack){
+	if(logging.trace)
+		logging.log('in init');
+
+	mongo.connect('mongodb://localHost:27017/thillyNet', function(error, dataBase){
+		if(logging.mongo)
+		{
+			if(error)
+				logging.log('not connected to thillyNet: ' + error);
+			else
+				logging.log('connected to thillyNet');
+		}
+		if(error)
+			new DBException(error, callBack);
+		else
+		{
+			dataBase.createCollection('content', function(error, content){
+				contentCollection = content;
+				dataBase.createCollection('comment', function(error, comment){
+					commentCollection = comment;
+					dataBase.createCollection('user', function(error, user){
+						userCollection = user;
+						mongo = dataBase;
+						if(typeof(callBack) == 'function')
+							callBack();
+					});
+				});
+			});
+		}
+	});
+}
 
 /** */
 function DBException(msg, callBack){
