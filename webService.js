@@ -26,7 +26,6 @@ var webServiceMap = {//will be a require to a different file for each 'state'
 	test 			:	function(data){console.log('test is working\n');},
 	updatePage 		:	function(data, socket, exception){ updatePage(data, socket, exception);},
 	
-	
 //move to mongoMap	
 	addArticle 		:	function(data, socket, exception){addArticle(data, socket, exception);},
 	addUser 		:	function(data, socket, exception){addUser(data, socket, exception);},
@@ -96,7 +95,7 @@ function actionCommand(data, socket, functionMap)
 function updatePage(data, socket, exception)
 {
 	if(logging.trace)
-		logging.log('In updatePage');
+		logging.log('In updatePage' + data);
 	files.readFile('./client/' + data, function(error, returnValue){
 		if(error)
 		{

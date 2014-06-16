@@ -7,17 +7,17 @@
 
 /** */
 var flags = {
-	debug		:	true,//a flag for watching current area of work
-	display		:	true,//a flag for dislaying current logging
-	errors		:	true,//a flag for watching common errors
-	files		:	false,//a flag for watching file i/o
-	log			:	log,//a function to place logs into current log file
-	logging		:	false,//a flag for writing the log to a file
-	mongo		:	true,//a flag for watching any mongo actions
-	port		:	80,//the port the server will be listening on
-	socketIO 	:	false,//a flag for watching socket.io messages
-	sockets		:	true,//a flag for watching socket events
-	trace		: 	true//a flag for watching the flow of the program
+	debug		:	true,	//a flag for watching current area of work
+	display		:	true,	//a flag for displaying current logging
+	errors		:	true,	//a flag for watching common errors
+	files		:	false,	//a flag for watching file i/o
+	log			:	log,	//a function to place logs into current log file
+	logging		:	false,	//a flag for writing the log to a file
+	mongo		:	true,	//a flag for watching any mongo actions
+	port		:	80,		//the port the server will be listening on
+	socketIO 	:	false,	//a flag for watching socket.io messages
+	sockets		:	true,	//a flag for watching socket events
+	trace		: 	true	//a flag for watching the flow of the program
 };  
  
 /** */  

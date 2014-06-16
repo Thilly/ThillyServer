@@ -27,7 +27,8 @@ var toExport = {
 	'getPages'			:	getPages,
 	'addUser'			:	addUser,
 	'addComment'		:	addComment,
-	'addArticle'		:	addArticle
+	'addArticle'		:	addArticle,
+	'updatePageInfo'	:	updatePageInfo
 };
 
 /** */
@@ -40,6 +41,37 @@ module.exports = function(logObject, callBack){
 /*
 	Public
 */
+
+function updatePageInfo(data, callBack){
+
+	if(logging.trace)
+		logging.log('in updatePageInfo');
+		
+	contentCollection.update({pageID:data.pageID},
+		{
+			pageID: data.pageID,
+			title: data.title,
+			content:data.content,
+			pictures:data.pictures
+		}, 
+			function(error, result){
+			
+		if(logging.mongo)
+		{
+			if(error)
+				logging.log('error in updatePageInfo: ' + error);
+			else
+				logging.log('updatePageInfo completed: ' + result);
+		}
+		
+		if(error)
+			new DBException(error, callBack);
+		else if(typeof(callBack) == 'function')
+			callBack();
+	});
+
+
+}
 
 /** */
 function getUserVotes(userName, callBack){
@@ -327,7 +359,8 @@ function dateTimeStamp(type){
 	thillyNet{//database
 		content{//collection
 		//	_id: number,				(auto applied page _id)
-			pageID: number,				(date time stamp: 201406140)	
+			pageID: number,				(date time stamp: 201406140)
+			title: text,				(title of the article)
 			content: bigText,			(html of article)
 			pictures: imgSrc[],			(array of sources: [img1.png, img2.png, ... ])
 		},
@@ -349,4 +382,18 @@ function dateTimeStamp(type){
 		}
 	}
 */
+
+/*
+	generalize the mongo functions, take command: 'mongo'
+		data.type = 'update', 'find', 'insert'
+		and data.select = {field:param, field2:param2, ...},//the query ('find' + 'update')
+			'find' has, data.find = {field:1, field2:1, ...},//the shape
+			'update' has, data.update = {field:value, field2:value2, ...}//the content
+			'insert' has, data.insert = {field:value, field2:value2, ...}//the content
+
+	all remove functions specific programmed,
+		userCollection.remove({user:name}), yadda
+*/
+
+
 

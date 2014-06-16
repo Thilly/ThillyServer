@@ -1,5 +1,21 @@
 ChangeLog - Thilly.net V5 - Web Service
 
+15 June 2014 - mongo is weird and I had no clear plan
+
+after writing one REALLY general avenue, I realized it was opening me up to people just writing their own queries in the JS console...
+have to re-write my mongo
+
+	webService.js:
+		changed the behavior of how the server works with mongo a little bit in preparation for completely re-writing my mongo
+		
+	mongo.js:
+		realized I had painted myself into a huge security corner, now I have to re-write it
+		made a better pseudo idea at the bottom so hopefully I remember my notes and can understand them when I get back to it
+	
+	toDo:
+		re-writeMongo
+		--see yesterday--
+
 14 June 2014 - first query worked
 
 I pushed the two articles I created so far, FAQ and DependencyInjection into mongo just to see if I can query them back out. 
