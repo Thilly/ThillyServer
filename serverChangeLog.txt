@@ -1,5 +1,15 @@
 ChangeLog - Thilly.net V5 - Web Service
 
+16 June 2014
+Lets keep a back button and static linking
+
+	webService.js
+		modified page querying to get specific and a range
+	
+	mongo.js
+		modified page querying to get specific and a range
+
+
 15 June 2014 - mongo is weird and I had no clear plan
 
 after writing one REALLY general avenue, I realized it was opening me up to people just writing their own queries in the JS console...
@@ -11,10 +21,7 @@ have to re-write my mongo
 	mongo.js:
 		realized I had painted myself into a huge security corner, now I have to re-write it
 		made a better pseudo idea at the bottom so hopefully I remember my notes and can understand them when I get back to it
-	
-	toDo:
-		re-writeMongo
-		--see yesterday--
+
 
 14 June 2014 - first query worked
 
@@ -24,15 +31,7 @@ I can and did, it's wonderful to see the pieces fall into place.
 	webService.js:
 		refactoring the function map for the mongo hooks, will move to their own file/map
 		finished writing the general mongo functions, not finished but good enough to move on
-		
-	toDo:
-		extend fileHandler to account for streams and any other file types that come up
-		create supervisory process to 'watch' webService, contest, and other node processes
-		create external 'classes' for different states of socket commands
-		implement my CMS
-		finish up mongo
-		finish up exception handling
-		give thillyLogging hooks to modify logging from outside hardcoded values	
+
 
 13 June 2014 - Implementing mongoDB
 
@@ -58,15 +57,6 @@ Started creating a library that will work as the storage for my CMS, so far pret
 			'addUser','addComment','addArticle'	
 		implemented various private functions as well:
 			dateTimeStamp, getComments, DBException, isLogging
-	
-	toDo:
-		extend fileHandler to account for streams and any other file types that come up
-		create supervisory process to 'watch' webService, contest, and other node processes
-		create external 'classes' for different states of socket commands
-		implement CMS
-		finish up mongo
-		finish up exception handling
-		give thillyLogging hooks to modify logging from outside hardcoded values
 
 
 8 June 2014 - Start logging development to not loose track of progress
@@ -92,11 +82,3 @@ Began trying to make an extensible web service to act as a webServer, fileHandle
 		
 	Other:
 		Created service to start automatically when server is powered on.
-		
-	toDo:
-		extend fileHandler to account for streams and any other file types that come up
-		extend thillyExceptions to handle errors cleanly (or at least provide the illusion of doing so)
-		create supervisory process to 'watch' webService, contest, and other node processes
-		create external 'classes' for different states of socket commands
-		implement CMS
-		implement mongoDB delivery or content

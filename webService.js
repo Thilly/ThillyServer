@@ -35,8 +35,8 @@ var webServiceMap = {//will be a require to a different file for each 'state'
 	getUserComments	:	function(data, socket, exception){getUserComments(data, socket, exception);},
 	getPageComments	:	function(data, socket, exception){getPageComments(data, socket, exception);},
 	getUser			:	function(data, socket, exception){getUser(data, socket, exception);},
-	getPages		:	function(data, socket, exception){getPages(data, socket, exception);}
-	
+	getPages		:	function(data, socket, exception){getPages(data, socket, exception);},
+	updateFeed		:	function(data, socket, exception){updateFeed(data, socket, exception);}
 
 };
 
@@ -158,8 +158,20 @@ function getUser(data, socket, exception){
 }
 
 /** */
+function updateFeed(data, socket, exception){
+	mongo.updateFeed(data.from, data.to, function(error, result){
+		if(error)
+			logging.log('error in getPages: ' + error);
+		else
+		{
+			socket.sendCommand('getPages', result);
+		}
+	});
+}
+
+/** */
 function getPages(data, socket, exception){
-	mongo.getPages(data.from, data.to, function(error, result){
+	mongo.getPages(data.ids, function(error, result){
 		if(error)
 			logging.log('error in getPages: ' + error);
 		else

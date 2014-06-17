@@ -25,6 +25,7 @@ var toExport = {
 	'getPageComments'	:	getPageComments,
 	'getUser'			:	getUser,
 	'getPages'			:	getPages,
+	'updateFeed'		:	updateFeed,
 	'addUser'			:	addUser,
 	'addComment'		:	addComment,
 	'addArticle'		:	addArticle,
@@ -150,14 +151,34 @@ function getUser(userName, callBack){
 }
 
 /** */
-function getPages(from, to, callBack){		
+function updateFeed(from, to, callBack){		
 	if(logging.trace)
-		logging.log('in getPages');
+		logging.log('in updateFeed');
 	 
 	from = from || 0;
 	to = to || 5;
 	
 	contentCollection.find().sort({'pageID': -1}).skip(from).limit(to-from).toArray(function(error, result){
+		if(logging.mongo)
+		{
+			if(error)
+				logging.log('error in updateFeed: ' + error);
+			else
+				logging.log('updateFeed completed: ' + result.length);
+		}
+		if(error)
+			new DBException(error, callBack);
+		else if(result)
+			callBack(error, result);	
+	});
+}
+
+/** */
+function getPages(QpageID, callBack){		
+	if(logging.trace)
+		logging.log('in getPages');
+		
+	contentCollection.find({pageID: QpageID}).toArray(function(error, result){
 		if(logging.mongo)
 		{
 			if(error)
