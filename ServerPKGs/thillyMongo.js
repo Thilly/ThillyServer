@@ -19,17 +19,10 @@ var commentCollection;
 /** */
 var userCollection;
 
+var collectionMap = {};
+
 var toExport = {
-	'getUserVotes'		:	getUserVotes,
-	'getUserComments'	:	getUserComments,
-	'getPageComments'	:	getPageComments,
-	'getUser'			:	getUser,
-	'getPages'			:	getPages,
-	'updateFeed'		:	updateFeed,
-	'addUser'			:	addUser,
-	'addComment'		:	addComment,
-	'addArticle'		:	addArticle,
-	'updatePageInfo'	:	updatePageInfo
+	'select'			:	select
 };
 
 /** */
@@ -43,251 +36,30 @@ module.exports = function(logObject, callBack){
 	Public
 */
 
-function updatePageInfo(data, callBack){
-
+/** */
+function select(collection, query, options, callBack){
 	if(logging.trace)
-		logging.log('in updatePageInfo');
+		logging.log('in select');
 		
-	contentCollection.update({pageID:data.pageID},
-		{
-			pageID: data.pageID,
-			title: data.title,
-			content:data.content,
-			pictures:data.pictures
-		}, 
-			function(error, result){
-			
-		if(logging.mongo)
-		{
-			if(error)
-				logging.log('error in updatePageInfo: ' + error);
-			else
-				logging.log('updatePageInfo completed: ' + result);
-		}
-		
-		if(error)
-			new DBException(error, callBack);
-		else if(typeof(callBack) == 'function')
-			callBack();
-	});
-
-
-}
-
-/** */
-function getUserVotes(userName, callBack){
-	if(logging.trace)
-		logging.log('in getUserVotes');
-	userCollection.find({'userID':userName}, {'votes': 1}, function(error, cursor){
-		if(logging.mongo)
-		{
-			if(error)
-				logging.log('error in getUserVotes: ' + error);
-			else
-				logging.log('getUserVotes completed: ' + cursor);
-		}
-		if(error)
-			new DBException(error, callBack);
-		else if(cursor)
-			cursor.toArray(callBack);
-	});
-}
-
-/** */
-function getUserComments(userName, callBack){
-	if(logging.trace)
-		logging.log('in getUserComments');
-	commentCollection.find({'userID':userName}, function(error, cursor){
-		if(logging.mongo)
-		{
-			if(error)
-				logging.log('error in getUserComments: ' + error);
-			else
-				logging.log('getUserComments completed: ' + cursor);
-		}
-		if(error)
-			new DBException(error, callBack);
-		else if(cursor)
-			cursor.toArray(callBack);
-	});
-}
-
-/** */
-function getPageComments(page, callBack){
-	if(logging.trace)
-		logging.log('in getPageComments');
-	commentCollection.find({'pageID': page}, function(error, cursor){
-		if(logging.mongo)
-		{
-			if(error)
-				logging.log('error in getPageComments: ' + error);
-			else
-				logging.log('getPageComments completed: ' + cursor);
-		}
-		if(error)
-			new DBException(error, callBack);
-		else if(cursor)
-			cursor.toArray(callBack);
-	});
-}
-
-/** */
-function getUser(userName, callBack){
-	if(logging.trace)
-		logging.log('in getUser');
-	userCollection.find({'userID':userName}, function(error, cursor){
-		if(logging.mongo)
-		{
-			if(error)
-				logging.log('error in getUser: ' + error);
-			else
-				logging.log('getUser completed: ' + cursor);
-		}
-		if(error)
-			new DBException(error, callBack);
-		else if(cursor)
-			cursor.toArray(callBack);
-	});
-}
-
-/** */
-function updateFeed(from, to, callBack){		
-	if(logging.trace)
-		logging.log('in updateFeed');
-	 
-	from = from || 0;
-	to = to || 5;
-	
-	contentCollection.find().sort({'pageID': -1}).skip(from).limit(to-from).toArray(function(error, result){
-		if(logging.mongo)
-		{
-			if(error)
-				logging.log('error in updateFeed: ' + error);
-			else
-				logging.log('updateFeed completed: ' + result.length);
-		}
-		if(error)
-			new DBException(error, callBack);
-		else if(result)
-			callBack(error, result);	
-	});
-}
-
-/** */
-function getPages(QpageID, callBack){		
-	if(logging.trace)
-		logging.log('in getPages');
-		
-	contentCollection.find({pageID: QpageID}).toArray(function(error, result){
-		if(logging.mongo)
-		{
-			if(error)
-				logging.log('error in getPages: ' + error);
-			else
-				logging.log('getPages completed: ' + result.length);
-		}
-		if(error)
-			new DBException(error, callBack);
-		else if(result)
-			callBack(error, result);	
-	});
-}
-
-/** */
-function addUser(userObj, callBack){
-	if(logging.trace)
-		logging.log('in addUser');
-		
-	userCollection.insert(
-		{
-			//_id 			: auto applied,
-			'userID'	: 	userObj.name,				
-			'password'	: 	userObj.pass,				
-			//'votes'		: 	[],	//doesn't fill in the empty array, $push to start putting stuff in
-			'points'	: 	0
-		},
-		
-		isLogging(callBack),
-		
-		function(error, result){
+	collectionMap[collection].find(query, options.projection, function(error, cursor){
+		if(options.skip)
+			cursor = cursor.skip(options.skip);
+		if(options.limit)
+			cursor = cursor.limit(options.limit);
+		cursor.toArray(function(error, result){
 			if(logging.mongo)
 			{
 				if(error)
-					logging.log('error in addUser: ' + error);
+					logging.log('error in select: ' + error);
 				else
-					logging.log('addUser completed: ' + result);
+					logging.log('select completed: ' + result.length);
 			}
 			if(error)
 				new DBException(error, callBack);
 			else if(result)
-				callBack(error, result);			
-		}
-	);
-}
-
-/** */
-function addComment(commentObj, callBack){
-	if(logging.trace)
-		logging.log('in addComment');
-		
-	commentCollection.insert(
-		{
-			//_id 			:	auto applied,
-			'pageID'		:	commentObj.page,				
-			'commentText'	:	commentObj.text,		
-			'date'			:	dateTimeStamp('full'), 				
-			'replyTO'		:	commentObj.reply,			
-			'points'		:	1,				
-			'userID'		:	commentObj.user				
-		},
-		
-		isLogging(callBack),
-		
-		function(error, result){
-			if(logging.mongo)
-			{
-				if(error)
-					logging.log('error in addComment: ' + error);
-				else
-					logging.log('addComment completed: ' + result);
-			}
-			if(error)
-				new DBException(error, callBack);
-			else if(result)
-				callBack(error, result);			
-		}
-	);
-}
-
-/** */
-function addArticle(contents, pictures, date, callBack){
-	if(logging.trace)
-		logging.log('in addArticle');
-		
-	contentCollection.insert(
-		{
-			//_id		:	auto applied,
-			'pageID'	: 	date || dateTimeStamp(),
-			'content'	: 	contents,
-			'pics'		:	pictures
-		},
-		
-		isLogging(callBack),
-		
-		function(error, result){
-			if(logging.mongo)
-			{
-				if(error)
-					logging.log('error in addArticle: ' + error);
-				else
-					logging.log('addArticle completed: ' + result);
-			}
-			if(error)
-				new DBException(error, callBack);
-			else if(result)
-				callBack(error, result);			
-		}
-	);
+				callBack(error, result);	
+		});
+	});
 }
 
 /*
@@ -318,6 +90,11 @@ function init(callBack){
 					dataBase.createCollection('user', function(error, user){
 						userCollection = user;
 						mongo = dataBase;
+						collectionMap =	{
+							'users' 	:	userCollection,
+							'comment'	:	commentCollection,
+							'content'	:	contentCollection
+						};
 						if(typeof(callBack) == 'function')
 							callBack();
 					});
@@ -374,6 +151,9 @@ function dateTimeStamp(type){
 	}
 	return dateString;
 }
+
+
+
 
 /* thillyNet schema
 

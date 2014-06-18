@@ -23,22 +23,15 @@ console.log('WebService has started on port: ' + logging.port + '\n');
 
 /** */
 var webServiceMap = {//will be a require to a different file for each 'state'
-	test 			:	function(data){console.log('test is working\n');},
 	updatePage 		:	function(data, socket, exception){ updatePage(data, socket, exception);},
 	
 //move to mongoMap	
-	addArticle 		:	function(data, socket, exception){addArticle(data, socket, exception);},
-	addUser 		:	function(data, socket, exception){addUser(data, socket, exception);},
-	addComment		:	function(data, socket, exception){addComment(data, socket, exception);},
-	
-	getUserVotes	:	function(data, socket, exception){getUserVotes(data, socket, exception);},
-	getUserComments	:	function(data, socket, exception){getUserComments(data, socket, exception);},
-	getPageComments	:	function(data, socket, exception){getPageComments(data, socket, exception);},
-	getUser			:	function(data, socket, exception){getUser(data, socket, exception);},
-	getPages		:	function(data, socket, exception){getPages(data, socket, exception);},
-	updateFeed		:	function(data, socket, exception){updateFeed(data, socket, exception);}
 
-};
+	getPages		:	function(data, socket, exception){getPages(data, socket, exception);},
+	getPageIDs		:	function(data, socket, exception){getPageIDs(data, socket, exception);},
+	getPageDetails	:	function(data, socket, exception){getPageDetails(data, socket, exception);}
+	
+};	
 
 /** */
 sockets.on('connection', function(socket){
@@ -114,119 +107,46 @@ function updatePage(data, socket, exception)
 */
 
 /** */
-function getUserVotes(data, socket, exception){
-	mongo.getUserVotes(data.userName, function(error, result){
-		if(error)
-			logging.log('error in get userVotes: ' + error)
-		else
-			socket.sendCommand('getUserVotes', result);
+function getPageDetails(data, socket, exception){
+	if(logging.trace)
+		logging.log('in getPageDetails');
+	
+	mongo.select('content', {pageID:data}, {projection : {}}, function(error, result){
+		socket.emit('getPageDetails', result);
 	});
-
 }
 
 /** */
-function getUserComments(data, socket, exception){
-	mongo.getUserComments(data.userName, function(error, result){
-		if(error)
-			logging.log('error in getUserComments: ' + error)
-		else
-			socket.sendCommand('getUserComments', result);
+function getPageIDs(data, socket, exception){
+	if(logging.trace)
+		logging.log('in getPageIDs');
 		
-	});
-
-}
-
-/** */
-function getPageComments(data, socket, exception){
-	mongo.getPageComments(data.pageID, function(error, result){
-		if(error)
-			logging.log('error in getPageComments: ' + error)
-		else
-			socket.sendCommand('getPageComments', result);
-	});
-}
-
-/** */
-function getUser(data, socket, exception){
-	mongo.getUser(data.userName, function(error, result){
-		if(error)
-			logging.log('error in getUser: ' + error);
-		else
-			socket.sendCommand('getUser', result);
-	});
-
-}
-
-/** */
-function updateFeed(data, socket, exception){
-	mongo.updateFeed(data.from, data.to, function(error, result){
-		if(error)
-			logging.log('error in getPages: ' + error);
-		else
-		{
-			socket.sendCommand('getPages', result);
-		}
+	mongo.select('content', {}, {projection : {pageID:-1}}, function(error, result){
+		socket.sendCommand('pageIDs', result);
 	});
 }
 
 /** */
 function getPages(data, socket, exception){
-	mongo.getPages(data.ids, function(error, result){
-		if(error)
-			logging.log('error in getPages: ' + error);
-		else
-		{
-			socket.sendCommand('getPages', result);
-		}
-	});
-}
-
-/** */
-function addArticle(data, socket, exception){
 	if(logging.trace)
-		logging.log('In addArticle');
-	mongo.addArticle(data.content, data.pictures, function(error, result){
-		if(error)
-		{
-			if(logging.error)
-				logging.log('Error in addArticle: ' + error);
-			socket.emit('addArticle', {'error': error});
-		}
-		else
-			socket.sendCommand('addArticle', {'value':result.toString()});
-	});
+		logging.log('in getPages');
+		
+	var callBack = function(error, result){
+		if(logging.mongo)
+			logging.log('returned from select: ' + result.length);
+		socket.sendCommand('getPages', result);
+	};
+	
+	if(typeof(data) == 'number'){
+		console.log('number query ' + data);
+		mongo.select('content', {}, {projection: {}, skip:data, limit:5}, callBack);
+	}
+	else if(typeof(data) == 'object'){
+		console.log('objectQuery ' + data);
+		mongo.select('content', {pageID: {$in:data}}, {projection:{}}, callBack);
+	}
+	else if(typeof(data) == 'string'){
+		console.log('stringQuery ' + data);
+		mongo.select('content', {pageID: data}, {projection:{}}, callBack);	
+	}
 }
-
-/** */
-function addUser(data, socket, exception){
-	if(logging.trace)
-		logging.log('In addUser');
-	mongo.addUser(data, function(error, result){
-		if(error)
-		{
-			if(logging.error)
-				logging.log('Error in addUser: ' + error);
-			socket.emit('addUser', {'error': error});
-		}
-		else
-			socket.sendCommand('addUser', {'value':result.toString()});	
-	});
-}
-
-/** */
-function addComment(data, socket, exception){
-	if(logging.trace)
-		logging.log('In addComment');
-	mongo.addComment(data, function(error, result){
-		if(error)
-		{
-			if(logging.error)
-				logging.log('Error in addComment: ' + error);
-			socket.emit('addComment', {'error': error});
-		}
-		else
-			socket.sendCommand('addComment', {'value':result.toString()});	
-	});
-}
-
-

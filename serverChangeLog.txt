@@ -1,5 +1,15 @@
 ChangeLog - Thilly.net V5 - Web Service
 
+17 June 2014 - template gogo
+Start actually working on the template
+
+	webService.js
+		modified page querying again to better serve my implementation
+		implemented a few functions to help with the templating
+	
+	mongo.js
+		created a single select function with different composing functions
+
 16 June 2014
 Lets keep a back button and static linking
 
