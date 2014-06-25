@@ -13,6 +13,9 @@ var mongo = new require('./ServerPKGs/thillyMongo.js')(logging, function(){
 });
 
 /** */
+var crypto = require('./ServerPKGs/thillyCrypto.js');
+
+/** */
 var server = require('http').createServer(files.fileHandler).listen(logging.port);
 
 /** */
@@ -24,6 +27,8 @@ console.log('WebService has started on port: ' + logging.port + '\n');
 /** */
 var webServiceMap = {//will be a require to a different file for each 'state'
 	updatePage 		:	function(data, socket, exception){ updatePage(data, socket, exception);},
+	login			:	function(data, socket, exception){ login(data, socket, exception);},
+	register		:	function(data, socket, exception){ register(data, socket, exception);},
 	
 //move to mongoMap	
 
@@ -85,8 +90,7 @@ function actionCommand(data, socket, functionMap)
 */
 
 /** */
-function updatePage(data, socket, exception)
-{
+function updatePage(data, socket, exception){
 	if(logging.trace)
 		logging.log('In updatePage' + data);
 	files.readFile('./client/' + data, function(error, returnValue){
@@ -101,6 +105,81 @@ function updatePage(data, socket, exception)
 	});
 }
 
+/** */
+function login(data, socket, exception){
+
+	if(logging.trace)
+		logging.log('in login: ' + data.userName + ' : ' + data.password);
+	
+	mongo.select('user', {userID:data.userName}, {projection:{userID:1, password:1, type:1}}, function(error, result){
+		if(error)
+			logging.log('error in login: ' + error);
+		else if(result.length == 0){
+			if(logging.sockets)
+				logging.log('login failed: no such user');		
+			socket.sendCommand('login', {failed:'no such user'});
+		}
+		else if(result[0].password == crypto.createHash(data.password)){
+	//pull me out	
+			var userTypeFileName = (result[0].type == 'admin')?'admin.js':'standard.js';
+			files.readFile('./servedJS/' + userTypeFileName, function(error, data){
+				if(logging.sockets)
+					logging.log('login successful, sending ' + userTypeFileName);
+				socket.sendCommand('login', {success: true, userScript: data.toString()});
+			});
+
+		}
+		else
+		{
+			if(logging.sockets)
+				logging.log('login failed: wrong password');
+			socket.sendCommand('login', {failed:'wrong password'});
+		}
+	});
+}
+
+/** */
+function register(data, socket, exception){
+	if(logging.trace)
+		logging.log('in register');
+	
+	var insertObj = {
+		userID	:	data.userName,
+		userName:	data.userName.toLowerCase(),
+		password:	crypto.createHash(data.password),
+		votes 	:	[],
+		points	:	0,
+		type	:	'standard'
+	};
+	
+	mongo.select('user', {userName:data.userName.toLowerCase()}, {projection:{userID:1}}, function(error, result){
+		if(error)
+			logging.log('error in register select: ' + error);
+		else if(result.length > 0){
+			if(logging.sockets)
+				logging.log('user name: ' + data.userName + ' taken.');
+			socket.sendCommand('login', {failed:'user name taken'});
+		}
+		else{
+			mongo.insert('user', insertObj, {w:1}, function(error, result){
+				if(error)
+					logging.log('error in register: ' + error);
+				else{
+					if(logging.sockets)
+						logging.log('register completed successfully');
+	//pull me out					
+					var userTypeFileName = 'standard.js';
+					files.readFile('./servedJS/' + userTypeFileName, function(error, data){
+						if(logging.sockets)
+							logging.log('login successful, sending ' + userTypeFileName);
+						socket.sendCommand('login', {success: true, userScript: data.toString(), userName: insertObj.userID});
+					});
+					
+				}
+			});
+		}
+	});
+}
 
 /*
 	BEGIN mongoMap definitions

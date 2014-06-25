@@ -22,7 +22,8 @@ var userCollection;
 var collectionMap = {};
 
 var toExport = {
-	'select'			:	select
+	'select'		:	select,
+	'insert'		:	insert
 };
 
 /** */
@@ -32,6 +33,7 @@ module.exports = function(logObject, callBack){
 	init(callBack);
 	return toExport;
 };
+
 /*
 	Public
 */
@@ -39,7 +41,7 @@ module.exports = function(logObject, callBack){
 /** */
 function select(collection, query, options, callBack){
 	if(logging.trace)
-		logging.log('in select');
+		logging.log('in select: ' + collection);
 		
 	collectionMap[collection].find(query, options.projection, function(error, cursor){
 		if(options.skip)
@@ -59,6 +61,25 @@ function select(collection, query, options, callBack){
 			else if(result)
 				callBack(error, result);	
 		});
+	});
+}
+
+/** */
+function insert(collection, query, options, callBack){
+	if(logging.trace)
+		logging.log('in insert: ' + collection);
+	collectionMap[collection].insert(query, options, function(error, result){
+		if(logging.mongo)
+		{
+			if(error)
+				logging.log('error in insert: ' + error);
+			else
+				logging.log('insert completed: ' + result);					
+		}
+		if(error)
+			new DBException(error, callBack);
+		else
+			callBack(error, result);	
 	});
 }
 
@@ -91,7 +112,7 @@ function init(callBack){
 						userCollection = user;
 						mongo = dataBase;
 						collectionMap =	{
-							'users' 	:	userCollection,
+							'user' 	:	userCollection,
 							'comment'	:	commentCollection,
 							'content'	:	contentCollection
 						};
@@ -179,7 +200,8 @@ function dateTimeStamp(type){
 			userID: text,				(user choice, 'Some Random' for guest)
 			password: text,				(password, hashed)
 			votes: {commentID, vote}[],	(array of votes: [{commentID, 1}, {commentID, -1}, ... ])
-			points: number				(total comment points user earned)
+			points: number,				(total comment points user earned)
+			type: string				(type of user: (admin, standard, moderator))
 		}
 	}
 */

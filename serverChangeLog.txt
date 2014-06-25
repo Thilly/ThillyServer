@@ -1,5 +1,31 @@
 ChangeLog - Thilly.net V5 - Web Service
 
+24 June 2014 - login and crypto additions
+setting up server for registering accounts and logging in
+	
+	mongo.js:
+		implemented insert to create/save users
+		passwords are hashed and secure
+		
+	webService.js
+		implemented a few more commands to the function map to carry the logic for logging and registering
+	
+	crypto.js
+		implemented very small wrapper for nodes crypto module
+			require and call createHash(toBeHashed), very simple API
+	
+	servedJS
+		created new directory for composing JS on the fly to serve to the user based on privlege level
+		determined at login, only standard and admin for test at the moment	
+	
+
+23 June 2014 - client side work on logins
+mostly client stuff on UI
+	
+	mongo.js
+		only added a field to my schema, nothing actually done
+
+		
 17 June 2014 - template gogo
 Start actually working on the template
 
