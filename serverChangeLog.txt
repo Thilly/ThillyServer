@@ -1,5 +1,11 @@
 ChangeLog - Thilly.net V5 - Web Service
 
+25 June 2014 - Share logged with client
+
+	webService.js
+		implemented giving the socket(client) it's type and name to hold on to while logged in
+		
+
 24 June 2014 - login and crypto additions
 setting up server for registering accounts and logging in
 	

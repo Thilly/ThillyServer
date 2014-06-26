@@ -120,14 +120,7 @@ function login(data, socket, exception){
 			socket.sendCommand('login', {failed:'no such user'});
 		}
 		else if(result[0].password == crypto.createHash(data.password)){
-	//pull me out	
-			var userTypeFileName = (result[0].type == 'admin')?'admin.js':'standard.js';
-			files.readFile('./servedJS/' + userTypeFileName, function(error, data){
-				if(logging.sockets)
-					logging.log('login successful, sending ' + userTypeFileName);
-				socket.sendCommand('login', {success: true, userScript: data.toString()});
-			});
-
+			loginUser(result[0], socket);
 		}
 		else
 		{
@@ -137,6 +130,17 @@ function login(data, socket, exception){
 		}
 	});
 }
+
+function loginUser(userData, socket){
+	var userTypeFileName = (userData.type == 'admin')?'admin.js':'standard.js';
+	files.readFile('./servedJS/' + userTypeFileName, function(error, data){
+		if(logging.sockets)
+			logging.log('login successful, sending ' + userTypeFileName);
+		socket.user = userData;
+		socket.sendCommand('login', {success: true, userScript: data.toString(), type:userData.type, name:userData.userID});
+	});
+}
+
 
 /** */
 function register(data, socket, exception){
@@ -167,14 +171,7 @@ function register(data, socket, exception){
 				else{
 					if(logging.sockets)
 						logging.log('register completed successfully');
-	//pull me out					
-					var userTypeFileName = 'standard.js';
-					files.readFile('./servedJS/' + userTypeFileName, function(error, data){
-						if(logging.sockets)
-							logging.log('login successful, sending ' + userTypeFileName);
-						socket.sendCommand('login', {success: true, userScript: data.toString(), userName: insertObj.userID});
-					});
-					
+					loginUser(result[0], socket);
 				}
 			});
 		}
