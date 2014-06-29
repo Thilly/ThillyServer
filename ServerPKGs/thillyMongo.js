@@ -22,8 +22,9 @@ var userCollection;
 var collectionMap = {};
 
 var toExport = {
-	'select'		:	select,
-	'insert'		:	insert
+	'select'	:	select,
+	'insert'	:	insert,
+	'update'	:	update
 };
 
 /** */
@@ -48,6 +49,8 @@ function select(collection, query, options, callBack){
 			cursor = cursor.skip(options.skip);
 		if(options.limit)
 			cursor = cursor.limit(options.limit);
+		if(options.sort)
+			cursor = cursor.sort(options.sort);
 		cursor.toArray(function(error, result){
 			if(logging.mongo)
 			{
@@ -75,6 +78,25 @@ function insert(collection, query, options, callBack){
 				logging.log('error in insert: ' + error);
 			else
 				logging.log('insert completed: ' + result);					
+		}
+		if(error)
+			new DBException(error, callBack);
+		else
+			callBack(error, result);	
+	});
+}
+
+/** */
+function update(collection, selection, query, options, callBack){
+	if(logging.trace)
+		logging.log('in update: ' + collection);
+	collectionMap[collection].update(selection, query, options, function(error, result){
+		if(logging.mongo)
+		{
+			if(error)
+				logging.log('error in update: ' + error);
+			else
+				logging.log('update completed: ' + result);					
 		}
 		if(error)
 			new DBException(error, callBack);
@@ -112,7 +134,7 @@ function init(callBack){
 						userCollection = user;
 						mongo = dataBase;
 						collectionMap =	{
-							'user' 	:	userCollection,
+							'user' 		:	userCollection,
 							'comment'	:	commentCollection,
 							'content'	:	contentCollection
 						};
@@ -185,6 +207,7 @@ function dateTimeStamp(type){
 			title: text,				(title of the article)
 			content: bigText,			(html of article)
 			pictures: imgSrc[],			(array of sources: [img1.png, img2.png, ... ])
+			thumb:	imgSrc				(a single picURL to be set as thumbnail)
 		},
 		comment{//collection
 		//	_id: number,				(auto applied comment _id)

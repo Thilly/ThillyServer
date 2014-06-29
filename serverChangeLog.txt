@@ -1,6 +1,17 @@
 ChangeLog - Thilly.net V5 - Web Service
 
-25 June 2014 - Share logged with client
+28 June 2014 - template is actually working now
+	The template is up and running, first passes and edits are working. I'm sure a few more bugs need to be flushed out but I'll get em.	
+	
+	webService.js
+		implemented article storage and modification
+		implemented picture storage and retrieval
+	
+	mongo.js
+		implemented article storage and modification
+
+		
+25 June 2014 - Share logged in info with client
 
 	webService.js
 		implemented giving the socket(client) it's type and name to hold on to while logged in

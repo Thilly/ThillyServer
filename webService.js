@@ -21,7 +21,6 @@ var server = require('http').createServer(files.fileHandler).listen(logging.port
 /** */
 var sockets = require('socket.io').listen(server, {log: logging.socketIO});
 
-
 console.log('WebService has started on port: ' + logging.port + '\n');
 
 /** */
@@ -29,7 +28,8 @@ var webServiceMap = {//will be a require to a different file for each 'state'
 	updatePage 		:	function(data, socket, exception){ updatePage(data, socket, exception);},
 	login			:	function(data, socket, exception){ login(data, socket, exception);},
 	register		:	function(data, socket, exception){ register(data, socket, exception);},
-	
+	picUpload		:	function(data, socket, exception){ picUpload(data, socket, exception);},
+	pushNewArticle	:	function(data, socket, exception){ pushNewArticle(data, socket, exception);},
 //move to mongoMap	
 
 	getPages		:	function(data, socket, exception){getPages(data, socket, exception);},
@@ -89,6 +89,46 @@ function actionCommand(data, socket, functionMap)
 	BEGIN webServiceMap definitions
 */
 
+
+function pushNewArticle(data, socket, exception){
+	if(logging.trace)
+		logging.log('in pushNew article: ' + data.title);
+	if(logging.mongo){
+		logging.log('title: ' + data.title);
+		logging.log('thumb: ' + data.thumb);
+		logging.log('pageID: ' + data.pageID);
+		logging.log('pictures: ' + data.pictures);
+		logging.log('content: ' + data.content);
+	}
+	var selection = {pageID: data.pageID};
+	mongo.update('content', selection, data, {upsert: true, w:1}, function(error, result){
+		if(error)
+			logging.log('error pushing new article: ' + error);
+		else
+			logging.log('new article pushed ' + data.title);
+	});	
+}
+
+/** */
+function picUpload(data, socket, exception){
+	if(logging.trace)
+		logging.log('in picUpload: ' + data.name);
+	console.log('pic trying to be loaded: ' + data);
+	var fileName = 'client/content/images/' + data.name;
+	files.writeFile(fileName, data.file, function(error, file){
+		if(error)
+			logging.log('error in picUpload: ' + error);
+		else
+		{
+			var filePath = file.replace('client/','');
+			if(logging.trace)
+				logging.log('picUploaded: ' + file);
+			socket.sendCommand('picUploaded', {name:data.name, path:filePath});
+		}
+	});
+
+}
+
 /** */
 function updatePage(data, socket, exception){
 	if(logging.trace)
@@ -131,6 +171,7 @@ function login(data, socket, exception){
 	});
 }
 
+/**
 function loginUser(userData, socket){
 	var userTypeFileName = (userData.type == 'admin')?'admin.js':'standard.js';
 	files.readFile('./servedJS/' + userTypeFileName, function(error, data){
@@ -139,7 +180,7 @@ function loginUser(userData, socket){
 		socket.user = userData;
 		socket.sendCommand('login', {success: true, userScript: data.toString(), type:userData.type, name:userData.userID});
 	});
-}
+}*/
 
 
 /** */
@@ -197,7 +238,7 @@ function getPageIDs(data, socket, exception){
 	if(logging.trace)
 		logging.log('in getPageIDs');
 		
-	mongo.select('content', {}, {projection : {pageID:-1}}, function(error, result){
+	mongo.select('content', {}, {projection : {pageID:-1}, sort:{pageID: -1}}, function(error, result){
 		socket.sendCommand('pageIDs', result);
 	});
 }
@@ -215,7 +256,7 @@ function getPages(data, socket, exception){
 	
 	if(typeof(data) == 'number'){
 		console.log('number query ' + data);
-		mongo.select('content', {}, {projection: {}, skip:data, limit:5}, callBack);
+		mongo.select('content', {}, {projection: {}, skip:data, limit:5, sort:{pageID: -1}}, callBack);
 	}
 	else if(typeof(data) == 'object'){
 		console.log('objectQuery ' + data);
