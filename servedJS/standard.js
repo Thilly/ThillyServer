@@ -2,10 +2,18 @@
 // STANDARD.js
 //
 
+/** */
 window.thillyAdmin = {};
 
-(function(obj){
+/** */
+(function(debug){
 
-obj.admin = false;
+	/** */
+	this.admin = false;
 
-})(window.thillyAdmin)
+	/** */
+	this.submit = function(){
+		alert('Sorry, only Thilly can submit new content at this time');
+	};
+
+}).apply(window.thillyAdmin, [thillyLogging])

@@ -101,12 +101,22 @@ function pushNewArticle(data, socket, exception){
 		logging.log('content: ' + data.content);
 	}
 	var selection = {pageID: data.pageID};
-	mongo.update('content', selection, data, {upsert: true, w:1}, function(error, result){
-		if(error)
-			logging.log('error pushing new article: ' + error);
-		else
-			logging.log('new article pushed ' + data.title);
-	});	
+	if(socket.user.type == 'admin')
+		mongo.update('content', selection, data, {upsert: true, w:1}, function(error, result){
+			var msg = '';
+			if(error){
+				msg = 'error pushing new article: ' + error;
+				logging.log(msg);
+				socket.sendCommand('articlePushed', {msg:msg});
+			}
+			else{
+				msg = 'New article pushed: ' + data.title;
+				logging.log(msg);
+				socket.sendCommand('articlePushed', {msg:msg});
+			}
+		});		
+	else
+		socket.sendCommand('articlePushed', {msg:'Sorry, only Thilly can submit new content at this time'});
 }
 
 /** */
@@ -149,9 +159,14 @@ function updatePage(data, socket, exception){
 function login(data, socket, exception){
 
 	if(logging.trace)
-		logging.log('in login: ' + data.userName + ' : ' + data.password);
+		logging.log('in login: ' + data.userName + ' : ' + data.password + ' : ' + data.userString);
 	
-	mongo.select('user', {userID:data.userName}, {projection:{userID:1, password:1, type:1}}, function(error, result){
+	if(data.userString)
+		mongo.select('user', {_id:mongo.parse(data.userString)}, {projection:{_id : 1, userID:1, password:1, type:1}}, callBack)
+	else
+		mongo.select('user', {userID:data.userName}, {projection:{_id : 1, userID:1, password:1, type:1}}, callBack)
+		
+	function callBack(error, result){
 		if(error)
 			logging.log('error in login: ' + error);
 		else if(result.length == 0){
@@ -159,28 +174,29 @@ function login(data, socket, exception){
 				logging.log('login failed: no such user');		
 			socket.sendCommand('login', {failed:'no such user'});
 		}
+		else if(data.userString == result[0]._id)
+			loginUser(result[0], socket);
 		else if(result[0].password == crypto.createHash(data.password)){
 			loginUser(result[0], socket);
 		}
-		else
-		{
+		else{
 			if(logging.sockets)
 				logging.log('login failed: wrong password');
 			socket.sendCommand('login', {failed:'wrong password'});
 		}
-	});
+	}
 }
 
-/**
+/** */
 function loginUser(userData, socket){
 	var userTypeFileName = (userData.type == 'admin')?'admin.js':'standard.js';
 	files.readFile('./servedJS/' + userTypeFileName, function(error, data){
 		if(logging.sockets)
 			logging.log('login successful, sending ' + userTypeFileName);
 		socket.user = userData;
-		socket.sendCommand('login', {success: true, userScript: data.toString(), type:userData.type, name:userData.userID});
+		socket.sendCommand('login', {success: true, userScript: data.toString(), type:userData.type, name:userData.userID, userString:userData._id});
 	});
-}*/
+}
 
 
 /** */

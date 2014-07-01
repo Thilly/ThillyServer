@@ -7,6 +7,9 @@
 /** */
 var mongo;
 
+/** */
+var objectID;
+
 /** */ 
 var logging;
 
@@ -19,17 +22,21 @@ var commentCollection;
 /** */
 var userCollection;
 
+/** */
 var collectionMap = {};
 
+/** */
 var toExport = {
 	'select'	:	select,
 	'insert'	:	insert,
-	'update'	:	update
+	'update'	:	update,
+	'parse'		:	parse
 };
 
 /** */
 module.exports = function(logObject, callBack){
-	mongo = require('mongodb').MongoClient;
+	mongo = require('mongodb');
+	objectID = mongo.ObjectID;
 	logging = logObject;
 	init(callBack);
 	return toExport;
@@ -38,6 +45,11 @@ module.exports = function(logObject, callBack){
 /*
 	Public
 */
+
+/** */
+function parse(objectString){
+	return new objectID(objectString);
+}
 
 /** */
 function select(collection, query, options, callBack){
@@ -114,7 +126,7 @@ function init(callBack){
 	if(logging.trace)
 		logging.log('in init');
 
-	mongo.connect('mongodb://localHost:27017/thillyNet', function(error, dataBase){
+	mongo.MongoClient.connect('mongodb://localHost:27017/thillyNet', function(error, dataBase){
 		if(logging.mongo)
 		{
 			if(error)
