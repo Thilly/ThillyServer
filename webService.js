@@ -32,9 +32,11 @@ var webServiceMap = {//will be a require to a different file for each 'state'
 	pushNewArticle	:	function(data, socket, exception){ pushNewArticle(data, socket, exception);},
 //move to mongoMap	
 
+	getComments		:	function(data, socket, exception){getComments(data, socket, exception);},
 	getPages		:	function(data, socket, exception){getPages(data, socket, exception);},
 	getPageIDs		:	function(data, socket, exception){getPageIDs(data, socket, exception);},
 	getPageDetails	:	function(data, socket, exception){getPageDetails(data, socket, exception);}
+	
 	
 };	
 
@@ -50,7 +52,7 @@ sockets.on('connection', function(socket){
 	/** */
 	socket.on('command', function(data){
 		if(logging.trace)
-			logging.log('in socket.on("command"');
+			logging.log('In socket.on("command")');
 		if(logging.sockets)
 			logging.log('Recieved data from socket: ' + JSON.stringify(data));
 			
@@ -64,6 +66,8 @@ sockets.on('connection', function(socket){
 /** */
 function sendCommand(command, dataObject, callBack)
 {//general send command function
+	if(logging.trace)
+		logging.log('In sendCommand');
 	var commandObject = {'command':command, 'value':dataObject};
 	try{
 		if(typeof(callBack) == 'function')
@@ -72,7 +76,7 @@ function sendCommand(command, dataObject, callBack)
 			this.emit('command', commandObject);
 	}
 	catch(error){
-		throw new Exception('Socket has not been instantiated yet, cannot sendCommand');
+		new Exception.Utility('Socket has not been instantiated yet, cannot sendCommand');
 	}
 }
 
@@ -81,7 +85,12 @@ function actionCommand(data, socket, functionMap)
 {//general recieve command function
 	if(logging.trace)
 		logging.log('In actionCommand');
-	functionMap[data.command](data.value, socket, Exception.ErrorHandle);
+	try{
+		functionMap[data.command](data.value, socket, Exception.ErrorHandle);
+	}
+	catch(error){
+		new Exception.Utility('Exception when trying to call ' + data.command);
+	}
 }
 
 
@@ -92,7 +101,7 @@ function actionCommand(data, socket, functionMap)
 
 function pushNewArticle(data, socket, exception){
 	if(logging.trace)
-		logging.log('in pushNew article: ' + data.title);
+		logging.log('In pushNew article: ' + data.title);
 	if(logging.mongo){
 		logging.log('title: ' + data.title);
 		logging.log('thumb: ' + data.thumb);
@@ -122,7 +131,7 @@ function pushNewArticle(data, socket, exception){
 /** */
 function picUpload(data, socket, exception){
 	if(logging.trace)
-		logging.log('in picUpload: ' + data.name);
+		logging.log('In picUpload: ' + data.name);
 	console.log('pic trying to be loaded: ' + data);
 	var fileName = 'client/content/images/' + data.name;
 	files.writeFile(fileName, data.file, function(error, file){
@@ -159,7 +168,7 @@ function updatePage(data, socket, exception){
 function login(data, socket, exception){
 
 	if(logging.trace)
-		logging.log('in login: ' + data.userName + ' : ' + data.password + ' : ' + data.userString);
+		logging.log('In login: ' + data.userName + ' : ' + data.password + ' : ' + data.userString);
 	
 	if(data.userString)
 		mongo.select('user', {_id:mongo.parse(data.userString)}, {projection:{_id : 1, userID:1, password:1, type:1}}, callBack)
@@ -202,7 +211,7 @@ function loginUser(userData, socket){
 /** */
 function register(data, socket, exception){
 	if(logging.trace)
-		logging.log('in register');
+		logging.log('In register');
 	
 	var insertObj = {
 		userID	:	data.userName,
@@ -240,9 +249,18 @@ function register(data, socket, exception){
 */
 
 /** */
+function getComments(data, socket, exception){
+	if(logging.trace)
+		logging.log('In getComments: ' + data.pageID);
+	mongo.select('comment', {pageID:data.pageID}, {projection : {}}, function(error, result){
+		socket.sendCommand('getComments', result);
+	});
+}
+
+/** */
 function getPageDetails(data, socket, exception){
 	if(logging.trace)
-		logging.log('in getPageDetails');
+		logging.log('In getPageDetails');
 	
 	mongo.select('content', {pageID:data}, {projection : {}}, function(error, result){
 		socket.emit('getPageDetails', result);
@@ -252,7 +270,7 @@ function getPageDetails(data, socket, exception){
 /** */
 function getPageIDs(data, socket, exception){
 	if(logging.trace)
-		logging.log('in getPageIDs');
+		logging.log('In getPageIDs');
 		
 	mongo.select('content', {}, {projection : {pageID:-1}, sort:{pageID: -1}}, function(error, result){
 		socket.sendCommand('pageIDs', result);
@@ -262,7 +280,7 @@ function getPageIDs(data, socket, exception){
 /** */
 function getPages(data, socket, exception){
 	if(logging.trace)
-		logging.log('in getPages');
+		logging.log('In getPages');
 		
 	var callBack = function(error, result){
 		if(logging.mongo)

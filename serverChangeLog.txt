@@ -1,5 +1,12 @@
 ChangeLog - Thilly.net V5 - Web Service
 
+17 July 2014 - begin implementing comments
+	first pass on server to start viewing comments
+	
+	webservice.js
+		implemented a getComments function to function map
+		refactored the exceptions on send/actionCommand
+
 30 June 2014 - refactored logins
 	to keep the blog content secure the cookies and cached logins were refactored
 	
