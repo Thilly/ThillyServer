@@ -63,6 +63,7 @@ function select(collection, query, options, callBack){
 			cursor = cursor.limit(options.limit);
 		if(options.sort)
 			cursor = cursor.sort(options.sort);
+			
 		cursor.toArray(function(error, result){
 			if(logging.mongo)
 			{
@@ -89,12 +90,12 @@ function insert(collection, query, options, callBack){
 			if(error)
 				logging.log('error in insert: ' + error);
 			else
-				logging.log('insert completed: ' + result);					
+				logging.log('insert completed: ' + result.length);					
 		}
 		if(error)
 			new DBException(error, callBack);
 		else
-			callBack(error, result);	
+			callBack(error, result.length);	
 	});
 }
 
@@ -226,8 +227,9 @@ function dateTimeStamp(type){
 			pageID: number,				(date time stamp of page comment is on: 201406140)
 			commentText: bigText,		(plain text of article)
 			date: text, 				(date time stamp of comment: 14 June 2014 : 21:13PM)
-			replyTO: number,			(0: root comment to article; other: nested comment)
-			points: number,				(total of votes on comment)	
+			commentID: number,			(id of comment, zero based)
+			replyTo: number,			(0: root comment to article; other: nested comment)
+			points: number,				(total of votes on comment)
 			userID: text,				(submitter)
 		},
 		user{//collection
@@ -252,6 +254,3 @@ function dateTimeStamp(type){
 	all remove functions specific programmed,
 		userCollection.remove({user:name}), yadda
 */
-
-
-

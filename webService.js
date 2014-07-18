@@ -30,6 +30,7 @@ var webServiceMap = {//will be a require to a different file for each 'state'
 	register		:	function(data, socket, exception){ register(data, socket, exception);},
 	picUpload		:	function(data, socket, exception){ picUpload(data, socket, exception);},
 	pushNewArticle	:	function(data, socket, exception){ pushNewArticle(data, socket, exception);},
+	pushNewComment	:	function(data, socket, exception){ pushNewComment(data, socket, exception);},
 //move to mongoMap	
 
 	getComments		:	function(data, socket, exception){getComments(data, socket, exception);},
@@ -97,11 +98,34 @@ function actionCommand(data, socket, functionMap)
 /*
 	BEGIN webServiceMap definitions
 */
-
+function pushNewComment(data, socket, exception){
+	if(logging.trace)
+		logging.log('In pushNewComment');
+	if(logging.mongo){
+		logging.log('userName: ' + data.userID);
+		logging.log('pageID: ' + data.pageID);
+		logging.log('text: ' + data.commentText);
+		logging.log('replyTo: ' + data.replyTo);
+	}
+	
+	mongo.insert('comment', data, {w:1}, function(error, result){
+		var msg = '';
+		if(error){
+			msg = 'error pushing new comment: ' + error;
+			socket.sendCommand('commentPushed', {msg:msg});
+		}
+		else{
+			msg = 'New comment pushed: ' + result;
+			socket.sendCommand('commentPushed', {msg:msg});
+		}
+		if(logging.mongo)
+			logging.log(msg);
+	});
+}
 
 function pushNewArticle(data, socket, exception){
 	if(logging.trace)
-		logging.log('In pushNew article: ' + data.title);
+		logging.log('In pushNewArticle: ' + data.title);
 	if(logging.mongo){
 		logging.log('title: ' + data.title);
 		logging.log('thumb: ' + data.thumb);
@@ -115,14 +139,14 @@ function pushNewArticle(data, socket, exception){
 			var msg = '';
 			if(error){
 				msg = 'error pushing new article: ' + error;
-				logging.log(msg);
 				socket.sendCommand('articlePushed', {msg:msg});
 			}
 			else{
 				msg = 'New article pushed: ' + data.title;
-				logging.log(msg);
 				socket.sendCommand('articlePushed', {msg:msg});
 			}
+			if(logging.mongo)
+				logging.log(msg);
 		});		
 	else
 		socket.sendCommand('articlePushed', {msg:'Sorry, only Thilly can submit new content at this time'});
@@ -253,7 +277,7 @@ function getComments(data, socket, exception){
 	if(logging.trace)
 		logging.log('In getComments: ' + data.pageID);
 	mongo.select('comment', {pageID:data.pageID}, {projection : {}}, function(error, result){
-		socket.sendCommand('getComments', result);
+		socket.sendCommand('getComments', {value:result, id:data.pageID});
 	});
 }
 
@@ -289,15 +313,12 @@ function getPages(data, socket, exception){
 	};
 	
 	if(typeof(data) == 'number'){
-		console.log('number query ' + data);
 		mongo.select('content', {}, {projection: {}, skip:data, limit:5, sort:{pageID: -1}}, callBack);
 	}
 	else if(typeof(data) == 'object'){
-		console.log('objectQuery ' + data);
 		mongo.select('content', {pageID: {$in:data}}, {projection:{}}, callBack);
 	}
 	else if(typeof(data) == 'string'){
-		console.log('stringQuery ' + data);
 		mongo.select('content', {pageID: data}, {projection:{}}, callBack);	
 	}
 }
