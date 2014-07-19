@@ -28,15 +28,16 @@ var webServiceMap = {//will be a require to a different file for each 'state'
 	updatePage 		:	function(data, socket, exception){ updatePage(data, socket, exception);},
 	login			:	function(data, socket, exception){ login(data, socket, exception);},
 	register		:	function(data, socket, exception){ register(data, socket, exception);},
+
+//move to mongoMap	
+	commentVote		:	function(data, socket, exception){ constructVote(data, socket, exception);},
 	picUpload		:	function(data, socket, exception){ picUpload(data, socket, exception);},
 	pushNewArticle	:	function(data, socket, exception){ pushNewArticle(data, socket, exception);},
 	pushNewComment	:	function(data, socket, exception){ pushNewComment(data, socket, exception);},
-//move to mongoMap	
-
-	getComments		:	function(data, socket, exception){getComments(data, socket, exception);},
-	getPages		:	function(data, socket, exception){getPages(data, socket, exception);},
-	getPageIDs		:	function(data, socket, exception){getPageIDs(data, socket, exception);},
-	getPageDetails	:	function(data, socket, exception){getPageDetails(data, socket, exception);}
+	getComments		:	function(data, socket, exception){ getComments(data, socket, exception);},
+	getPages		:	function(data, socket, exception){ getPages(data, socket, exception);},
+	getPageIDs		:	function(data, socket, exception){ getPageIDs(data, socket, exception);},
+	getPageDetails	:	function(data, socket, exception){ getPageDetails(data, socket, exception);}
 	
 	
 };	
@@ -241,7 +242,6 @@ function register(data, socket, exception){
 		userID	:	data.userName,
 		userName:	data.userName.toLowerCase(),
 		password:	crypto.createHash(data.password),
-		votes 	:	[],
 		points	:	0,
 		type	:	'standard'
 	};
@@ -261,7 +261,7 @@ function register(data, socket, exception){
 				else{
 					if(logging.sockets)
 						logging.log('register completed successfully');
-					loginUser(result[0], socket);
+					loginUser(insertObj, socket);
 				}
 			});
 		}
@@ -273,9 +273,109 @@ function register(data, socket, exception){
 */
 
 /** */
+function constructVote(data, socket, exception){
+	if(logging.trace)
+		logging.log('In constructVote');
+	
+	var commentObj = {'pID':data.pageID, 'cID':data.commentID};
+	var query = {userID:data.userID, '$or':[{'upVotes':{'$elemMatch':commentObj}}, {'downVotes':{'$elemMatch':commentObj}}]};
+	var projection = {projection:{_id:0, 'downVotes':1, 'upVotes':1}};
+	
+	mongo.select('user', query, projection, function(error, result){//see if changing a vote
+		if(error)
+			logging.log(error);
+		if(logging.trace)
+			logging.log('votequery returned: ' + JSON.stringify(result));
+		if(result.length > 0){
+			result = result[0];
+			console.log(result);
+			for(var i in result){
+				for(var j in result[i]){
+					if(result[i][j].pID == commentObj.pID && result[i][j].cID == commentObj.cID){
+						recordVote(commentObj, data, i);//this thing was already voted on				
+						return;
+					}
+				}
+			}
+		}
+		recordVote(commentObj, data);
+	});
+}
+
+/** */
+function recordVote(commentObj, userData, voteExists){
+	if(logging.trace)
+		logging.log('In recordVote');
+		
+	var update, modify = 1;
+	
+	if(userData.vote == 1){
+		if(voteExists == 'downVotes'){
+			modify = 2;
+			update = {'$addToSet':{'upVotes':commentObj},'$pull':{'downVotes':commentObj}};
+		}
+		else if(voteExists == 'upVotes'){
+			modify = -1;
+			update = {'$pull':{'upVotes':commentObj}};
+		}
+		else
+			update = {'$addToSet':{'upVotes':commentObj}};
+	}
+	else if(userData.vote == -1){
+		if(voteExists == 'upVotes'){
+			modify = 2;
+			update = {'$addToSet':{'downVotes':commentObj},'$pull':{'upVotes':commentObj}};
+		}
+		else if(voteExists == 'downVotes'){
+			modify = -1;
+			update = {'$pull':{'downVotes':commentObj}};
+		}
+		else
+			update = {'$addToSet':{'downVotes':commentObj}};
+	}
+	
+	mongo.update('user',{userID: userData.userID},update,{w:1},function(error, result, second){//record the votes
+		if(error)
+			logging.log(error);
+		if(logging.trace)
+			logging.log('vote recorded: ' + modify*userData.vote);
+		
+		recordPoints(userData, modify);
+			
+	});
+}
+
+/** */
+function recordPoints(userData, modify){
+
+	var coll, query, update = {'$inc': {points:(modify*userData.vote)}};
+	
+	if(userData.commentID > 0){
+		coll = 'comment';
+		query = {date: userData.commentID, pageID:userData.pageID};
+	}
+	else{
+		coll = 'content';
+		query = {pageID:userData.pageID};
+	}
+	
+	mongo.update(coll, query, update, {w:1}, function(error, result){
+			if(error)
+				logging.log(error);
+			if(logging.trace)
+				logging.log(coll + ' points recorded: ' + result);
+	});
+}
+
+/** */
 function getComments(data, socket, exception){
 	if(logging.trace)
-		logging.log('In getComments: ' + data.pageID);
+		logging.log('In getComments: ' + data.pageID + ':' + data.user);
+	if(data.user)
+		mongo.select('user', {userID: data.userName}, {projection : {upVotes: 1, downVotes: 1}}, function(error, result){
+			socket.sendCommand('getVotes', {value:result, id:data.pageID});
+		});
+			
 	mongo.select('comment', {pageID:data.pageID}, {projection : {}}, function(error, result){
 		socket.sendCommand('getComments', {value:result, id:data.pageID});
 	});

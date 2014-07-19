@@ -103,7 +103,7 @@ function insert(collection, query, options, callBack){
 function update(collection, selection, query, options, callBack){
 	if(logging.trace)
 		logging.log('in update: ' + collection);
-	collectionMap[collection].update(selection, query, options, function(error, result){
+	collectionMap[collection].update(selection, query, options, function(error, result, writes){
 		if(logging.mongo)
 		{
 			if(error)
@@ -114,7 +114,7 @@ function update(collection, selection, query, options, callBack){
 		if(error)
 			new DBException(error, callBack);
 		else
-			callBack(error, result);	
+			callBack(error, result, writes);	
 	});
 }
 
@@ -220,14 +220,15 @@ function dateTimeStamp(type){
 			title: text,				(title of the article)
 			content: bigText,			(html of article)
 			pictures: imgSrc[],			(array of sources: [img1.png, img2.png, ... ])
-			thumb:	imgSrc				(a single picURL to be set as thumbnail)
+			thumb:	imgSrc,				(a single picURL to be set as thumbnail)
+			points:	number				(any upvotes the article received)
 		},
 		comment{//collection
 		//	_id: number,				(auto applied comment _id)
 			pageID: number,				(date time stamp of page comment is on: 201406140)
 			commentText: bigText,		(plain text of article)
 			date: text, 				(date time stamp of comment: 14 June 2014 : 21:13PM)
-			commentID: number,			(id of comment, zero based)
+			commentID: number,			(id of comment, timeDateStamp)
 			replyTo: number,			(0: root comment to article; other: nested comment)
 			points: number,				(total of votes on comment)
 			userID: text,				(submitter)
@@ -236,7 +237,8 @@ function dateTimeStamp(type){
 		//	_id: number,				(auto applied user _id)
 			userID: text,				(user choice, 'Some Random' for guest)
 			password: text,				(password, hashed)
-			votes: {commentID, vote}[],	(array of votes: [{commentID, 1}, {commentID, -1}, ... ])
+			upVotes: {pageID, commentID}[],	(array of votes: [{commentID, 1}, {commentID, -1}, ... ])
+			downVotes: {pageID, commentID}[], ''
 			points: number,				(total comment points user earned)
 			type: string				(type of user: (admin, standard, moderator))
 		}

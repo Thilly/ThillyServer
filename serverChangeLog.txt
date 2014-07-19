@@ -1,4 +1,17 @@
 ChangeLog - Thilly.net V5 - Web Service
+19 July 2014 - lots of work with mongo finishing up comment functionality
+
+	webService.js
+		implemented the voting functionality in three parts
+			constructing a 'vote' by checking for existing votes
+			recording the user vote for persistence
+			recording the points given/taken away from the vote
+	
+	mongo.js
+		changed the schema from the weird nested voting structure to two arrays with up/down votes 
+			I want to go back to the nested in the future because I think it will be better for long run.
+			
+
 18 July 2014 - comments can be posted now, voting still to come
 
 	webservice.js
