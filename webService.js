@@ -99,79 +99,6 @@ function actionCommand(data, socket, functionMap)
 /*
 	BEGIN webServiceMap definitions
 */
-function pushNewComment(data, socket, exception){
-	if(logging.trace)
-		logging.log('In pushNewComment');
-	if(logging.mongo){
-		logging.log('userName: ' + data.userID);
-		logging.log('pageID: ' + data.pageID);
-		logging.log('text: ' + data.commentText);
-		logging.log('replyTo: ' + data.replyTo);
-	}
-	
-	mongo.insert('comment', data, {w:1}, function(error, result){
-		var msg = '';
-		if(error){
-			msg = 'error pushing new comment: ' + error;
-			socket.sendCommand('commentPushed', {msg:msg});
-		}
-		else{
-			msg = 'New comment pushed: ' + result;
-			socket.sendCommand('commentPushed', {msg:msg});
-		}
-		if(logging.mongo)
-			logging.log(msg);
-	});
-}
-
-function pushNewArticle(data, socket, exception){
-	if(logging.trace)
-		logging.log('In pushNewArticle: ' + data.title);
-	if(logging.mongo){
-		logging.log('title: ' + data.title);
-		logging.log('thumb: ' + data.thumb);
-		logging.log('pageID: ' + data.pageID);
-		logging.log('pictures: ' + data.pictures);
-		logging.log('content: ' + data.content);
-	}
-	var selection = {pageID: data.pageID};
-	if(socket.user.type == 'admin')
-		mongo.update('content', selection, data, {upsert: true, w:1}, function(error, result){
-			var msg = '';
-			if(error){
-				msg = 'error pushing new article: ' + error;
-				socket.sendCommand('articlePushed', {msg:msg});
-			}
-			else{
-				msg = 'New article pushed: ' + data.title;
-				socket.sendCommand('articlePushed', {msg:msg});
-			}
-			if(logging.mongo)
-				logging.log(msg);
-		});		
-	else
-		socket.sendCommand('articlePushed', {msg:'Sorry, only Thilly can submit new content at this time'});
-}
-
-/** */
-function picUpload(data, socket, exception){
-	if(logging.trace)
-		logging.log('In picUpload: ' + data.name);
-	console.log('pic trying to be loaded: ' + data);
-	var fileName = 'client/content/images/' + data.name;
-	files.writeFile(fileName, data.file, function(error, file){
-		if(error)
-			logging.log('error in picUpload: ' + error);
-		else
-		{
-			var filePath = file.replace('client/','');
-			if(logging.trace)
-				logging.log('picUploaded: ' + file);
-			socket.sendCommand('picUploaded', {name:data.name, path:filePath});
-		}
-	});
-
-}
 
 /** */
 function updatePage(data, socket, exception){
@@ -232,7 +159,6 @@ function loginUser(userData, socket){
 	});
 }
 
-
 /** */
 function register(data, socket, exception){
 	if(logging.trace)
@@ -271,6 +197,81 @@ function register(data, socket, exception){
 /*
 	BEGIN mongoMap definitions
 */
+
+/** */
+function picUpload(data, socket, exception){
+	if(logging.trace)
+		logging.log('In picUpload: ' + data.name);
+	console.log('pic trying to be loaded: ' + data);
+	var fileName = 'client/content/images/' + data.name;
+	files.writeFile(fileName, data.file, function(error, file){
+		if(error)
+			logging.log('error in picUpload: ' + error);
+		else
+		{
+			var filePath = file.replace('client/','');
+			if(logging.trace)
+				logging.log('picUploaded: ' + file);
+			socket.sendCommand('picUploaded', {name:data.name, path:filePath});
+		}
+	});
+
+}
+
+/** */
+function pushNewComment(data, socket, exception){
+	if(logging.trace)
+		logging.log('In pushNewComment');
+	if(logging.mongo){
+		logging.log('userName: ' + data.userID);
+		logging.log('pageID: ' + data.pageID);
+		logging.log('text: ' + data.commentText);
+		logging.log('replyTo: ' + data.replyTo);
+	}
+	
+	mongo.insert('comment', data, {w:1}, function(error, result){
+		var msg = '';
+		if(error){
+			msg = 'error pushing new comment: ' + error;
+			socket.sendCommand('commentPushed', {msg:msg});
+		}
+		else{
+			msg = 'New comment pushed: ' + result;
+		}
+		if(logging.mongo)
+			logging.log(msg);
+	});
+}
+
+/** */
+function pushNewArticle(data, socket, exception){
+	if(logging.trace)
+		logging.log('In pushNewArticle: ' + data.title);
+	if(logging.mongo){
+		logging.log('title: ' + data.title);
+		logging.log('thumb: ' + data.thumb);
+		logging.log('pageID: ' + data.pageID);
+		logging.log('pictures: ' + data.pictures);
+		logging.log('content: ' + data.content);
+	}
+	var selection = {pageID: data.pageID};
+	if(socket.user.type == 'admin')
+		mongo.update('content', selection, data, {upsert: true, w:1}, function(error, result){
+			var msg = '';
+			if(error){
+				msg = 'error pushing new article: ' + error;
+				socket.sendCommand('articlePushed', {msg:msg});
+			}
+			else{
+				msg = 'New article pushed: ' + data.title;
+				socket.sendCommand('articlePushed', {msg:msg});
+			}
+			if(logging.mongo)
+				logging.log(msg);
+		});		
+	else
+		socket.sendCommand('articlePushed', {msg:'Sorry, only Thilly can submit new content at this time'});
+}
 
 /** */
 function constructVote(data, socket, exception){
@@ -358,27 +359,60 @@ function recordPoints(userData, modify){
 		coll = 'content';
 		query = {pageID:userData.pageID};
 	}
-	
+	if(userData.commentID > 0)
+		mongo.update('user', {userID:userData.commenter}, update, {w:1}, function(error, result){
+			if(error)
+				logging.log(error);
+			if(logging.trace)
+				logging.log(coll + ' points recorded for user: ' + userData.commenter);
+		
+		});
+		
 	mongo.update(coll, query, update, {w:1}, function(error, result){
 			if(error)
 				logging.log(error);
 			if(logging.trace)
-				logging.log(coll + ' points recorded: ' + result);
+				logging.log(coll + ' points recorded for comment:' + userData.commentID);
 	});
 }
 
 /** */
 function getComments(data, socket, exception){
 	if(logging.trace)
-		logging.log('In getComments: ' + data.pageID + ':' + data.user);
-	if(data.user)
-		mongo.select('user', {userID: data.userName}, {projection : {upVotes: 1, downVotes: 1}}, function(error, result){
-			socket.sendCommand('getVotes', {value:result, id:data.pageID});
-		});
+		logging.log('In getComments: ' + data.pageID + ':' + data.userName);
+	if(data.userName)
+		getVotes(data, socket, exception);
+
 			
 	mongo.select('comment', {pageID:data.pageID}, {projection : {}}, function(error, result){
 		socket.sendCommand('getComments', {value:result, id:data.pageID});
 	});
+}
+
+/** */
+function getVotes(data, socket, exception){
+	if(logging.trace)
+		logging.log('In getVotes: ' + data.pageID + ':' + data.userName);
+	mongo.select('user', {userID: data.userName}, {projection : {_id: 0, upVotes: 1, downVotes: 1}}, function(error, result){
+		result = result[0];
+		var votes = {
+			downVotes: [],
+			upVotes: []
+		}
+		for(var i = 0; i < result.downVotes.length; i++){
+			if(result.downVotes[i].pID == data.pageID){
+				votes.downVotes.push(result.downVotes[i]);
+			}
+		}		
+		for(var j = 0; j < result.upVotes.length; j++){
+			if(result.upVotes[j].pID == data.pageID){
+				votes.upVotes.push(result.upVotes[j]);	
+			}
+		}
+		socket.sendCommand('getVotes', {value:votes, id:data.pageID});
+	});
+
+
 }
 
 /** */

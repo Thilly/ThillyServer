@@ -43,6 +43,8 @@
 	create external 'classes' for different states of socket commands
 	finish up exception handling
 	give thillyLogging hooks to modify logging from outside hardcoded values
+		implement a way for an admin to watch the log during runtime
+			add a stream, logging.log also broadcasts to the admin channel if anyone listening
 	generalize page requests
 */
 
@@ -79,4 +81,25 @@
 		breakout
 			mouse / click	
 			
+*/
+
+/** user profile stuff
+	give each user a public and private profile
+	link to public on each comment
+		create list of users when pulling comments
+		query all the users $all[userList], 
+		with projection {userID: 1, points: 1, publicLink:1}
+		after comments are populated, run over comments and add title/link to each user
+*/
+
+/** graphics
+
+	create sprite sheet for buttons
+		up/down default
+		up/down active
+		x (close buttons)
+		comment/comment active
+		minimap arrows
+		settings/options gear + active
+		profile button + active
 */

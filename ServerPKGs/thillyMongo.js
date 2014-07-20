@@ -10,7 +10,7 @@ var mongo;
 /** */
 var objectID;
 
-/** */ 
+/** */
 var logging;
 
 /** */

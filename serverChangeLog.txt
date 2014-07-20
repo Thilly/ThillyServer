@@ -1,4 +1,14 @@
 ChangeLog - Thilly.net V5 - Web Service
+20 July 2014 - last bit of commenting functionality
+
+	general
+		code cleanup and re-arranging
+		
+	webService.js
+		removed the alert from a comment submission since local modifications have been implemented
+		implemented points and total user points, because they are just fun
+		implemented vote retrieving
+
 19 July 2014 - lots of work with mongo finishing up comment functionality
 
 	webService.js
