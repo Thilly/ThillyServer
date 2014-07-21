@@ -253,8 +253,9 @@ function pushNewArticle(data, socket, exception){
 		logging.log('pageID: ' + data.pageID);
 		logging.log('pictures: ' + data.pictures);
 		logging.log('content: ' + data.content);
+		logging.log('category: ' + data.category);
 	}
-	var selection = {pageID: data.pageID};
+	var selection = {pageID: data.pageID, category: data.category};
 	if(socket.user.type == 'admin')
 		mongo.update('content', selection, data, {upsert: true, w:1}, function(error, result){
 			var msg = '';
@@ -418,9 +419,9 @@ function getVotes(data, socket, exception){
 /** */
 function getPageDetails(data, socket, exception){
 	if(logging.trace)
-		logging.log('In getPageDetails');
+		logging.log('In getPageDetails: ' + JSON.stringify(data));
 	
-	mongo.select('content', {pageID:data}, {projection : {}}, function(error, result){
+	mongo.select('content', {pageID:data.pageID, category: data.category}, {projection : {}}, function(error, result){
 		socket.emit('getPageDetails', result);
 	});
 }
@@ -430,7 +431,7 @@ function getPageIDs(data, socket, exception){
 	if(logging.trace)
 		logging.log('In getPageIDs');
 		
-	mongo.select('content', {}, {projection : {pageID:-1}, sort:{pageID: -1}}, function(error, result){
+	mongo.select('content', {}, {projection : {pageID:-1, category: 1}, sort:{pageID: -1}}, function(error, result){
 		socket.sendCommand('pageIDs', result);
 	});
 }
@@ -438,7 +439,7 @@ function getPageIDs(data, socket, exception){
 /** */
 function getPages(data, socket, exception){
 	if(logging.trace)
-		logging.log('In getPages');
+		logging.log('In getPages:' + JSON.stringify(data));
 		
 	var callBack = function(error, result){
 		if(logging.mongo)
@@ -446,13 +447,25 @@ function getPages(data, socket, exception){
 		socket.sendCommand('getPages', result);
 	};
 	
-	if(typeof(data) == 'number'){
-		mongo.select('content', {}, {projection: {}, skip:data, limit:5, sort:{pageID: -1}}, callBack);
+	var query = {};
+	var options = {
+		projection: {}
+	};
+	
+	if(typeof(data.article) == 'number'){
+		options.skip = data.article;
+		options.limit = 5;
+		options.sort = {pageID: -1};
 	}
-	else if(typeof(data) == 'object'){
-		mongo.select('content', {pageID: {$in:data}}, {projection:{}}, callBack);
+	else if(typeof(data.article) == 'object'){
+		query.pageID = {$in: data.article};
 	}
-	else if(typeof(data) == 'string'){
-		mongo.select('content', {pageID: data}, {projection:{}}, callBack);	
+	else if(typeof(data.article) == 'string'){
+		query.pageID = data.article;
 	}
+	if(data.state != 'home')
+		query.category = data.state;
+		
+		mongo.select('content', query, options, callBack);	
 }
+

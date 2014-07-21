@@ -1,4 +1,15 @@
 ChangeLog - Thilly.net V5 - Web Service
+21 July 2014 - changing links and adding categories
+
+	webService.js
+		modified how getpages works to allow 
+			now takes an object { currentCount, category }
+		modified how pages are created and stored, allowed to have dupes on dateString
+			unique on date/category still (intended for ease of edit)
+		modified how pageIDs are served to template
+		refactored page ids
+		
+
 20 July 2014 - last bit of commenting functionality
 
 	general

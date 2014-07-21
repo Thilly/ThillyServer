@@ -218,6 +218,7 @@ function dateTimeStamp(type){
 		//	_id: number,				(auto applied page _id)
 			pageID: number,				(date time stamp: 201406140)
 			title: text,				(title of the article)
+			category: text,				(category of the article, standard, games, bio, etc..)
 			content: bigText,			(html of article)
 			pictures: imgSrc[],			(array of sources: [img1.png, img2.png, ... ])
 			thumb:	imgSrc,				(a single picURL to be set as thumbnail)

@@ -1,7 +1,7 @@
-//
-// ADMIN.js
-//
-
+/**
+ *
+ */
+ 
 /** */
 window.thillyAdmin = {};
 
@@ -23,7 +23,7 @@ window.thillyAdmin = {};
 	/** */
 	this.submit = function(oldPics, thumbNail){
 		var picList = document.getElementsByClassName('controlBox');
-		var pageID = document.getElementById('comboBox').value;
+		var pageID = document.getElementById('comboBox').value.split(' ')[0];
 		var thumbSent = false;
 		oldPictures = oldPics;
 		thumb = thumbNail;
@@ -103,10 +103,14 @@ window.thillyAdmin = {};
 		var uploadObj = {
 			pageID 		: 	document.getElementById('comboBox').value,
 			title		: 	document.getElementById('titleBox').value,
+			category	:	document.getElementById('categoryBox').value,
 			content		: 	templateView.innerHTML,
 			pictures	: 	oldPictures,
+			points		:	0,
 			thumb		: 	thumb.url
 		};
+		if(uploadObj.pageID.length == 8)
+			uploadObj.pageID += uploadObj.category;
 			
 		mainSocket.sendCommand('pushNewArticle', uploadObj);
 		document.getElementById('templateTextInput').value = uploadObj.content;

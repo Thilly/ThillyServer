@@ -92,7 +92,11 @@
 		after comments are populated, run over comments and add title/link to each user
 */
 
-/** graphics
+/** graphics and UX
+
+	css, lots of it
+		make the webby look good for a change
+		find inspiration deep inside :D
 
 	create sprite sheet for buttons
 		up/down default
@@ -100,6 +104,7 @@
 		x (close buttons)
 		comment/comment active
 		minimap arrows
-		settings/options gear + active
+		template tools + tools/hide
+		general settings gear
 		profile button + active
 */
