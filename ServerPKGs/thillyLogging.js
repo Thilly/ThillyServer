@@ -7,10 +7,11 @@
 
 /** */
 var flags = {
+	Loc404		:	'http://174.49.168.70',
 	debug		:	true,	//a flag for watching current area of work
 	display		:	true,	//a flag for displaying current logging
 	errors		:	true,	//a flag for watching common errors
-	files		:	false,	//a flag for watching file i/o
+	files		:	true,	//a flag for watching file i/o
 	log			:	log,	//a function to place logs into current log file
 	logging		:	false,	//a flag for writing the log to a file
 	mongo		:	true,	//a flag for watching any mongo actions

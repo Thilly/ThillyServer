@@ -47,10 +47,10 @@ function fileHandler(req, res)
 		logging.log('In fileHandler');
 	var filePath = req.url;
 	if(filePath == '/')//if first request
-		filePath = './client/index.html';
+		filePath = './client/content/index.html';
 		//give main page
-	else	//otherwise
-		filePath = './client' + req.url;	
+	else
+		filePath = './client/content' + filePath;
 			//go into shared directory and get the thing requested
 	if(logging.files)	
 		logging.log('Retrieving: ' + filePath);//log thing gotten
@@ -97,7 +97,8 @@ function fileHandler(req, res)
 				if (error) {
 					res.writeHead(500);
 					res.end();//cant read it, bail and go elsewhere
-					logging.log('Error loading' + filePath); //loggit
+					if(logging.files)
+						logging.log('Error loading' + filePath); //loggit
 				}
 				
 				res.writeHead(200, {'Content-Type': contentType,
@@ -114,8 +115,12 @@ function fileHandler(req, res)
 			});
 		else
 		{
-			res.writeHead(404);//cant find it? 404 it
-			res.end;
+			if(logging.files)
+				logging.log(filePath + ' not found, 404ing');
+			res.writeHead(302,{
+				Location: (logging.Loc404 + '/404.html')//rename to
+			});//cant find it? 404 it
+			res.end();
 		}
 	});//end of file exist callback
 }//end of fileHandle object

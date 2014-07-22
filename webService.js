@@ -35,6 +35,7 @@ var webServiceMap = {//will be a require to a different file for each 'state'
 	pushNewArticle	:	function(data, socket, exception){ pushNewArticle(data, socket, exception);},
 	pushNewComment	:	function(data, socket, exception){ pushNewComment(data, socket, exception);},
 	getComments		:	function(data, socket, exception){ getComments(data, socket, exception);},
+	getTemplate		:	function(data, socket, exception){ getTemplate(data, socket, exception);},
 	getPages		:	function(data, socket, exception){ getPages(data, socket, exception);},
 	getPageIDs		:	function(data, socket, exception){ getPageIDs(data, socket, exception);},
 	getPageDetails	:	function(data, socket, exception){ getPageDetails(data, socket, exception);}
@@ -431,9 +432,20 @@ function getPageIDs(data, socket, exception){
 	if(logging.trace)
 		logging.log('In getPageIDs');
 		
-	mongo.select('content', {}, {projection : {pageID:-1, category: 1}, sort:{pageID: -1}}, function(error, result){
+	mongo.select('content', {pageID:{$ne:"00000001template"}}, {projection : {pageID:-1, category: 1}, sort:{pageID: -1}}, function(error, result){
 		socket.sendCommand('pageIDs', result);
 	});
+}
+
+/** */
+function getTemplate(data, socket, exception){
+	if(logging.trace)
+		logging.log('In getTemplates');
+		
+	mongo.select('content', {category:'template'}, {projection : {}, sort:{pageID: -1}}, function(error, result){
+		socket.emit('gotTemplate', result);
+	});
+
 }
 
 /** */
@@ -449,16 +461,13 @@ function getPages(data, socket, exception){
 	
 	var query = {};
 	var options = {
-		projection: {}
+		projection: {},
+		sort:{pageID: -1}
 	};
-	
-	if(typeof(data.article) == 'number'){
-		options.skip = data.article;
-		options.limit = 5;
-		options.sort = {pageID: -1};
-	}
-	else if(typeof(data.article) == 'object'){
-		query.pageID = {$in: data.article};
+
+	if(typeof(data.article) == 'object'){
+		query.pageID = {$nin: data.article};
+		query.category = {$ne:'template'}
 	}
 	else if(typeof(data.article) == 'string'){
 		query.pageID = data.article;

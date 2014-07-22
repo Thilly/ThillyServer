@@ -1,4 +1,17 @@
 ChangeLog - Thilly.net V5 - Web Service
+22 July 2014 - cleaning up some fiddly bits
+
+	general
+		removed all static html except for index.html and 404.html
+		re-arranged filesystem
+		
+	webservice.js
+		modified how getpages works to get ALL articles without dupes (not in set of pageIDs)
+	
+	thillyFiles.js
+		refactored how filehandler deals with urls a bit
+		
+
 21 July 2014 - changing links and adding categories
 
 	webService.js

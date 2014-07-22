@@ -23,7 +23,7 @@ window.thillyAdmin = {};
 	/** */
 	this.submit = function(oldPics, thumbNail){
 		var picList = document.getElementsByClassName('controlBox');
-		var pageID = document.getElementById('comboBox').value.split(' ')[0];
+		var pageID = document.getElementById('comboBox').value;
 		var thumbSent = false;
 		oldPictures = oldPics;
 		thumb = thumbNail;
@@ -36,7 +36,6 @@ window.thillyAdmin = {};
 		
 		if(thumb.source == 'old'){
 			thumb.url = document.getElementById('aBox1').style.backgroundImage;
-			thumb.url = thumb.url.split('/')[5].replace(')','');
 		}
 		else if(thumb.source == 'new'){
 			var file = URItoBlob(thumb.url);
