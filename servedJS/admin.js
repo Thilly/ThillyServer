@@ -24,6 +24,8 @@ window.thillyAdmin = {};
 	this.submit = function(oldPics, thumbNail){
 		var picList = document.getElementsByClassName('controlBox');
 		var pageID = document.getElementById('comboBox').value;
+		if(pageID.length == 8) 
+			pageID += document.getElementById('categoryBox').value;
 		var thumbSent = false;
 		oldPictures = oldPics;
 		thumb = thumbNail;

@@ -1,4 +1,20 @@
 ChangeLog - Thilly.net V5 - Web Service
+23 July 2014 - more cleanup and preparing for some extending
+	
+	logging.js	
+		implemented a domain flag for setting test/deploy environments
+		implemented a set function for changing values during runtime
+	
+	files.js
+		modified to fit above
+	
+	webservice.js
+		modified to fit above
+		fixed a bug related to templates and old thumbnails being updated properly
+		
+	admin.js
+		fixed a bug related to templates and old thumbnails being updated properly
+
 22 July 2014 - cleaning up some fiddly bits
 
 	general

@@ -204,7 +204,7 @@ function picUpload(data, socket, exception){
 	if(logging.trace)
 		logging.log('In picUpload: ' + data.name);
 	console.log('pic trying to be loaded: ' + data);
-	var fileName = 'client/content/images/' + data.name;
+	var fileName = 'client/' + logging.domain + '/images/' + data.name;
 	files.writeFile(fileName, data.file, function(error, file){
 		if(error)
 			logging.log('error in picUpload: ' + error);
@@ -253,11 +253,12 @@ function pushNewArticle(data, socket, exception){
 		logging.log('thumb: ' + data.thumb);
 		logging.log('pageID: ' + data.pageID);
 		logging.log('pictures: ' + data.pictures);
-		logging.log('content: ' + data.content);
+		logging.log('content: ' + data.content.length + ' bytes');
 		logging.log('category: ' + data.category);
 	}
 	var selection = {pageID: data.pageID, category: data.category};
-	if(socket.user.type == 'admin')
+	if(socket.user.type == 'admin'){
+		console.log('under admin');
 		mongo.update('content', selection, data, {upsert: true, w:1}, function(error, result){
 			var msg = '';
 			if(error){
@@ -271,6 +272,7 @@ function pushNewArticle(data, socket, exception){
 			if(logging.mongo)
 				logging.log(msg);
 		});		
+	}
 	else
 		socket.sendCommand('articlePushed', {msg:'Sorry, only Thilly can submit new content at this time'});
 }
@@ -386,7 +388,7 @@ function getComments(data, socket, exception){
 		getVotes(data, socket, exception);
 
 			
-	mongo.select('comment', {pageID:data.pageID}, {projection : {}}, function(error, result){
+	mongo.select('comment', {pageID:data.pageID}, {projection : {}, sort: {date: 1}, function(error, result){
 		socket.sendCommand('getComments', {value:result, id:data.pageID});
 	});
 }
@@ -459,15 +461,17 @@ function getPages(data, socket, exception){
 		socket.sendCommand('getPages', result);
 	};
 	
-	var query = {};
+	var query = {
+		category: {$ne: 'template'}
+	};
 	var options = {
 		projection: {},
-		sort:{pageID: -1}
+		sort:{pageID: -1},
+		limit: 5		
 	};
 
 	if(typeof(data.article) == 'object'){
 		query.pageID = {$nin: data.article};
-		query.category = {$ne:'template'}
 	}
 	else if(typeof(data.article) == 'string'){
 		query.pageID = data.article;

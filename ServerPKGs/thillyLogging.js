@@ -7,20 +7,28 @@
 
 /** */
 var flags = {
-	Loc404		:	'http://174.49.168.70',
+	loc404		:	'http://174.49.168.70',
 	debug		:	true,	//a flag for watching current area of work
 	display		:	true,	//a flag for displaying current logging
+	domain		:	'test',	//which environment is the current service running
 	errors		:	true,	//a flag for watching common errors
 	files		:	true,	//a flag for watching file i/o
 	log			:	log,	//a function to place logs into current log file
 	logging		:	false,	//a flag for writing the log to a file
 	mongo		:	true,	//a flag for watching any mongo actions
 	port		:	80,		//the port the server will be listening on
+	set			:	setFlag,//a function to change logging during runtime
 	socketIO 	:	false,	//a flag for watching socket.io messages
 	sockets		:	true,	//a flag for watching socket events
 	trace		: 	true	//a flag for watching the flow of the program
 };  
- 
+
+var constFlags = {
+	loc404	: true,
+	set		: true,
+	log		: true
+};
+
 /** */  
 module.exports = flags;  
  
@@ -53,3 +61,10 @@ function getTimeStamp()
 	return dateString;
 }
 
+function setFlag(flag, value){
+	if(flag)
+		if(!constFlags[flag]){
+			log('setting: ' + flag + ' to ' + value);
+			flags[flag] = value;
+		}
+}

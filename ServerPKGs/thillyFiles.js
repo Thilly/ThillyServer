@@ -47,10 +47,10 @@ function fileHandler(req, res)
 		logging.log('In fileHandler');
 	var filePath = req.url;
 	if(filePath == '/')//if first request
-		filePath = './client/content/index.html';
+		filePath = './client/' + logging.domain + '/index.html';
 		//give main page
 	else
-		filePath = './client/content' + filePath;
+		filePath = './client/' + logging.domain + filePath;
 			//go into shared directory and get the thing requested
 	if(logging.files)	
 		logging.log('Retrieving: ' + filePath);//log thing gotten
@@ -118,7 +118,7 @@ function fileHandler(req, res)
 			if(logging.files)
 				logging.log(filePath + ' not found, 404ing');
 			res.writeHead(302,{
-				Location: (logging.Loc404 + '/404.html')//rename to
+				Location: (logging.loc404 + '/404.html')//rename to
 			});//cant find it? 404 it
 			res.end();
 		}
