@@ -5,54 +5,90 @@
  *	@author Nicholas 'Thilly' Evans
  */
 
+/** */ 
+var files = {};
+
 /** */
-var flags = {
-	loc404		:	'http://174.49.168.70',
-	debug		:	true,	//a flag for watching current area of work
-	display		:	true,	//a flag for displaying current logging
-	domain		:	'test',	//which environment is the current service running
-	errors		:	true,	//a flag for watching common errors
-	files		:	true,	//a flag for watching file i/o
-	log			:	log,	//a function to place logs into current log file
-	logging		:	false,	//a flag for writing the log to a file
-	mongo		:	true,	//a flag for watching any mongo actions
-	port		:	80,		//the port the server will be listening on
-	set			:	setFlag,//a function to change logging during runtime
-	socketIO 	:	false,	//a flag for watching socket.io messages
-	sockets		:	true,	//a flag for watching socket events
-	trace		: 	true	//a flag for watching the flow of the program
+var cache = [];
+
+/** */
+var logs = {
+	debug		:	function(msg){log('debug', msg);},
+	//a flag for watching current area of work
+	errors		:	function(msg){log('errors', msg);},	
+	//a flag for watching common errors
+	files		:	function(msg){log('files', msg);},	
+	//a flag for watching file i/o
+	mongo		:	function(msg){log('mongo', msg);},	
+	//a flag for watching any mongo actions
+	socketIO 	:	function(msg){log('socketIO', msg);},
+	//a flag for watching socket.io messages
+	sockets		:	function(msg){log('sockets', msg);},	
+	//a flag for watching socket events
+	trace		: 	function(msg){log('trace', msg);}
+	//a flag for watching the flow of the program
 };  
 
-var constFlags = {
-	loc404	: true,
-	set		: true,
-	log		: true
+/** */
+var flags = {
+	debug		:	true,
+	//a flag for watching current area of work
+	display		:	true,	
+	//a flag for displaying current logging
+	errors		:	true,	
+	//a flag for watching common errors
+	files		:	true,	
+	//a flag for watching file i/o
+	logging		:	false,	
+	//a flag for writing the log to a file
+	mongo		:	true,	
+	//a flag for watching any mongo actions
+	socketIO 	:	true,	
+	//a flag for watching socket.io messages
+	sockets		:	true,	
+	//a flag for watching socket events
+	trace		: 	true	
+	//a flag for watching the flow of the program
 };
 
 /** */  
-module.exports = flags;  
- 
-/** */ 
-var files = require('./thillyFiles.js');
-	files = new files(flags);
+module.exports = function(options){
+
+	var thisObj = {
+		log			: logs,
+		set 		: setFlag,
+		flags		: flags,
+		environment	: options.environment || 'test',
+		homeDomain 	: options.homeDomain || 'http://174.49.168.70',
+		port 		: options.port || 80
+	};
+	
+	files = require('./thillyFiles.js');
+	files = new files(thisObj);
+	
+	return thisObj;
+};
+	
 
 /** */
 var fileName =  './Logging/' + getTimeStamp() + 'serverLog.log';
-if(flags.logging)
-	files.writeFile(fileName, 'Started Server log: ' + new Date().toString());
+logs.files('Started Server log: ' + new Date().toString());
 
 /** */  
-function log(logString)
-{
-	if(this.display)
-		process.stdout.write(logString + '\n');
-	if(this.logging)
-		files.appendLog(fileName, '\n' + getTimeStamp() + '\t' + logString);
+function log(flag, logString){
+	if(flags[flag]){
+		if(flags.display)
+			process.stdout.write(logString + '\n');
+		if(flags.logging)
+			files.appendLog(fileName, '\n' + getTimeStamp() + '\t' + logString);
+		cache.push(logString);
+		if(cache.length > 100)
+			cache.shift();
+	}
 }
 
 /** */  
-function getTimeStamp()
-{
+function getTimeStamp(){
 	var dateStamp = new Date();
 	var dateString = (dateStamp.getDate() > 8)?(dateStamp.getDate()):('0'+dateStamp.getDate());
 	dateString += (dateStamp.getHours() > 9)?(dateStamp.getHours()):('0'+dateStamp.getHours());
@@ -61,6 +97,7 @@ function getTimeStamp()
 	return dateString;
 }
 
+/** */
 function setFlag(flag, value){
 	if(flag)
 		if(!constFlags[flag]){

@@ -1,8 +1,18 @@
 /** */
-var logging = require('./ServerPKGs/thillyLogging.js');
+
+/**options for Logging and rest of webService */
+//will come from launcher/process manager eventually
+var options = {
+	port		:	80,
+	environment	:	'test', 
+	homeDomain	:	'http://174.49.168.70'
+};
 
 /** */
-var Exception = require('./ServerPKGs/thillyExceptions.js');
+var logging = require('./ServerPKGs/thillylogging.js')(options);
+
+/** */
+var exception = require('./ServerPKGs/thillyexceptions.js')(logging);
 
 /** */
 var files = new require('./ServerPKGs/thillyFiles.js')(logging);
@@ -13,13 +23,13 @@ var mongo = new require('./ServerPKGs/thillyMongo.js')(logging, function(){
 });
 
 /** */
-var crypto = require('./ServerPKGs/thillyCrypto.js');
+var crypto = require('./ServerPKGs/thillyCrypto.js')(logging);
 
 /** */
 var server = require('http').createServer(files.fileHandler).listen(logging.port);
 
 /** */
-var sockets = require('socket.io').listen(server, {log: logging.socketIO});
+var sockets = require('socket.io').listen(server, {log: logging.flags.socketIO});
 
 console.log('WebService has started on port: ' + logging.port + '\n');
 
@@ -29,7 +39,7 @@ var webServiceMap = {//will be a require to a different file for each 'state'
 	login			:	function(data, socket, exception){ login(data, socket, exception);},
 	register		:	function(data, socket, exception){ register(data, socket, exception);},
 
-//move to mongoMap	
+//move to mongoFunctionMap	
 	commentVote		:	function(data, socket, exception){ constructVote(data, socket, exception);},
 	picUpload		:	function(data, socket, exception){ picUpload(data, socket, exception);},
 	pushNewArticle	:	function(data, socket, exception){ pushNewArticle(data, socket, exception);},
@@ -39,25 +49,19 @@ var webServiceMap = {//will be a require to a different file for each 'state'
 	getPages		:	function(data, socket, exception){ getPages(data, socket, exception);},
 	getPageIDs		:	function(data, socket, exception){ getPageIDs(data, socket, exception);},
 	getPageDetails	:	function(data, socket, exception){ getPageDetails(data, socket, exception);}
-	
-	
 };	
 
 /** */
 sockets.on('connection', function(socket){
-	if(logging.trace)
-		logging.log('In sockets.on("connection")');
-	if(logging.sockets)
-		logging.log(socket.id + ' connected');
+	logging.log.trace('In sockets.on("connection")');
+	logging.log.sockets(socket.id + ' connected');
 	
 	socket.sendCommand = sendCommand;
 	
 	/** */
 	socket.on('command', function(data){
-		if(logging.trace)
-			logging.log('In socket.on("command")');
-		if(logging.sockets)
-			logging.log('Recieved data from socket: ' + JSON.stringify(data));
+		logging.log.trace('In socket.on("command")');
+		logging.log.sockets('Recieved data from socket: ' + JSON.stringify(data));
 			
 		actionCommand(data, socket, webServiceMap);
 	});
@@ -69,8 +73,7 @@ sockets.on('connection', function(socket){
 /** */
 function sendCommand(command, dataObject, callBack)
 {//general send command function
-	if(logging.trace)
-		logging.log('In sendCommand');
+	logging.log.trace('In sendCommand');
 	var commandObject = {'command':command, 'value':dataObject};
 	try{
 		if(typeof(callBack) == 'function')
@@ -79,20 +82,19 @@ function sendCommand(command, dataObject, callBack)
 			this.emit('command', commandObject);
 	}
 	catch(error){
-		new Exception.Utility('Socket has not been instantiated yet, cannot sendCommand');
+		new exception.utility('Socket has not been instantiated yet, cannot sendCommand');
 	}
 }
 
 /** */
 function actionCommand(data, socket, functionMap)
 {//general recieve command function
-	if(logging.trace)
-		logging.log('In actionCommand');
+	logging.log.trace('In actionCommand');
 	try{
-		functionMap[data.command](data.value, socket, Exception.ErrorHandle);
+		functionMap[data.command](data.value, socket, exception.ErrorHandle);
 	}
 	catch(error){
-		new Exception.Utility('Exception when trying to call ' + data.command);
+		new exception.utility('exception when trying to call ' + data.command);
 	}
 }
 
@@ -103,13 +105,11 @@ function actionCommand(data, socket, functionMap)
 
 /** */
 function updatePage(data, socket, exception){
-	if(logging.trace)
-		logging.log('In updatePage' + data);
+	logging.log.trace('In updatePage' + data);
 	files.readFile('./client/' + data, function(error, returnValue){
 		if(error)
 		{
-			if(logging.error)
-				logging.log('Error in updatePage: ' + error);
+			logging.log.error('Error in updatePage: ' + error);
 			socket.emit('updatePage', {'error': error});
 		}
 		else
@@ -120,8 +120,7 @@ function updatePage(data, socket, exception){
 /** */
 function login(data, socket, exception){
 
-	if(logging.trace)
-		logging.log('In login: ' + data.userName + ' : ' + data.password + ' : ' + data.userString);
+	logging.log.trace('In login: ' + data.userName + ' : ' + data.password + ' : ' + data.userString);
 	
 	if(data.userString)
 		mongo.select('user', {_id:mongo.parse(data.userString)}, {projection:{_id : 1, userID:1, password:1, type:1}}, callBack)
@@ -130,10 +129,9 @@ function login(data, socket, exception){
 		
 	function callBack(error, result){
 		if(error)
-			logging.log('error in login: ' + error);
+			logging.log.error('error in login: ' + error);
 		else if(result.length == 0){
-			if(logging.sockets)
-				logging.log('login failed: no such user');		
+			logging.log.sockets('login failed: no such user');		
 			socket.sendCommand('login', {failed:'no such user'});
 		}
 		else if(data.userString == result[0]._id)
@@ -142,8 +140,7 @@ function login(data, socket, exception){
 			loginUser(result[0], socket);
 		}
 		else{
-			if(logging.sockets)
-				logging.log('login failed: wrong password');
+			logging.log.sockets('login failed: wrong password');
 			socket.sendCommand('login', {failed:'wrong password'});
 		}
 	}
@@ -151,10 +148,10 @@ function login(data, socket, exception){
 
 /** */
 function loginUser(userData, socket){
+	logging.log.trace('In loginUser');
 	var userTypeFileName = (userData.type == 'admin')?'admin.js':'standard.js';
 	files.readFile('./servedJS/' + userTypeFileName, function(error, data){
-		if(logging.sockets)
-			logging.log('login successful, sending ' + userTypeFileName);
+		logging.log.sockets('login successful, sending ' + userTypeFileName);
 		socket.user = userData;
 		socket.sendCommand('login', {success: true, userScript: data.toString(), type:userData.type, name:userData.userID, userString:userData._id});
 	});
@@ -162,8 +159,7 @@ function loginUser(userData, socket){
 
 /** */
 function register(data, socket, exception){
-	if(logging.trace)
-		logging.log('In register');
+	logging.log.trace('In register');
 	
 	var insertObj = {
 		userID	:	data.userName,
@@ -175,19 +171,17 @@ function register(data, socket, exception){
 	
 	mongo.select('user', {userName:data.userName.toLowerCase()}, {projection:{userID:1}}, function(error, result){
 		if(error)
-			logging.log('error in register select: ' + error);
+			logging.log.error('error in register select: ' + error);
 		else if(result.length > 0){
-			if(logging.sockets)
-				logging.log('user name: ' + data.userName + ' taken.');
+			logging.log.sockets('user name: ' + data.userName + ' taken.');
 			socket.sendCommand('login', {failed:'user name taken'});
 		}
 		else{
 			mongo.insert('user', insertObj, {w:1}, function(error, result){
 				if(error)
-					logging.log('error in register: ' + error);
+					logging.log.error('error in register: ' + error);
 				else{
-					if(logging.sockets)
-						logging.log('register completed successfully');
+					logging.log.sockets('register completed successfully');
 					loginUser(insertObj, socket);
 				}
 			});
@@ -201,18 +195,15 @@ function register(data, socket, exception){
 
 /** */
 function picUpload(data, socket, exception){
-	if(logging.trace)
-		logging.log('In picUpload: ' + data.name);
-	console.log('pic trying to be loaded: ' + data);
-	var fileName = 'client/' + logging.domain + '/images/' + data.name;
+	logging.log.trace('In picUpload: ' + data.name);
+	var fileName = 'client/' + logging.log.environment + '/images/' + data.name;
 	files.writeFile(fileName, data.file, function(error, file){
 		if(error)
-			logging.log('error in picUpload: ' + error);
+			logging.log.error('error in picUpload: ' + error);
 		else
 		{
 			var filePath = file.replace('client/','');
-			if(logging.trace)
-				logging.log('picUploaded: ' + file);
+			logging.log.trace('picUploaded: ' + file);
 			socket.sendCommand('picUploaded', {name:data.name, path:filePath});
 		}
 	});
@@ -221,44 +212,34 @@ function picUpload(data, socket, exception){
 
 /** */
 function pushNewComment(data, socket, exception){
-	if(logging.trace)
-		logging.log('In pushNewComment');
-	if(logging.mongo){
-		logging.log('userName: ' + data.userID);
-		logging.log('pageID: ' + data.pageID);
-		logging.log('text: ' + data.commentText);
-		logging.log('replyTo: ' + data.replyTo);
-	}
+	logging.log.trace('In pushNewComment');
+	logging.log.mongo('userName: ' + data.userID);
+	logging.log.mongo('pageID: ' + data.pageID);
+	logging.log.mongo('text: ' + data.commentText);
+	logging.log.mongo('replyTo: ' + data.replyTo);
 	
 	mongo.insert('comment', data, {w:1}, function(error, result){
 		var msg = '';
-		if(error){
+		if(error)
 			msg = 'error pushing new comment: ' + error;
-			socket.sendCommand('commentPushed', {msg:msg});
-		}
-		else{
+		else
 			msg = 'New comment pushed: ' + result;
-		}
-		if(logging.mongo)
-			logging.log(msg);
+		logging.log.mongo(msg);
 	});
 }
 
 /** */
 function pushNewArticle(data, socket, exception){
-	if(logging.trace)
-		logging.log('In pushNewArticle: ' + data.title);
-	if(logging.mongo){
-		logging.log('title: ' + data.title);
-		logging.log('thumb: ' + data.thumb);
-		logging.log('pageID: ' + data.pageID);
-		logging.log('pictures: ' + data.pictures);
-		logging.log('content: ' + data.content.length + ' bytes');
-		logging.log('category: ' + data.category);
-	}
+	logging.log.trace('In pushNewArticle: ' + data.title);
+	logging.log.mongo('title: ' + data.title);
+	logging.log.mongo('thumb: ' + data.thumb);
+	logging.log.mongo('pageID: ' + data.pageID);
+	logging.log.mongo('pictures: ' + data.pictures);
+	logging.log.mongo('content: ' + data.content.length + ' bytes');
+	logging.log.mongo('category: ' + data.category);
+
 	var selection = {pageID: data.pageID, category: data.category};
 	if(socket.user.type == 'admin'){
-		console.log('under admin');
 		mongo.update('content', selection, data, {upsert: true, w:1}, function(error, result){
 			var msg = '';
 			if(error){
@@ -269,8 +250,7 @@ function pushNewArticle(data, socket, exception){
 				msg = 'New article pushed: ' + data.title;
 				socket.sendCommand('articlePushed', {msg:msg});
 			}
-			if(logging.mongo)
-				logging.log(msg);
+			logging.log.mongo(msg);
 		});		
 	}
 	else
@@ -279,8 +259,7 @@ function pushNewArticle(data, socket, exception){
 
 /** */
 function constructVote(data, socket, exception){
-	if(logging.trace)
-		logging.log('In constructVote');
+	logging.log.trace('In constructVote');
 	
 	var commentObj = {'pID':data.pageID, 'cID':data.commentID};
 	var query = {userID:data.userID, '$or':[{'upVotes':{'$elemMatch':commentObj}}, {'downVotes':{'$elemMatch':commentObj}}]};
@@ -288,12 +267,10 @@ function constructVote(data, socket, exception){
 	
 	mongo.select('user', query, projection, function(error, result){//see if changing a vote
 		if(error)
-			logging.log(error);
-		if(logging.trace)
-			logging.log('votequery returned: ' + JSON.stringify(result));
+			logging.log.error(error);
+		logging.log.trace('votequery returned: ' + JSON.stringify(result));
 		if(result.length > 0){
 			result = result[0];
-			console.log(result);
 			for(var i in result){
 				for(var j in result[i]){
 					if(result[i][j].pID == commentObj.pID && result[i][j].cID == commentObj.cID){
@@ -309,8 +286,7 @@ function constructVote(data, socket, exception){
 
 /** */
 function recordVote(commentObj, userData, voteExists){
-	if(logging.trace)
-		logging.log('In recordVote');
+	logging.log.trace('In recordVote');
 		
 	var update, modify = 1;
 	
@@ -341,18 +317,17 @@ function recordVote(commentObj, userData, voteExists){
 	
 	mongo.update('user',{userID: userData.userID},update,{w:1},function(error, result, second){//record the votes
 		if(error)
-			logging.log(error);
-		if(logging.trace)
-			logging.log('vote recorded: ' + modify*userData.vote);
-		
-		recordPoints(userData, modify);
-			
+			logging.log.error(error);
+		else{
+			logging.log.trace('vote recorded: ' + modify*userData.vote);
+			recordPoints(userData, modify);
+		}
 	});
 }
 
 /** */
 function recordPoints(userData, modify){
-
+	logging.log.trace('In recordPoints');
 	var coll, query, update = {'$inc': {points:(modify*userData.vote)}};
 	
 	if(userData.commentID > 0){
@@ -366,37 +341,33 @@ function recordPoints(userData, modify){
 	if(userData.commentID > 0)
 		mongo.update('user', {userID:userData.commenter}, update, {w:1}, function(error, result){
 			if(error)
-				logging.log(error);
-			if(logging.trace)
-				logging.log(coll + ' points recorded for user: ' + userData.commenter);
-		
+				logging.log.error(error);
+			else
+				logging.log.trace(coll + ' points recorded for user: ' + userData.commenter);
 		});
 		
 	mongo.update(coll, query, update, {w:1}, function(error, result){
 			if(error)
-				logging.log(error);
-			if(logging.trace)
-				logging.log(coll + ' points recorded for comment:' + userData.commentID);
+				logging.log.error(error);
+			else
+				logging.log.trace(coll + ' points recorded for comment:' + userData.commentID);
 	});
 }
 
 /** */
 function getComments(data, socket, exception){
-	if(logging.trace)
-		logging.log('In getComments: ' + data.pageID + ':' + data.userName);
+	logging.log.trace('In getComments: ' + data.pageID + ':' + data.userName);
 	if(data.userName)
 		getVotes(data, socket, exception);
-
 			
-	mongo.select('comment', {pageID:data.pageID}, {projection : {}, sort: {date: 1}, function(error, result){
+	mongo.select('comment', {pageID:data.pageID}, {projection : {}, sort: {date: 1}}, function(error, result){
 		socket.sendCommand('getComments', {value:result, id:data.pageID});
 	});
 }
 
 /** */
 function getVotes(data, socket, exception){
-	if(logging.trace)
-		logging.log('In getVotes: ' + data.pageID + ':' + data.userName);
+	logging.log.trace('In getVotes: ' + data.pageID + ':' + data.userName);
 	mongo.select('user', {userID: data.userName}, {projection : {_id: 0, upVotes: 1, downVotes: 1}}, function(error, result){
 		result = result[0];
 		var votes = {
@@ -415,14 +386,11 @@ function getVotes(data, socket, exception){
 		}
 		socket.sendCommand('getVotes', {value:votes, id:data.pageID});
 	});
-
-
 }
 
 /** */
 function getPageDetails(data, socket, exception){
-	if(logging.trace)
-		logging.log('In getPageDetails: ' + JSON.stringify(data));
+	logging.log.trace('In getPageDetails: ' + JSON.stringify(data));
 	
 	mongo.select('content', {pageID:data.pageID, category: data.category}, {projection : {}}, function(error, result){
 		socket.emit('getPageDetails', result);
@@ -431,8 +399,7 @@ function getPageDetails(data, socket, exception){
 
 /** */
 function getPageIDs(data, socket, exception){
-	if(logging.trace)
-		logging.log('In getPageIDs');
+	logging.log.trace('In getPageIDs');
 		
 	mongo.select('content', {pageID:{$ne:"00000001template"}}, {projection : {pageID:-1, category: 1}, sort:{pageID: -1}}, function(error, result){
 		socket.sendCommand('pageIDs', result);
@@ -441,8 +408,7 @@ function getPageIDs(data, socket, exception){
 
 /** */
 function getTemplate(data, socket, exception){
-	if(logging.trace)
-		logging.log('In getTemplates');
+	logging.log.trace('In getTemplates');
 		
 	mongo.select('content', {category:'template'}, {projection : {}, sort:{pageID: -1}}, function(error, result){
 		socket.emit('gotTemplate', result);
@@ -452,12 +418,10 @@ function getTemplate(data, socket, exception){
 
 /** */
 function getPages(data, socket, exception){
-	if(logging.trace)
-		logging.log('In getPages:' + JSON.stringify(data));
+	logging.log.trace('In getPages:' + JSON.stringify(data));
 		
 	var callBack = function(error, result){
-		if(logging.mongo)
-			logging.log('returned from select: ' + result.length);
+		logging.log.mongo('returned from select: ' + result.length);
 		socket.sendCommand('getPages', result);
 	};
 	
@@ -479,6 +443,6 @@ function getPages(data, socket, exception){
 	if(data.state != 'home')
 		query.category = data.state;
 		
-		mongo.select('content', query, options, callBack);	
+	mongo.select('content', query, options, callBack);	
 }
 

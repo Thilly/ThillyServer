@@ -5,7 +5,7 @@
  */
  
 var files = require('fs');
-var logging;
+var logging = {};
  
 /** @public */
 module.exports = function(logObject)
@@ -22,15 +22,13 @@ module.exports = function(logObject)
 	};
 };//end of module.export
 
-/** errorHandle
+/** fileErrorHandle
  *	takes care of error logging, displaying and general error stuff quickly
  *	@private 
  */
-function errorHandle(error, callback)
-{
-	if(logging.trace)
-		logging.log('In errorHandle');
-	logging.log(JSON.stringify(error));
+function fileErrorHandle(error, callback){
+	logging.log.trace('In fileErrorHandle');
+	logging.log.files(JSON.stringify(error));
 	if(typeof(callback) == 'function')
 		callback(error, "");
 } 
@@ -41,19 +39,17 @@ function errorHandle(error, callback)
  *	@param {string} req The request from a connection
  *	@param {string} res The response to be written
  */	
-function fileHandler(req, res)
-{
-	if(logging.trace)
-		logging.log('In fileHandler');
+function fileHandler(req, res){
+	logging.log.trace('In fileHandler');
+	
 	var filePath = req.url;
 	if(filePath == '/')//if first request
-		filePath = './client/' + logging.domain + '/index.html';
+		filePath = './client/' + logging.environment + '/index.html';
 		//give main page
 	else
-		filePath = './client/' + logging.domain + filePath;
+		filePath = './client/' + logging.environment + filePath;
 			//go into shared directory and get the thing requested
-	if(logging.files)	
-		logging.log('Retrieving: ' + filePath);//log thing gotten
+	logging.log.files('Retrieving: ' + filePath);//log thing gotten
 	/*
 	favicon.ico is a continued request.
 	Apparently some type of google thing, possibly a heartbeat, 
@@ -97,8 +93,7 @@ function fileHandler(req, res)
 				if (error) {
 					res.writeHead(500);
 					res.end();//cant read it, bail and go elsewhere
-					if(logging.files)
-						logging.log('Error loading' + filePath); //loggit
+					logging.log.files('Error loading' + filePath + ': ' + error);
 				}
 				
 				res.writeHead(200, {'Content-Type': contentType,
@@ -115,11 +110,11 @@ function fileHandler(req, res)
 			});
 		else
 		{
-			if(logging.files)
-				logging.log(filePath + ' not found, 404ing');
-			res.writeHead(302,{
-				Location: (logging.loc404 + '/404.html')//rename to
-			});//cant find it? 404 it
+			logging.log.files(filePath + ' not found, 404ing');
+			
+			res.writeHead(302,{//cant find it? 404 it
+				Location: (logging.homeDomain + '/404.html')
+			});
 			res.end();
 		}
 	});//end of file exist callback
@@ -132,34 +127,25 @@ function fileHandler(req, res)
  * @returns {Buffer} bufferRead A buffer of the data in the file
  * @returns {error} error If an error was thrown, it is returned instead of read data
  */	
-function readFile(fileName, callback)
-{	
-	if(logging.trace)
-		logging.log('In readFile');
-	try
-	{
+function readFile(fileName, callback){	
+	logging.log.trace('In readFile');
+	try{
 		files.open(fileName, 'r', function(error, fd){//open the file
-			if(logging.files)//log them if need be
-					logging.log('fileName: ' + fileName + ' opened for reading');
+			logging.log.files('fileName: ' + fileName + ' opened for reading');
 			if(error)//log any error
-				errorHandle({errno:1, errmsg:'File ' + fileName + ' not found.'}, callback);	
+				fileErrorHandle({errno:1, errmsg:'File ' + fileName + ' not found.'}, callback);	
 			else
 				files.fstat(fd, function(error, stats){//get the stats
-					if(logging.files)//log them if need be
-						logging.log('fd: ' + fd + ' size: ' + stats.size);
+					logging.log.files('fd: ' + fd + ' size: ' + stats.size);
 					if(stats.size == 0)
-						errorHandle({errno:2, errmsg:'File ' + fileName + ' is empty.'}, callback);
+						fileErrorHandle({errno:2, errmsg:'File ' + fileName + ' is empty.'}, callback);
 					else
 					files.read(fd, new Buffer(stats.size), 0, stats.size, 0, function(error, bytesRead, bufferRead){//read the file
 						if(error)//log any error
-							errorHandle({errno:3, errmsg:'File ' + fileName + ' error during read.'}, callback);
+							fileErrorHandle({errno:3, errmsg:'File ' + fileName + ' error during read.'}, callback);
 						else//no error
 							files.close(fd, function(){//close the file
-								if(logging.files)
-								{
-									logging.log('fileName: ' + fileName + ' closed');
-									logging.log('read: ' + bytesRead + ' bytes');
-								}
+								logging.log.files('fileName: ' + fileName + ' closed\nread: ' + bytesRead + ' bytes');
 							});
 							if(typeof(callback) == 'function')
 								callback(error, bufferRead);
@@ -169,9 +155,8 @@ function readFile(fileName, callback)
 				});	
 		});
 	}
-	catch(error)
-	{
-		errorHandle({errno:0, errmsg:'Unexpected Error in readFile: ' + error}, callback);	
+	catch(error){
+		fileErrorHandle({errno:0, errmsg:'Unexpected Error in readFile: ' + error}, callback);	
 	}
 }//end of readFile
 
@@ -182,30 +167,22 @@ function readFile(fileName, callback)
  *	@param {string} dataToWrite The information to be written to the file
  *	@param {function} callback (Optional)The action to take after the write is finished
  */	
-function writeFile(fileName, dataToWrite, callback)
-{
-	if(logging.trace)
-		logging.log('In writeFile');
-	try
-	{	
+function writeFile(fileName, dataToWrite, callback){
+	logging.log.trace('In writeFile');
+	try{	
 		var buffer = new Buffer(dataToWrite);
 		files.open(fileName, 'w', function(error, fd){//open the file or create if not there yet
-			if(logging.files)//log them if need be
-				logging.log('fileName: ' + fileName + ' opened for writing');
+			logging.log.files('fileName: ' + fileName + ' opened for writing');
 			if(error)
-				errorHandle({errno:1, errmsg:'File ' + fileName + ' not be opened/created for writing.'}, callback);
+				fileErrorHandle({errno:1, errmsg:'File ' + fileName + ' not be opened/created for writing.'}, callback);
 			//file descriptor, buffer to be written, start at beginning of buffer, write the whole buffer, from beginning of file, then callback
 			files.write(fd, buffer, 0, buffer.length, 0, function(error, written, buffer){//after writing to the file
 				if(error)//log any error
-					errorHandle({errno:2, errmsg:'File ' + fileName + ' not be written to.'}, callback);
+					fileErrorHandle({errno:2, errmsg:'File ' + fileName + ' not be written to.'}, callback);
 				else//no error
 				{
 					files.close(fd, function(){//close the file
-						if(logging.files)
-						{
-							logging.log('fileName: ' + fileName + ' closed');
-							logging.log('wrote: ' + written + ' bytes');
-						}
+						logging.log.files('fileName: ' + fileName + ' closed\nwrote: ' + written + ' bytes');
 					});
 					if(typeof(callback) == 'function')
 						callback(error, fileName);
@@ -213,9 +190,8 @@ function writeFile(fileName, dataToWrite, callback)
 			});
 		});	
 	}
-	catch(error)
-	{
-		errorHandle({errno:0, errmsg:'Unexpected Error in writeFile: ' + error}, callback);	
+	catch(error){
+		fileErrorHandle({errno:0, errmsg:'Unexpected Error in writeFile: ' + error}, callback);	
 	}
 }//end of writeFile
 
@@ -226,30 +202,22 @@ function writeFile(fileName, dataToWrite, callback)
  *	@param {string} dataToWrite The information to be written to the file
  *	@param {function} callback (Optional)The action to take after the append is finished
  */	
-function appendFile(fileName, dataToWrite, callback)
-{
-	if(logging.trace)
-		logging.log('In appendFile');
-	try
-	{	
+function appendFile(fileName, dataToWrite, callback){
+	logging.log.trace('In appendFile');
+	try{	
 		var buffer = new Buffer(dataToWrite);
 		files.open(fileName, 'a', function(error, fd){//open the file or create if not there yet
-			if(logging.files)//log them if need be
-				logging.log('fileName: ' + fileName + ' opened for appending');
+			logging.log.files('fileName: ' + fileName + ' opened for appending');
 			if(error)
-				errorHandle({errno:1, errmsg:'File ' + fileName + ' not found.'}, callback);	
+				fileErrorHandle({errno:1, errmsg:'File ' + fileName + ' not found.'}, callback);	
 			//file descriptor, buffer to be written, start at beginning of buffer, write the whole buffer, from beginning of file, then callback
 			files.write(fd, buffer, 0, buffer.length, 0, function(error, written, buffer){//write to the file
 				if(error)//log any error
-					errorHandle({errno:1, errmsg:'File ' + fileName + ' could not be appended.'}, callback);	
+					fileErrorHandle({errno:1, errmsg:'File ' + fileName + ' could not be appended.'}, callback);	
 				else//no error
 				{
 					files.close(fd, function(){//close the file
-						if(logging.files)
-						{
-							logging.log('fileName: ' + fileName + ' closed');
-							logging.log('appended: ' + written + ' bytes');
-						}
+						logging.log.files('fileName: ' + fileName + ' closed\nappended: ' + written + ' bytes');
 					});
 					if(typeof(callback) == 'function')
 						callback(error, fileName);
@@ -257,9 +225,8 @@ function appendFile(fileName, dataToWrite, callback)
 			});
 		});	
 	}
-	catch(error)
-	{
-		errorHandle({errno:0, errmsg:'Unexpected Error in appendFile: ' + error}, callback);	
+	catch(error){
+		fileErrorHandle({errno:0, errmsg:'Unexpected Error in appendFile: ' + error}, callback);	
 	}
 }//end of appendFile
 
@@ -271,22 +238,13 @@ function appendFile(fileName, dataToWrite, callback)
  *	@param {string} dataToWrite The information to be written to the file
  *	@param {function} callback (Optional)The action to take after the append is finished
  */	
-function appendLog(fileName, dataToWrite, callback)
-{
-	try
-	{	
+function appendLog(fileName, dataToWrite, callback){
+	try{	
 		var buffer = new Buffer(dataToWrite);
 		files.open(fileName, 'a', function(error, fd){//open the file or create if not there yet
-			if(logging.files)//log them if need be
-				console.log('fileName: ' + fileName + ' opened for appending log');
-			if(error)
-				errorHandle({errno:1, errmsg:'File ' + fileName + ' not found.'}, callback);	
-			//file descriptor, buffer to be written, start at beginning of buffer, write the whole buffer, from beginning of file, then callback
+			if(!error)
 			files.write(fd, buffer, 0, buffer.length, 0, function(error, written, buffer){//write to the file
-				if(error)//log any error
-					errorHandle({errno:2, errmsg:'File ' + fileName + ' could not be appended.'}, callback);	
-				else//no error
-				{
+				if(!error){
 					files.close(fd);
 					if(typeof(callback) == 'function')
 						callback(error, fileName);
@@ -294,11 +252,10 @@ function appendLog(fileName, dataToWrite, callback)
 			});
 		});	
 	}
-	catch(error)
-	{
-		errorHandle({errno:0, errmsg:'Unexpected Error in appendFile: ' + error}, callback);	
+	catch(error){
+		fileErrorHandle({errno:0, errmsg:'Unexpected Error in appendFile: ' + error}, callback);	
 	}
-}//end of appendFile
+}//end of appendLog
 
 
 

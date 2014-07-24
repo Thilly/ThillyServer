@@ -1,4 +1,14 @@
 ChangeLog - Thilly.net V5 - Web Service
+24 July 2014 - reorganized logging to streamline and allow for extensibility
+
+	logging.js 
+		refactored into a named function map for each logging type
+		implemented a cache to be able to pull last bit from client/admin
+		implemented options for when I move to multiple environments
+
+	/ServerPkgs/
+		modified each file to use the new logging structure
+		
 23 July 2014 - more cleanup and preparing for some extending
 	
 	logging.js	

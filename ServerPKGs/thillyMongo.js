@@ -11,7 +11,7 @@ var mongo;
 var objectID;
 
 /** */
-var logging;
+var logging = {};
 
 /** */
 var contentCollection;
@@ -53,8 +53,7 @@ function parse(objectString){
 
 /** */
 function select(collection, query, options, callBack){
-	if(logging.trace)
-		logging.log('in select: ' + collection);
+	logging.log.trace('in select: ' + collection);
 		
 	collectionMap[collection].find(query, options.projection, function(error, cursor){
 		if(options.skip)
@@ -65,56 +64,45 @@ function select(collection, query, options, callBack){
 			cursor = cursor.sort(options.sort);
 			
 		cursor.toArray(function(error, result){
-			if(logging.mongo)
-			{
-				if(error)
-					logging.log('error in select: ' + error);
-				else
-					logging.log('select completed: ' + result.length);
-			}
-			if(error)
+			if(error){
+				logging.log.error('error in select: ' + error);
 				new DBException(error, callBack);
-			else if(result)
+			}
+			else{
+				logging.log.mongo('select completed: ' + result.length);
 				callBack(error, result);	
+			}
 		});
 	});
 }
 
 /** */
 function insert(collection, query, options, callBack){
-	if(logging.trace)
-		logging.log('in insert: ' + collection);
+	logging.log.trace('in insert: ' + collection);
 	collectionMap[collection].insert(query, options, function(error, result){
-		if(logging.mongo)
-		{
-			if(error)
-				logging.log('error in insert: ' + error);
-			else
-				logging.log('insert completed: ' + result.length);					
-		}
-		if(error)
-			new DBException(error, callBack);
-		else
-			callBack(error, result.length);	
+			if(error){
+				logging.log.error('error in insert: ' + error);
+				new DBException(error, callBack);
+			}
+			else{
+				logging.log.mongo('insert completed: ' + result.length);
+				callBack(error, result);	
+			}
 	});
 }
 
 /** */
 function update(collection, selection, query, options, callBack){
-	if(logging.trace)
-		logging.log('in update: ' + collection);
+	logging.log.trace('in update: ' + collection);
 	collectionMap[collection].update(selection, query, options, function(error, result, writes){
-		if(logging.mongo)
-		{
-			if(error)
-				logging.log('error in update: ' + error);
-			else
-				logging.log('update completed: ' + result);					
-		}
-		if(error)
-			new DBException(error, callBack);
-		else
-			callBack(error, result, writes);	
+			if(error){
+				logging.log.error('error in update: ' + error);
+				new DBException(error, callBack);
+			}
+			else{
+				logging.log.mongo('update completed: ' + result + ': ' + JSON.stringify(writes));
+				callBack(error, result);	
+			}
 	});
 }
 
@@ -124,21 +112,15 @@ function update(collection, selection, query, options, callBack){
 
 /** */
 function init(callBack){
-	if(logging.trace)
-		logging.log('in init');
+	logging.log.trace('in init');
 
 	mongo.MongoClient.connect('mongodb://localHost:27017/thillyNet', function(error, dataBase){
-		if(logging.mongo)
-		{
-			if(error)
-				logging.log('not connected to thillyNet: ' + error);
-			else
-				logging.log('connected to thillyNet');
-		}
-		if(error)
+		if(error){
+			logging.log.error('not connected to thillyNet: ' + error);
 			new DBException(error, callBack);
-		else
-		{
+		}
+		else{
+			logging.log.mongo('connected to thillyNet');
 			dataBase.createCollection('content', function(error, content){
 				contentCollection = content;
 				dataBase.createCollection('comment', function(error, comment){
@@ -174,14 +156,6 @@ function DBException(msg, callBack){
 }
 
 /** */
-function isLogging(testCallBack){
-	if(typeof(callBack) == 'function')
-		return {w:1}
-	else
-		return {w:0}
-}
-
-/** */
 function dateTimeStamp(type){
 	var date = new Date();
 	var year = date.getFullYear();
@@ -208,10 +182,7 @@ function dateTimeStamp(type){
 	return dateString;
 }
 
-
-
-
-/* thillyNet schema
+/* thillyNet schema, its a moving target
 
 	thillyNet{//database
 		content{//collection
@@ -244,16 +215,4 @@ function dateTimeStamp(type){
 			type: string				(type of user: (admin, standard, moderator))
 		}
 	}
-*/
-
-/*
-	generalize the mongo functions, take command: 'mongo'
-		data.type = 'update', 'find', 'insert'
-		and data.select = {field:param, field2:param2, ...},//the query ('find' + 'update')
-			'find' has, data.find = {field:1, field2:1, ...},//the shape
-			'update' has, data.update = {field:value, field2:value2, ...}//the content
-			'insert' has, data.insert = {field:value, field2:value2, ...}//the content
-
-	all remove functions specific programmed,
-		userCollection.remove({user:name}), yadda
 */

@@ -1,32 +1,32 @@
 
 /** */
-var logging = require('./thillyLogging.js');
+var logging = {};
 
 /** */
-function UtilityException(msg){
-	if(logging.trace)
-		logging.log('In UtilityException');
+function utilityException(msg){
+	logging.log.trace('In UtilityException');
 	this.message = msg;
 	this.name = 'Utility Exception';
-	if(logging.errors)
-		logging.log(msg);
+	logging.log.errors(msg);
 }
 
 /** */
-function ErrorCallBack(error, data, callBack){
-	if(logging.trace)
-		logging.log('in ErrorCallBack');	
+function errorCallBack(error, data, callBack){
+	logging.log.trace('in ErrorCallBack');	
 	if(error)
 	{
-		if(logging.errors)
-			logging.log(error)
+		logging.log.errors(error)
 	}
 	else
 		callBack(data);
 }
 
 /** */
-module.exports = {
-	Utility : UtilityException,
-	ErrorHandle	: ErrorCallBack
-};
+module.exports = function(logObject){
+	logging = logObject;
+
+	return{
+		utilityException : utilityException,
+		errorHandle	: errorCallBack
+	};
+};//end of module.export
