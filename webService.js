@@ -4,7 +4,7 @@
 //will come from launcher/process manager eventually
 var options = {
 	port		:	80,
-	environment	:	'test', 
+	environment	:	process.argv[2] || 'test', 
 	homeDomain	:	'http://174.49.168.70'
 };
 
