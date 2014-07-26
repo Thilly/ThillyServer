@@ -1,4 +1,28 @@
 ChangeLog - Thilly.net V5 - Web Service
+26 July 2014 - server manager
+
+	serverManager.js
+		implemented a script that launches each environment in their own node instance
+		test: port 8080 only private network
+		live: port 80 open to public
+	
+	webService.js -> thillyServer.js
+		no longer the parent process, dependency of serverManager.js
+		modified slightly to allow to be run from serverManager
+		modified dependency paths
+	
+	logging.js
+		modified logging to take into account the environment it's running in
+
+		
+25 July 2014 - build script
+
+	build.js
+		implemented a build script that creates two environments from source
+			test: full non-minified source
+			live: minified JS
+
+
 24 July 2014 - reorganized logging to streamline and allow for extensibility
 
 	logging.js 
@@ -8,6 +32,7 @@ ChangeLog - Thilly.net V5 - Web Service
 
 	/ServerPkgs/
 		modified each file to use the new logging structure
+		
 		
 23 July 2014 - more cleanup and preparing for some extending
 	
@@ -25,6 +50,7 @@ ChangeLog - Thilly.net V5 - Web Service
 	admin.js
 		fixed a bug related to templates and old thumbnails being updated properly
 
+		
 22 July 2014 - cleaning up some fiddly bits
 
 	general
@@ -59,6 +85,7 @@ ChangeLog - Thilly.net V5 - Web Service
 		implemented points and total user points, because they are just fun
 		implemented vote retrieving
 
+		
 19 July 2014 - lots of work with mongo finishing up comment functionality
 
 	webService.js
@@ -152,6 +179,7 @@ Start actually working on the template
 	mongo.js
 		created a single select function with different composing functions
 
+		
 16 June 2014
 Lets keep a back button and static linking
 
