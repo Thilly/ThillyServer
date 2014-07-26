@@ -6,14 +6,23 @@ var paths = {
 	
 var exec = require('child_process').exec;
 var fileSys = require('fs');
+var time = new Date().getTime();
+var done = 0;
+var work = ['test','live'];
 
-build('test');
-build('live');
+for(var i = 0; i < work.length; i++)
+	build(work[i]);
+	
+function timeThis(){	
+	if(done == work.length)
+		console.log('Build completed in ' + ((new Date().getTime()) - time) + 'ms');
+}
 
 /** */
 function build(buildType){
 	var JSFiles = [];
 	var CSSFiles = [];
+	console.log('beggining build for: ' + buildType);
 	//minify or move the JS
 	fileSys.readdir(paths['src'] + 'javascript/', function(error, files){
 		for(var i in files){
@@ -33,16 +42,14 @@ function build(buildType){
 		fileSys.readdir(paths['src'] + 'styleSheets/', function(error, files){
 			for(var i in files){
 				files[i] = paths['src'] + 'styleSheets/' + files[i];
-				console.log(files[i]);
 			}
-			buildCSS(paths[buildType] + 'styleSheets/', files.join(' '));
-			CSSFiles.push('styleSheets/style.css');
+			CSSFiles.push(buildCSS(paths[buildType] + 'styleSheets/', files.join(' ')));
 			
 			//copy the few static HTML
 			listFilesToCopy(paths['src'], paths[buildType], JSFiles, CSSFiles);
 			//copy the pictures
 			listFilesToCopy(paths['src']+'images/', paths[buildType]+'images/');
-			listFilesToCopy(paths['src']+'images/resources', paths[buildType]+'images/resources');
+			listFilesToCopy(paths['src']+'images/resources/', paths[buildType]+'images/resources/');
 		});		
 	});
 }
@@ -61,6 +68,7 @@ function listFilesToCopy(fromPath, toPath, JS, CSS){
 
 /** */
 function buildHTML(from, to, JS, CSS){
+	console.log('building index.html for: ' + to);
 	var writeMe = '<!doctype HTML><html><head>';
 	for(var i in CSS){
 		var aLink ='<link rel="stylesheet" href="' + CSS[i] + '">\n';
@@ -74,8 +82,10 @@ function buildHTML(from, to, JS, CSS){
 	}
 	
 	fileSys.readFile(from + 'index.html', function(error, data){
-		if(error)
+		if(error){
+			if(error != 'EISDIR');
 			console.log('error reading index.html: ' + error);
+		}
 		else
 			fileSys.writeFile(to + 'index.html', writeMe + data, function(error){
 				if(error)
@@ -86,14 +96,17 @@ function buildHTML(from, to, JS, CSS){
 
 /** */
 function copyFile(from, to, fileName){
-	console.log('copying file: ' + from + fileName);
 	fileSys.readFile(from + fileName, function(error, data){
-		if(error)
-			console.log('error reading file: ' + error);
+		if(error){
+			if(error.code != 'EISDIR')
+				console.log('error reading file: ' + error);
+		}
 		else
 			fileSys.writeFile(to+fileName, data, function(error){
-				if(error)
+				console.log('copying file: ' + fileName);
+				if(error){
 					console.log('error copying file: ' + error);
+				}
 			});
 	
 	});
@@ -102,10 +115,8 @@ function copyFile(from, to, fileName){
 /** */
 function buildJS(toPath, fileList, live){
 	console.log('uglifying: ' + fileList.split(' \ ').length + ' files');
-	var uglify = exec('uglifyjs ' + fileList + ' -o ' + toPath + 'min.js' + ((live)?'':''),
+	var uglify = exec('uglifyjs ' + fileList + ' -o ' + toPath + 'min.js' + ((live)?' -c -m':''),
 		function(error, stdout, stderr){
-			console.log('out: ' + stdout);
-			console.log('err: ' + stderr);
 			if(error)
 				console.log('error: ' + error);
 		});
@@ -113,14 +124,17 @@ function buildJS(toPath, fileList, live){
 
 /** */
 function buildCSS(toPath, fileList){
-
+	console.log('building css for ' + toPath);
 	var sass = require('node-sass');
 		sass.renderFile({
 			file: fileList,
 			outputStyle: 'compressed',
 			outFile: toPath + 'style.css',
 			success: function(css){
-				console.log(css);
+				console.log('built: ' + css);
+				done++;
+				timeThis();
 			}
 		});
-}
+	return 'styleSheets/style.css';
+}	

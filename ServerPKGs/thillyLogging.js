@@ -5,8 +5,11 @@
  *	@author Nicholas 'Thilly' Evans
  */
 
-/** */ 
+ /** */ 
 var files = {};
+
+/** */
+var fileName;
 
 /** */
 var cache = [];
@@ -39,7 +42,7 @@ var flags = {
 	//a flag for watching common errors
 	files		:	true,	
 	//a flag for watching file i/o
-	logging		:	false,	
+	logging		:	true,	
 	//a flag for writing the log to a file
 	mongo		:	true,	
 	//a flag for watching any mongo actions
@@ -51,10 +54,13 @@ var flags = {
 	//a flag for watching the flow of the program
 };
 
+/** */
+var thisObj = {};
+
 /** */  
 module.exports = function(options){
 
-	var thisObj = {
+	thisObj = {
 		log			: logs,
 		set 		: setFlag,
 		flags		: flags,
@@ -66,21 +72,21 @@ module.exports = function(options){
 	files = require('./thillyFiles.js');
 	files = new files(thisObj);
 	
+	fileName =  './Logging/' + thisObj.environment + getTimeStamp() + 'serverLog.log';
+	logs.files('Started Server log: ' + new Date().toString());
+	
 	return thisObj;
 };
 	
-
-/** */
-var fileName =  './Logging/' + getTimeStamp() + 'serverLog.log';
-logs.files('Started Server log: ' + new Date().toString());
-
 /** */  
 function log(flag, logString){
 	if(flags[flag]){
-		if(flags.display)
-			process.stdout.write(logString + '\n');
-		if(flags.logging)
-			files.appendLog(fileName, '\n' + getTimeStamp() + '\t' + logString);
+		if(flags.display){
+			process.stdout.write(((thisObj)?(thisObj.environment + '\t'):'') + logString + '\n');
+		}
+		if(flags.logging){
+			files.appendLog(fileName, '\n' + getTimeStamp() + ':\t' + logString);
+		}
 		cache.push(logString);
 		if(cache.length > 100)
 			cache.shift();

@@ -145,7 +145,7 @@ function readFile(fileName, callback){
 							fileErrorHandle({errno:3, errmsg:'File ' + fileName + ' error during read.'}, callback);
 						else//no error
 							files.close(fd, function(){//close the file
-								logging.log.files('fileName: ' + fileName + ' closed\nread: ' + bytesRead + ' bytes');
+								logging.log.files('fileName: ' + fileName + ' closed, read: ' + bytesRead + ' bytes');
 							});
 							if(typeof(callback) == 'function')
 								callback(error, bufferRead);

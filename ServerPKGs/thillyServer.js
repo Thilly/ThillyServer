@@ -1,29 +1,29 @@
 /** */
 
-/**options for Logging and rest of webService */
+/**options for Logging and rest of the server */
 //will come from launcher/process manager eventually
 var options = {
-	port		:	80,
+	port		:	(process.argv[2] == 'live')?80:8080,
 	environment	:	process.argv[2] || 'test', 
 	homeDomain	:	'http://174.49.168.70'
 };
 
 /** */
-var logging = require('./ServerPKGs/thillylogging.js')(options);
+var logging = require('./thillylogging.js')(options);
 
 /** */
-var exception = require('./ServerPKGs/thillyexceptions.js')(logging);
+var exception = require('./thillyexceptions.js')(logging);
 
 /** */
-var files = new require('./ServerPKGs/thillyFiles.js')(logging);
+var files = new require('./thillyFiles.js')(logging);
 
 /** */
-var mongo = new require('./ServerPKGs/thillyMongo.js')(logging, function(){
+var mongo = new require('./thillyMongo.js')(logging, function(){
 	console.log('MongoDB has started\n');
 });
 
 /** */
-var crypto = require('./ServerPKGs/thillyCrypto.js')(logging);
+var crypto = require('./thillyCrypto.js')(logging);
 
 /** */
 var server = require('http').createServer(files.fileHandler).listen(logging.port);
