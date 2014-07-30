@@ -10,8 +10,11 @@ var time = new Date().getTime();
 var done = 0;
 var work = ['test','live'];
 
-for(var i = 0; i < work.length; i++)
-	build(work[i]);
+if(process.argv[2] == 'test')
+		build('test');
+if(process.argv[2] == 'live')
+		build('live');
+	
 	
 function timeThis(){	
 	if(done == work.length)

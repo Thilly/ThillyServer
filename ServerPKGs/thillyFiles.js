@@ -113,7 +113,7 @@ function fileHandler(req, res){
 			logging.log.files(filePath + ' not found, 404ing');
 			
 			res.writeHead(302,{//cant find it? 404 it
-				Location: (logging.homeDomain + '/404.html')
+				Location: (logging.homeDomain + '404.html')
 			});
 			res.end();
 		}

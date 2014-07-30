@@ -1,24 +1,3 @@
-/** loader module for webService 
- *	shove all of the requires into one, and leave one require('loader.js')(this);
- *	it might work
- *	(function(module){
-		module.logging = new...();
-		module.exceptions = new ...
-		module.mongo = new require('./thillyMongo.js')(module.logging);
-		module.files = new ... (module.logging);
-		module.Socketio = new ... (logging.socketIO)
-		module.http = new ...
-		module.crypto = new ...
-	}).apply(module);
-	
-	NOOOOOOOPE, 
-	create a whole process management process, 
-	
-		launch webservice and other processes I need to host.
-			fork/child/spawn, which ever does it's own v8 with options object
-	
-*/
-
 /** refactor admin.js and standard.js to be built during login
 		**create assemble file in thillyFiles.js
 		**take array of filenames, keep appending till done, return final string
@@ -28,25 +7,13 @@
 	and desktop (all the fun), also split up JS to allow for different games to be partitioned
 */
 
-/**	create deployment script
-		test:
-			move js/html so can still step through
-			compile scss into testing directory
-		
-		deploy:
-			minify js/html into deploy directory
-			compile scss into deploy directory
-*/
-
 /** random server library improvements
 	extend fileHandler to account for streams and any other file types that come up
 	extend thillyExceptions to handle errors cleanly (or at least provide the illusion of doing so)
-	create supervisory process to 'watch' webService, contest, and other node processes
 	create external modules for different states of socket commands
 	give thillyLogging hooks to modify logging from outside hardcoded values
 		implement a way for an admin to watch the log during runtime
 			add a stream, logging.log also broadcasts to the admin channel if anyone listening
-	generalize page requests
 */
 
 /** random client improvements

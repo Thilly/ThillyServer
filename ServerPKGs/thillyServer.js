@@ -5,7 +5,7 @@
 var options = {
 	port		:	(process.argv[2] == 'live')?80:8080,
 	environment	:	process.argv[2] || 'test', 
-	homeDomain	:	'http://174.49.168.70'
+	homeDomain	:	(process.argv[2] == 'live')?'http://thilly.net/':'http://192.168.1.50:8080/'
 };
 
 /** */
@@ -196,13 +196,13 @@ function register(data, socket, exception){
 /** */
 function picUpload(data, socket, exception){
 	logging.log.trace('In picUpload: ' + data.name);
-	var fileName = 'client/' + logging.log.environment + '/images/' + data.name;
+	var fileName = 'client/source/images/' + data.name;
 	files.writeFile(fileName, data.file, function(error, file){
 		if(error)
-			logging.log.error('error in picUpload: ' + error);
+			logging.log.errors('error in picUpload: ' + error);
 		else
 		{
-			var filePath = file.replace('client/','');
+			var filePath = file.replace('client/source/','');
 			logging.log.trace('picUploaded: ' + file);
 			socket.sendCommand('picUploaded', {name:data.name, path:filePath});
 		}

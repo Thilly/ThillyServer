@@ -1,4 +1,24 @@
 ChangeLog - Thilly.net V5 - Web Service
+
+30 July 2014 - changed DNS, webby is officially live
+	
+	build.js
+		modified to be a one or the other deploy script (live/test) to test before pushing broken code
+	
+	thillyServer.js
+		modified to have thilly.net as origin when 'live'
+		and 192.168.1.50:8080 as test, only accessible locally, hence private IP :D
+	
+	thillyLogging.js
+		set flags to be mostly hidden except for errors
+		
+
+27 July 2014 - couple of bugs before 'release'
+	
+	thillyFiles.js
+		isolated and fixed a bug in regards to submitting more content under different environments
+		
+
 26 July 2014 - server manager
 
 	serverManager.js

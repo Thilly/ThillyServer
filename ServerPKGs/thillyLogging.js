@@ -34,24 +34,24 @@ var logs = {
 
 /** */
 var flags = {
-	debug		:	true,
+	debug		:	false,
 	//a flag for watching current area of work
-	display		:	true,	
+	display		:	false,	
 	//a flag for displaying current logging
 	errors		:	true,	
-	//a flag for watching common errors
-	files		:	true,	
+	//a flag for watching for errors
+	files		:	false,	
 	//a flag for watching file i/o
-	logging		:	true,	
+	logging		:	false,	
 	//a flag for writing the log to a file
-	mongo		:	true,	
+	mongo		:	false,	
 	//a flag for watching any mongo actions
-	socketIO 	:	true,	
+	socketIO 	:	false,	
 	//a flag for watching socket.io messages
-	sockets		:	true,	
+	sockets		:	false,	
 	//a flag for watching socket events
-	trace		: 	true	
-	//a flag for watching the flow of the program
+	trace		: 	false	
+	//a flag for watching the flow of the program, basically debug flag
 };
 
 /** */
