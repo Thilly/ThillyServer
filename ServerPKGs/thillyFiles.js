@@ -6,13 +6,16 @@
  
 var files = require('fs');
 var logging = {};
+var cacheTime = 0;
  
 /** @public */
 module.exports = function(logObject)
 {//dependency injected from thillyLogging to prevent circular dependency
 
 	logging = logObject;
-
+	if(logging.environment == 'live')
+		cacheTime = 60 * 60 * 24 * 7;
+		
 	return{
 		'fileHandler'	:	fileHandler,
 		'readFile'		:	readFile,
@@ -89,17 +92,18 @@ function fileHandler(req, res){
 		
 	files.exists(filePath, function(exists) {	//read file in and tell browser what it is
 		if(exists)
-			readFile(filePath,  function (error, data) {
+			readFile(filePath,  function (error, data, time) {
 				if (error) {
 					res.writeHead(500);
 					res.end();//cant read it, bail and go elsewhere
 					logging.log.files('Error loading' + filePath + ': ' + error);
 				}
-				
+
 				res.writeHead(200, {'Content-Type': contentType,
 									'Content-length': data.length,
-									'Accept-Randges': 'bytes',
-									'Cache-Control': 'max-age=1800'
+									'Accept-Ranges': 'bytes',
+									'Cache-Control': 'max-age=' + cacheTime,
+									'Last-Modified': time.getTime()
 				});//serve file based on type
 				if(contentType.indexOf('image') >= 0 || 
 					contentType.indexOf('audio') >= 0 ||
@@ -134,8 +138,9 @@ function readFile(fileName, callback){
 			logging.log.files('fileName: ' + fileName + ' opened for reading');
 			if(error)//log any error
 				fileErrorHandle({errno:1, errmsg:'File ' + fileName + ' not found.'}, callback);	
-			else
+			else{
 				files.fstat(fd, function(error, stats){//get the stats
+				var time = stats.mtime;
 					logging.log.files('fd: ' + fd + ' size: ' + stats.size);
 					if(stats.size == 0)
 						fileErrorHandle({errno:2, errmsg:'File ' + fileName + ' is empty.'}, callback);
@@ -148,11 +153,12 @@ function readFile(fileName, callback){
 								logging.log.files('fileName: ' + fileName + ' closed, read: ' + bytesRead + ' bytes');
 							});
 							if(typeof(callback) == 'function')
-								callback(error, bufferRead);
+								callback(error, bufferRead, time);
 							else
 								return(error)?error:bufferRead.toString();
 					});
-				});	
+				});
+			}
 		});
 	}
 	catch(error){

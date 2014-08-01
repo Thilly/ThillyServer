@@ -1,5 +1,14 @@
 ChangeLog - Thilly.net V5 - Web Service
 
+31 July 2014 - added a weak attempt at caching, updated admin.js
+
+	thillyFiles.js
+		implemented modified date on the files served
+	
+	admin.js
+		modified to work with new thillyIndex structure
+
+
 30 July 2014 - changed DNS, webby is officially live
 	
 	build.js

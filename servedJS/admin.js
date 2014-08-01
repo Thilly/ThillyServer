@@ -43,7 +43,7 @@ window.thillyAdmin = {};
 			var file = URItoBlob(thumb.url);
 			var fileName = pageID + 't.' + file.extension;
 			thumb.url = fileName;
-			mainSocket.sendCommand('picUpload', {name: fileName, file: file.data});	
+			thillyIndex.mainSocket.sendCommand('picUpload', {name: fileName, file: file.data});	
 			thumb.source = 'created';
 			thumbSent = true;
 		}
@@ -64,7 +64,7 @@ window.thillyAdmin = {};
 			var file = URItoBlob(uploadUs[picSource]);
 			var fileName = pageID + (uploadTotal++ + oldPictures.length) + '.' + file.extension;
 			uploadUs[picSource] = fileName;
-			mainSocket.sendCommand('picUpload', {name: fileName, file: file.data});
+			thillyIndex.mainSocket.sendCommand('picUpload', {name: fileName, file: file.data});
 		}
 		
 		if(uploadTotal == 0 && !thumbSent)
@@ -113,7 +113,7 @@ window.thillyAdmin = {};
 		if(uploadObj.pageID.length == 8)
 			uploadObj.pageID += uploadObj.category;
 			
-		mainSocket.sendCommand('pushNewArticle', uploadObj);
+		thillyIndex.mainSocket.sendCommand('pushNewArticle', uploadObj);
 		document.getElementById('templateTextInput').value = uploadObj.content;
 	}
 
