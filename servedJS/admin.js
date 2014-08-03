@@ -18,38 +18,31 @@ window.thillyAdmin = {};
 	var oldPictures = [];
 	
 	/** */
-	var thumb;
+	var thisThumb;
 	
 	/** */
-	this.submit = function(oldPics, thumbNail){
+	this.submit = function(oldPics, thumb){
 		var picList = document.getElementsByClassName('controlBox');
 		var pageID = document.getElementById('comboBox').value;
 		if(pageID.length == 8) 
 			pageID += document.getElementById('categoryBox').value;
 		var thumbSent = false;
 		oldPictures = oldPics;
-		thumb = thumbNail;
-		uploadTotal = 0;		
+		uploadTotal = 0;
+		thisThumb = thumb;
 		uploadUs = {};
 		if(titleBox.value == ''){
 			alert("You must enter title");
 			return;
 		}
 		
-		if(thumb.source == 'old'){
-			thumb.url = document.getElementById('aBox1').style.backgroundImage;
-		}
-		else if(thumb.source == 'new'){
-			var file = URItoBlob(thumb.url);
+		if(thisThumb.source == 'new'){
+			var file = URItoBlob(thisThumb.url);
 			var fileName = pageID + 't.' + file.extension;
-			thumb.url = fileName;
+			thisThumb.url = fileName;
 			thillyIndex.mainSocket.sendCommand('picUpload', {name: fileName, file: file.data});	
-			thumb.source = 'created';
+			thisThumb.source = 'created';
 			thumbSent = true;
-		}
-		else if(thumb.source == 'none'){
-			alert('You must choose thumbnail');
-			return;
 		}
 		
 		for(var aPic in picList){
@@ -108,7 +101,7 @@ window.thillyAdmin = {};
 			content		: 	templateView.innerHTML,
 			pictures	: 	oldPictures,
 			points		:	0,
-			thumb		: 	thumb.url
+			thumb		: 	thisThumb.url
 		};
 		if(uploadObj.pageID.length == 8)
 			uploadObj.pageID += uploadObj.category;

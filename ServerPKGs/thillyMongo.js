@@ -23,6 +23,12 @@ var commentCollection;
 var userCollection;
 
 /** */
+var challengeCollection;
+
+/** */
+var submissionCollection;
+
+/** */
 var collectionMap = {};
 
 /** */
@@ -119,7 +125,7 @@ function init(callBack){
 			logging.log.error('not connected to thillyNet: ' + error);
 			new DBException(error, callBack);
 		}
-		else{
+		else{//make into a promise, or some type of iterative process, this is getting stupid
 			logging.log.mongo('connected to thillyNet');
 			dataBase.createCollection('content', function(error, content){
 				contentCollection = content;
@@ -127,14 +133,23 @@ function init(callBack){
 					commentCollection = comment;
 					dataBase.createCollection('user', function(error, user){
 						userCollection = user;
-						mongo = dataBase;
-						collectionMap =	{
-							'user' 		:	userCollection,
-							'comment'	:	commentCollection,
-							'content'	:	contentCollection
-						};
-						if(typeof(callBack) == 'function')
-							callBack();
+						dataBase.createCollection('challenge', function(error, challenge){
+							challengeCollection = challenge;
+							dataBase.createCollection('submission', function(error, submission){
+								submissionCollection = submission;
+						
+								mongo = dataBase;
+								collectionMap =	{
+									'user' 		:	userCollection,
+									'comment'	:	commentCollection,
+									'content'	:	contentCollection,
+									'challenge'	:	challengeCollection,
+									'submission':	submissionCollection
+								};
+								if(typeof(callBack) == 'function')
+									callBack();
+							});
+						});
 					});
 				});
 			});
@@ -195,6 +210,7 @@ function dateTimeStamp(type){
 			thumb:	imgSrc,				(a single picURL to be set as thumbnail)
 			points:	number				(any upvotes the article received)
 		},
+		
 		comment{//collection
 		//	_id: number,				(auto applied comment _id)
 			pageID: number,				(date time stamp of page comment is on: 201406140)
@@ -205,14 +221,36 @@ function dateTimeStamp(type){
 			points: number,				(total of votes on comment)
 			userID: text,				(submitter)
 		},
+		
 		user{//collection
 		//	_id: number,				(auto applied user _id)
 			userID: text,				(user choice, 'Some Random' for guest)
 			password: text,				(password, hashed)
-			upVotes: {pageID, commentID}[],	(array of votes: [{commentID, 1}, {commentID, -1}, ... ])
-			downVotes: {pageID, commentID}[], ''
+			contest: {
+				subs: [], 				(array of tries: indexes of submissions, array of results: indexes of successes)
+				results:[]
+			} 
+			upVotes: [{}],				(array of votes: [{pageID: commentID} ... ])
+			downVotes: [{}], 			''
 			points: number,				(total comment points user earned)
 			type: string				(type of user: (admin, standard, moderator))
 		}
-	}
+		
+		challenge{//collection
+		//	_id: number,				(auto applied challenge _id)
+			name: text,					(name of content or problem)
+			content: text,				(actual content of problem or challenge related content)
+			submissions: {
+				success: []				(_ids of submissions for each problem)
+				fail:	[]
+			}
+			test:text,					(test data of problem)
+			answer:text,				(answer data of problem)
+		}
+		
+		submission{//collection
+		//	_id: number,				(auto applied submission _id)
+			content:
+			result:	
+		}
 */

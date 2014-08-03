@@ -100,12 +100,13 @@ function rootDir(fromPath, toPath, jsFiles, cssFiles){
 				copyFile(fromPath+files[i], toPath+files[i]);
 		}
 	});
-	movePictures(fromPath+'images/', toPath+'images/');
-	movePictures(fromPath+'images/resources/', toPath+'images/resources/');
+	moveStuff(fromPath+'images/', toPath+'images/');
+	moveStuff(fromPath+'images/resources/', toPath+'images/resources/');
+	moveStuff(fromPath+'challenge/', toPath+'challenge/');
 }
 
-function movePictures(fromPath, toPath){
-	console.log('moving Pics: ' + fromPath + ': ' + toPath);
+function moveStuff(fromPath, toPath){
+	console.log('moving file: ' + fromPath + ': ' + toPath);
 	var moveFiles = {};
 	fileSys.readdir(fromPath, function(error, files){
 		for(var i = 0; i < files.length; i++)

@@ -1,5 +1,15 @@
 ChangeLog - Thilly.net V5 - Web Service
 
+3 August 2014 - starting the integration of the programming contest thingy
+
+	thillyChallenge.js
+		added the initialization function
+	
+	build.js
+		modified the move script to just transfer everything from a directory
+			copies all files over to mirrored place on environment
+			until I try and test mongo as a file server
+
 2 August 2014 - finally abstracted the function maps out of thillyServer.js
 
 	thillyServer.js
