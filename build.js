@@ -2,142 +2,170 @@ var paths = {
 		src : './client/source/',
 		test : './client/test/',
 		live : './client/live/'
-	}
+	};
 	
 var exec = require('child_process').exec;
+var sass = require('node-sass');
 var fileSys = require('fs');
-var time = new Date().getTime();
-var done = 0;
-var work = ['test','live'];
+var minify = require('closurecompiler');
 
-if(process.argv[2] == 'test')
-		build('test');
-if(process.argv[2] == 'live')
-		build('live');
+var work = [];
+var commands = '';
+
+var buildJS = {
+	'live' : liveJS,
+	'test' : testJS
+	};
+
+	commands += process.argv.slice(2).join('');
 	
+	if(commands.indexOf('test') >= 0)
+		work.push('test');
+	if(commands.indexOf('live') >= 0)
+		work.push('live');
+
+for(var i in work)
+	build(work[i]);
 	
-function timeThis(){	
-	if(done == work.length)
-		console.log('Build completed in ' + ((new Date().getTime()) - time) + 'ms');
+function build(environment){
+	console.log('beginning build: ' + environment);
+	buildJS[environment](paths['src']+'javaScript/', paths[environment]+'javaScript/');
 }
 
-/** */
-function build(buildType){
-	var JSFiles = [];
-	var CSSFiles = [];
-	console.log('beggining build for: ' + buildType);
-	//minify or move the JS
-	fileSys.readdir(paths['src'] + 'javascript/', function(error, files){
-		for(var i in files){
-			JSFiles.push('javascript/'+files[i]);
-			files[i] = paths['src'] + 'javascript/' + files[i];
-		}
-		if(buildType == 'live'){
-			buildJS(paths[buildType]+'javascript/', files.join(' \ '));
-			JSFiles = [];
-			JSFiles.push('javascript/min.js');
-		}
-		if(buildType == 'test'){
-			listFilesToCopy(paths['src']+'javascript/', paths[buildType]+'javascript/');
-		}
-		
-		//build the css
-		fileSys.readdir(paths['src'] + 'styleSheets/', function(error, files){
-			for(var i in files){
-				files[i] = paths['src'] + 'styleSheets/' + files[i];
-			}
-			CSSFiles.push(buildCSS(paths[buildType] + 'styleSheets/', files.join(' ')));
-			
-			//copy the few static HTML
-			listFilesToCopy(paths['src'], paths[buildType], JSFiles, CSSFiles);
-			//copy the pictures
-			listFilesToCopy(paths['src']+'images/', paths[buildType]+'images/');
-			listFilesToCopy(paths['src']+'images/resources/', paths[buildType]+'images/resources/');
-		});		
-	});
-}
-
-/** */
-function listFilesToCopy(fromPath, toPath, JS, CSS){
+function testJS(fromPath, toPath){
+	var jsFiles = [];
+	console.log('building JS: ' + fromPath + ': ' + toPath);
 	fileSys.readdir(fromPath, function(error, files){
-		for(var i in files){
-			if(files[i] == 'index.html')
-				buildHTML(fromPath, toPath, JS, CSS);
-			else
-				copyFile(fromPath, toPath, files[i]);
+		for(var i = 0; i < files.length; i++){//copy each JS file over one at a time
+			jsFiles.push(files[i]);
+			copyFile(fromPath+files[i], toPath+files[i]);
 		}
+		testCSS(fromPath.replace('javaScript/','styleSheets/'), toPath.replace('javaScript/','styleSheets/'), jsFiles);
 	});
 }
 
-/** */
-function buildHTML(from, to, JS, CSS){
-	console.log('building index.html for: ' + to);
-	var writeMe = '<!doctype HTML><html><head>';
-	for(var i in CSS){
-		var aLink ='<link rel="stylesheet" href="' + CSS[i] + '">\n';
-		console.log('adding: ' + CSS[i]);
-		writeMe += aLink;
-	}
-	for(var j in JS){
-		var someJS = '<script type="application/javascript" src="'+ JS[j] +'"></script>\n';
-		console.log('adding: ' + JS[j]);
-		writeMe += someJS;
-	}
-	
-	fileSys.readFile(from + 'index.html', function(error, data){
-		if(error){
-			if(error != 'EISDIR');
-			console.log('error reading index.html: ' + error);
-		}
-		else
-			fileSys.writeFile(to + 'index.html', writeMe + data, function(error){
-				if(error)
-					console.log('error writing index.html: ' + error);
-			});
-	});
-}
-
-/** */
-function copyFile(from, to, fileName){
-	fileSys.readFile(from + fileName, function(error, data){
-		if(error){
-			if(error.code != 'EISDIR')
-				console.log('error reading file: ' + error);
-		}
-		else
-			fileSys.writeFile(to+fileName, data, function(error){
-				console.log('copying file: ' + fileName);
-				if(error){
-					console.log('error copying file: ' + error);
-				}
-			});
-	
-	});
-}
-
-/** */
-function buildJS(toPath, fileList, live){
-	console.log('uglifying: ' + fileList.split(' \ ').length + ' files');
-	var uglify = exec('uglifyjs ' + fileList + ' -o ' + toPath + 'min.js' + ((live)?' -c -m':''),
-		function(error, stdout, stderr){
-			if(error)
-				console.log('error: ' + error);
-		});
-}
-
-/** */
-function buildCSS(toPath, fileList){
-	console.log('building css for ' + toPath);
-	var sass = require('node-sass');
-		sass.renderFile({
-			file: fileList,
-			outputStyle: 'compressed',
-			outFile: toPath + 'style.css',
-			success: function(css){
-				console.log('built: ' + css);
-				done++;
-				timeThis();
+function testCSS(fromPath, toPath, jsFiles){
+	var cssFiles = [];
+	var totalSCSS = '';
+	console.log('building CSS: ' + fromPath + ': ' + toPath);
+	fileSys.readdir(fromPath, function(error, files){
+		for(var i = 0; i < files.length; i++){//parse each SCSS file over one at a time
+			if(files[i] == 'mobileStyle.scss')//don't add to list to insert into index.html
+				parseSass({'fileName':fromPath + files[i]}, toPath, 'mobile.css');
+			else{
+				cssFiles.push(parseSass({'fileName':fromPath + files[i]}, toPath, files[i].replace('.scss', '.css')));
 			}
-		});
-	return 'styleSheets/style.css';
+		}
+		rootDir(fromPath.replace('styleSheets/',''), toPath.replace('styleSheets/',''), jsFiles, cssFiles);
+	});
+}
+
+function liveJS(fromPath, toPath){
+	var jsFiles = [];
+	var append = [];
+	console.log('building JS: ' + fromPath + ': ' + toPath);
+	fileSys.readdir(fromPath, function(error, files){
+		for(var i = 0; i < files.length; i++){
+			jsFiles.push(fromPath + files[i]);
+		}
+		append.push(compileJS(jsFiles, toPath));
+	});
+	liveCSS(fromPath.replace('javaScript/','styleSheets/'), toPath.replace('javaScript/','styleSheets/'), append);
+}
+
+function liveCSS(fromPath, toPath, jsFiles){
+	var cssFiles = [];
+	var totalSCSS = '';
+	console.log('building CSS: ' + fromPath + ': ' + toPath);
+	fileSys.readdir(fromPath, function(error, files){
+		for(var i = 0; i < files.length; i++){//copy each JS file over one at a time
+			if(files[i] == 'mobileStyle.scss')
+				parseSass({'fileName':fromPath + files[i]}, toPath, 'mobile.css');
+			else{
+				totalSCSS += fileSys.readFileSync(fromPath+files[i]).toString();
+			}
+		}
+		cssFiles.push(parseSass({'data':totalSCSS}, toPath, 'style.css'));
+		rootDir(fromPath.replace('styleSheets/',''), toPath.replace('styleSheets/',''), jsFiles, cssFiles);
+	});
 }	
+
+function rootDir(fromPath, toPath, jsFiles, cssFiles){
+	console.log('building HTML: ' + fromPath + ': ' + toPath);
+	fileSys.readdir(fromPath, function(error, files){
+		for(var i = 0; i < files.length; i++){
+			if(files[i] == 'index.html')
+				buildHTML(fromPath, toPath, jsFiles, cssFiles);
+			else
+				copyFile(fromPath+files[i], toPath+files[i]);
+		}
+	});
+	movePictures(fromPath+'images/', toPath+'images/');
+	movePictures(fromPath+'images/resources/', toPath+'images/resources/');
+}
+
+function movePictures(fromPath, toPath){
+	console.log('moving Pics: ' + fromPath + ': ' + toPath);
+	var moveFiles = {};
+	fileSys.readdir(fromPath, function(error, files){
+		for(var i = 0; i < files.length; i++)
+			copyFile(fromPath + files[i], toPath + files[i]); 
+	});
+}
+
+function copyFile(from, to){
+	fileSys.readFile(from, function(error, data){
+		if(!error){
+			console.log('\tfile: ' + to);
+			fileSys.writeFile(to, data);
+		}
+	});
+}
+
+function buildHTML(fromPath, toPath, jsFiles, cssFiles){
+	var top = '<!doctype HTML>\n<html>\n\t<head>';
+	for(var i = 0; i < jsFiles.length; i++)
+		top += '\n\t\t<script type="application/javascript" src="javascript/'+jsFiles[i]+'"></script>';
+	for(var j = 0; j < cssFiles.length; j++)
+		top += '\n\t\t<link rel="stylesheet" href="styleSheets/'+cssFiles[j]+'">';
+	fileSys.readFile(fromPath+'index.html', function(error, data){
+		fileSys.writeFile(toPath+'index.html', top + data);
+	});
+}
+
+function parseSass(data, toPath, fileName){
+
+	if(data['fileName']){
+		sass.renderFile({
+			file: data['fileName'],
+			outFile: toPath + fileName,
+			success: function(css){
+				console.log('\tfile: ' + css);
+			},
+			error: function(error){
+				console.log('\tERROR: ' + error);
+			},
+		});
+	}
+	else if(data['data']){
+		sass.renderFile({
+			data: data['data'],
+			outFile: toPath + fileName,
+			success: function(css){
+				console.log('\tfile: ' + css);
+			},
+			error: function(error){
+				console.log('\tERROR: ' + error);
+			},
+		});
+	}
+	return fileName;
+};
+
+function compileJS(files, toPath){
+	minify.compile(files,{}, function(error, result){
+		console.log('\tfile: ' + toPath + 'min.js');
+		fileSys.writeFile(toPath + 'min.js', result);
+	});
+	return 'min.js';
+}

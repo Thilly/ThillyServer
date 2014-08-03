@@ -1,5 +1,34 @@
 ChangeLog - Thilly.net V5 - Web Service
 
+2 August 2014 - finally abstracted the function maps out of thillyServer.js
+
+	thillyServer.js
+		removed all of the function maps
+		implemented a function to build the function maps from each file in the function map directory
+	
+	thillyChallenge.js
+		getting ready to add the challenge into this version of the website
+		still deciding how I want it to work
+	
+	./functionMaps
+		created new directory for a place for functionMaps to live
+	
+		contentMap.js
+			the function map with the content related things
+			get/update/modify
+	
+		userMap.js
+			the function map with the user related things
+			login/logout/register
+			
+
+1 August 2014 - completely re-wrote build script, was really kludgy and bad structure
+	
+	build.js
+		ctrl+a del
+		started from scratch and made it a bit nicer to work with in the future
+			
+			
 31 July 2014 - added a weak attempt at caching, updated admin.js
 
 	thillyFiles.js

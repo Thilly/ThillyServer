@@ -36,7 +36,7 @@ var logs = {
 var flags = {
 	debug		:	false,
 	//a flag for watching current area of work
-	display		:	false,	
+	display		:	true,	
 	//a flag for displaying current logging
 	errors		:	true,	
 	//a flag for watching for errors
@@ -44,13 +44,13 @@ var flags = {
 	//a flag for watching file i/o
 	logging		:	false,	
 	//a flag for writing the log to a file
-	mongo		:	false,	
+	mongo		:	true,	
 	//a flag for watching any mongo actions
 	socketIO 	:	false,	
 	//a flag for watching socket.io messages
-	sockets		:	false,	
+	sockets		:	true,	
 	//a flag for watching socket events
-	trace		: 	false	
+	trace		: 	true	
 	//a flag for watching the flow of the program, basically debug flag
 };
 
