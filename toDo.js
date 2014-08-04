@@ -32,6 +32,10 @@
 		after comments are populated, run over comments and add title/link to each user
 	
 	graphics and UX	
+		build tabs for articles served as array
+			template
+			mongo
+			memory manager
 		css, lots of it
 		make the webby look good for a change
 		find inspiration deep inside :D

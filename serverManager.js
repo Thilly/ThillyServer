@@ -8,10 +8,20 @@ var	events = require('events');
 var manager = new myServers();
 
 /** */
-manager.startAServer('test');
+var commands = '';
 
 /** */
-manager.startAServer('live');
+var work = [];
+
+	commands += process.argv.slice(2).join('');
+		
+	if(commands.indexOf('test') >= 0)
+		work.push('test');
+	if(commands.indexOf('live') >= 0)
+		work.push('live');
+
+	for(var i in work)
+		manager.startAServer(work[i]);
 	
 /** */	
 function myServers(){
