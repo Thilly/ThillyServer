@@ -1,5 +1,12 @@
 ChangeLog - Thilly.net V5 - Web Service
 
+4 August 2014 - modified logins
+
+	userMap.js
+		modified login, now goes straight back to socket with reply, for client side callback handling of event and response
+		
+		
+		
 3 August 2014 - starting the integration of the programming contest thingy
 
 	serverManager.js

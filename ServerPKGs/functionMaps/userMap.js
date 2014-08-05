@@ -36,7 +36,7 @@ function login(data, socket, exception){
 			logging.log.error('error in login: ' + error);
 		else if(result.length == 0){
 			logging.log.sockets('login failed: no such user');		
-			socket.sendCommand('login', {failed:'no such user'});
+			socket.emit('login', {failed:'no such user'});
 		}
 		else if(data.userString == result[0]._id)
 			loginUser(result[0], socket);
@@ -45,7 +45,7 @@ function login(data, socket, exception){
 		}
 		else{
 			logging.log.sockets('login failed: wrong password');
-			socket.sendCommand('login', {failed:'wrong password'});
+			socket.emit('login', {failed:'wrong password'});
 		}
 	}
 }
@@ -57,7 +57,7 @@ function loginUser(userData, socket){
 	files.readFile('./servedJS/' + userTypeFileName, function(error, data){
 		logging.log.sockets('login successful, sending ' + userTypeFileName);
 		socket.user = userData;
-		socket.sendCommand('login', {success: true, userScript: data.toString(), type:userData.type, name:userData.userID, userString:userData._id});
+		socket.emit('login', {success: true, userScript: data.toString(), type:userData.type, name:userData.userID, userString:userData._id});
 	});
 }
 
@@ -78,7 +78,7 @@ function register(data, socket, exception){
 			logging.log.error('error in register select: ' + error);
 		else if(result.length > 0){
 			logging.log.sockets('user name: ' + data.userName + ' taken.');
-			socket.sendCommand('login', {failed:'user name taken'});
+			socket.emit('login', {failed:'user name taken'});
 		}
 		else{
 			mongo.insert('user', insertObj, {w:1}, function(error, result){

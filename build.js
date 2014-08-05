@@ -165,8 +165,14 @@ function parseSass(data, toPath, fileName){
 
 function compileJS(files, toPath){
 	minify.compile(files,{}, function(error, result){
-		console.log('\tfile: ' + toPath + 'min.js');
-		fileSys.writeFile(toPath + 'min.js', result);
+		if(error){
+			console.log('Error in compileJS:' + error);
+			console.log('\tfile: ' + toPath + 'min.js: NOT CREATED');
+		}
+		else{
+			console.log('\tfile: ' + toPath + 'min.js');
+			fileSys.writeFile(toPath + 'min.js', result);
+		}
 	});
 	return 'min.js';
 }
