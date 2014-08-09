@@ -1,5 +1,13 @@
 ChangeLog - Thilly.net V5 - Web Service
 
+9 August 2014 - modified Mongo to handle tabs
+
+	thillyMongo.js
+		modified update after I deleted the entire content collection.
+	
+	contentMap.js
+		modified article queries and pushes to accomodate tabs
+
 4 August 2014 - modified logins
 
 	userMap.js
