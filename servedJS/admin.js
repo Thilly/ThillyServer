@@ -21,7 +21,13 @@ window.thillyAdmin = {};
 	var thisThumb;
 	
 	/** */
-	this.submit = function(oldPics, thumb){
+	var updateTabs;
+	
+	/** */
+	this.submit = function(oldPics, thumb, tabs){
+		if(debug.trace)
+			debug.log('in submit: ' + tabs.length);
+		updateTabs = tabs;
 		var picList = document.getElementsByClassName('controlBox');
 		var pageID = document.getElementById('comboBox').value;
 		if(pageID.length == 8) 
@@ -66,7 +72,8 @@ window.thillyAdmin = {};
 	
 	/** */
 	this.picUploaded = function(data, socket){
-		console.log('pic upload successful: ' + data.path + ':' + data.name);
+		if(debug.trace)
+			debug.log('in picUploaded: ' + data.path);
 		var picList = document.getElementsByClassName('controlBox');
 		for(var aPic in picList){
 			if(picList[aPic].nodeName === 'DIV'){
@@ -88,6 +95,8 @@ window.thillyAdmin = {};
 	
 	/** */
 	function pushSubmit(){
+		if(debug.trace)
+			debug.log('in pushSubmit');
 		var pics = [];
 		for(var aPic in uploadUs)
 		{
@@ -96,22 +105,24 @@ window.thillyAdmin = {};
 		oldPictures = pics.concat(oldPictures);
 		var uploadObj = {
 			pageID 		: 	document.getElementById('comboBox').value,
-			title		: 	document.getElementById('titleBox').value,
+			tabs		:	updateTabs,
 			category	:	document.getElementById('categoryBox').value,
-			content		: 	templateView.innerHTML,
 			pictures	: 	oldPictures,
 			points		:	0,
 			thumb		: 	thisThumb.url
 		};
 		if(uploadObj.pageID.length == 8)
-			uploadObj.pageID += uploadObj.category;
+			uploadObj.pageID += uploadObj.category.toLowerCase();
 			
 		thillyIndex.mainSocket.sendCommand('pushNewArticle', uploadObj);
-		document.getElementById('templateTextInput').value = uploadObj.content;
+		document.getElementById('templateTextInput').value = uploadObj.tabs[0].content;
 	}
 
 	/** */
 	function URItoBlob(dataURI){
+		if(debug.trace)
+			debug.log('in URItoBlob');
+			
 		var byteString, mimestring, extension;
 
 		if(dataURI.split(',')[0].indexOf('base64') !== -1 ) {

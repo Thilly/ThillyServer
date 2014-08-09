@@ -100,9 +100,13 @@ function insert(collection, query, options, callBack){
 /** */
 function update(collection, selection, query, options, callBack){
 	logging.log.trace('in update: ' + collection);
-	collectionMap[collection].update(selection, query, options, function(error, result, writes){
+	var localQuery = {
+		$set: query
+	};
+	options.multi = true;
+	collectionMap[collection].update(selection, localQuery, options, function(error, result, writes){
 			if(error){
-				logging.log.error('error in update: ' + error);
+				logging.log.errors('error in update: ' + error);
 				new DBException(error, callBack);
 			}
 			else{

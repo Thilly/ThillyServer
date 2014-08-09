@@ -76,11 +76,12 @@ function pushNewComment(data, socket, exception){
 /** */
 function pushNewArticle(data, socket, exception){
 	logging.log.trace('In pushNewArticle: ' + data.title);
-	logging.log.mongo('title: ' + data.title);
+	logging.log.mongo('title: ' + data.tabs[0].title);
+	logging.log.mongo('tabs: ' + data.tabs.length);
 	logging.log.mongo('thumb: ' + data.thumb);
 	logging.log.mongo('pageID: ' + data.pageID);
 	logging.log.mongo('pictures: ' + data.pictures);
-	logging.log.mongo('content: ' + data.content.length + ' bytes');
+	logging.log.mongo('content: ' + data.tabs[0].content.length + ' bytes');
 	logging.log.mongo('category: ' + data.category);
 
 	var selection = {pageID: data.pageID, category: data.category};
@@ -92,7 +93,7 @@ function pushNewArticle(data, socket, exception){
 				socket.sendCommand('articlePushed', {msg:msg});
 			}
 			else{
-				msg = 'New article pushed: ' + data.title;
+				msg = 'New article pushed: ' + data.tabs[0].title;
 				socket.sendCommand('articlePushed', {msg:msg});
 			}
 			logging.log.mongo(msg);
@@ -238,7 +239,10 @@ function getPageDetails(data, socket, exception){
 	logging.log.trace('In getPageDetails: ' + JSON.stringify(data));
 	
 	mongo.select('content', {pageID:data.pageID, category: data.category}, {projection : {}}, function(error, result){
-		socket.emit('getPageDetails', result);
+		if(result)
+			socket.emit('getPageDetails', result[0]);
+		else
+			socket.emit('getPageDetails');
 	});
 }
 
@@ -246,7 +250,7 @@ function getPageDetails(data, socket, exception){
 function getPageIDs(data, socket, exception){
 	logging.log.trace('In getPageIDs');
 		
-	mongo.select('content', {pageID:{$ne:"00000001template"}}, {projection : {pageID:-1, category: 1}, sort:{pageID: -1}}, function(error, result){
+	mongo.select('content', {}, {projection : {pageID:-1, category: 1}, sort:{pageID: -1}, limit: 10}, function(error, result){
 		socket.sendCommand('pageIDs', result);
 	});
 }
@@ -254,9 +258,9 @@ function getPageIDs(data, socket, exception){
 /** */
 function getTemplate(data, socket, exception){
 	logging.log.trace('In getTemplates');
-		
+
 	mongo.select('content', {category:'template'}, {projection : {}, sort:{pageID: -1}}, function(error, result){
-		socket.emit('gotTemplate', result);
+		socket.emit('getTemplate', result);
 	});
 
 }
