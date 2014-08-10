@@ -37,8 +37,8 @@ function testJS(fromPath, toPath){
 	console.log('building JS: ' + fromPath + ': ' + toPath);
 	fileSys.readdir(fromPath, function(error, files){
 		for(var i = 0; i < files.length; i++){//copy each JS file over one at a time
-			jsFiles.push(files[i]);
-			copyFile(fromPath+files[i], toPath+files[i]);
+			jsFiles.push(files[i].match(/\d*-(\D*)/)[1]);
+			copyFile(fromPath+files[i], toPath+files[i].match(/\d*-(\D*)/)[1]);
 		}
 		testCSS(fromPath.replace('javaScript/','styleSheets/'), toPath.replace('javaScript/','styleSheets/'), jsFiles);
 	});

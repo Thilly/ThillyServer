@@ -1,5 +1,23 @@
 ChangeLog - Thilly.net V5 - Web Service
 
+10 August 2014 - 
+
+	build.js
+		modified build script slightly to accomodate change in client javascript naming convention
+	
+	thillyMongo.js
+		removed schema comment at bottom moved to own file
+	
+	resources/mongoSchema.js
+		created directory and file for random useful things
+		
+	challengeMap.js
+		implemented content management functions
+		implemented initial contest supply functions
+		locked down contest from sharing answers and testCases with non-admin, in template and in challenge
+		
+
+
 9 August 2014 - modified Mongo to handle tabs
 
 	thillyMongo.js
@@ -8,6 +26,7 @@ ChangeLog - Thilly.net V5 - Web Service
 	contentMap.js
 		modified article queries and pushes to accomodate tabs
 
+		
 4 August 2014 - modified logins
 
 	userMap.js

@@ -12,7 +12,10 @@ module.exports = function(deps){
 		getChallenge : function(data, socket, exception){getChallenge(data, socket, exception);},
 		getProblems : function(data, socket, exception){getProblems(data, socket, exception);},
 		getProblem : function(data, socket, exception){getProblem(data, socket, exception);},
-		codeSubmission : function(data, socket, exception){codeSubmission(data, socket, exception);}
+		codeSubmission : function(data, socket, exception){codeSubmission(data, socket, exception);},
+		getContests : function(data, socket, exception){getContests(data, socket, exception);},
+		getContest : function(data, socket, exception){getContest(data, socket, exception);},
+		pushChallenge : function(data, socket, exception){pushChallenge(data, socket, exception);}
 	};
 };
 
@@ -40,16 +43,16 @@ function getChallenge(data, socket, exception){
 }
 
 function getProblems(data, socket, exception){
-	logging.log.trace('in getProblems');
-	//mongo query {'challenge',{}, {projection:{_id:0, problemNames:1}}}
-	socket.emit('getProblems', ['name1', 'name2', 'name3']);
-}
-
-function getProblem(data, socket, exception){
-	logging.log.trace('in getProblems');
-	//mongoQuery {'challenge'}, {problemName:data.name}, {projection:{_id:0, problemText:1}}
-	socket.emit('getProblem', {problemText:'Not hooked up yet, still working on the content management so I can easily manage the problems'})
-
+	mongo.select('challenge', {live:true}, {projection:{_id: 0, 'problems.name': 1, 'problems.problemDetails':1}}, function(error, result){
+		if(error){
+			logging.log.errors(error);
+			socket.emit('getProblems', error);
+		}
+		else{
+			logging.log.mongo('getProblems successful');
+			socket.emit('getProblems', result)
+		}
+	})
 }
 
 function codeSubmission(data, socket, exception){
@@ -65,9 +68,56 @@ function codeSubmission(data, socket, exception){
 	
 }
 
+function getContests(data, socket, exception){
+	logging.log.trace('in getContests');
+	mongo.select('challenge', {}, {projection: {contestName:1}}, function(error, result){
+		if(error)
+			logging.log.errors(error)
+		else if(result.length > 0)
+			socket.emit('getContests', result);
+		else
+			socket.emit('getContests', false);
+	});
+}
 
+function getContest(data, socket, exception){
+	logging.log.trace('in getContest');
+	var projection = {};
+	if(socket.user.type != 'admin'){
+		projection = {_id: 0, live: 1, 'problems.name': 1, 'problems.problemDetails':1};
+		console.log('applying projection');
+	}
+	if(data.contestName){
+		console.log('querying');
+		mongo.select('challenge', {contestName: data.contestName}, {projection: projection}, function(error, result){
+			if(error)
+				logging.log.errors(error)
+			else if(result.length > 0)
+				socket.emit('getContest', result);
+			else
+				socket.emit('getContest', false);
+		});
+	}
+	else
+		socket.emit('getContest', false);
+}
 
-
+function pushChallenge(data, socket, exception){
+	if(socket.user.type != 'admin')
+		socket.emit('pushChallenge', 'Sorry, only Thilly can submit content at this time');
+	else{
+		mongo.update('challenge', {contestName: data.contestName}, {live: data.live, problems:data.data}, {upsert: true}, function(error, result, writes){
+			if(error){
+				logging.log.errors(error);
+				socket.emit('pushChallenge', error);
+			}
+			else{
+				logging.log.mongo('pushChallenge successful: ' + result);
+				socket.emit('pushChallenge', 'update successful')
+			}
+		});
+	}
+}
 
 
 

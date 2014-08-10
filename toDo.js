@@ -11,6 +11,11 @@
 		Map to priority queue, on remove purge map
 		max 100, let oldest fall off
 			Cache[query] -> array[idx]
+	
+	mongo backup - mongoDump
+		daily create backup db of all content currently hosted on mongo
+		move to different folder and archive it
+			keep last 2 weeks of backups 
 */
 
 /** random client improvements
@@ -49,40 +54,34 @@
 		profile button + active
 		
 	category:template = [
-		tab1: {contentTop: CT,  contentBottom:CB, tabName:TN, title:Title}
-		tab2: {contentTop: CT,  contentBottom:CB, tabName:TN, title:Title}
-		tab3: {contentTop: CT,  contentBottom:CB, tabName:TN, title:Title}
-		tab4: {contentTop: CT,  contentBottom:CB, tabName:TN, title:Title}
+	
 	]	
 Content TABS (refactor interaction to take/make tabs for all content, just in case)
-	newsFeed
-		include button/tabs to create as tab/add tabs
+	template
+		feature complete
 
 	DB management 
-		create a front end (admin only for real, test for standard) for managing the database easier
-		cick for db
-		click for collections, 
-		get a projection of collection and click for options
-			bottom content will be fields to change or an insert button to create new record
+		thillyMongo.js
+			submit: submit query
+			getDBs
+			getCollections
+			getDocuments
+			getFields
+		use bottom to see mongo result
 
 	Diagnostic
-		just like from contest 1
-		get log messages and memory usage just like contest 1
-	
+		thillyDiag.js
+			submit: change flags
+			getMemory: hook up socket to listen for memory outputs
+			getLog: hook up socket to listen for logging outputs
+		use bottom as viewport of memory or log
 	
 	contest management
-		top: 3fields
-			problem Text
-			problem input
-			problem output(answer)
-		
+		thillyChallenge.js
+			init: get problem set names
+			submit: add new problem
 		bottom
 			show the results of the three soon to be inputs
-	
-	onClick of tab = function(){
-		articleContent.innerHTML = this.contentTop
-		article1content.innerHTML = this.contentBottom
-		}		
 */
 	
 /** refactor admin.js and standard.js to be built during login
@@ -127,14 +126,4 @@ Content TABS (refactor interaction to take/make tabs for all content, just in ca
 		
 	Mainv29389.css
 	Minv73920.js
-*/
-
-/** first contest problem set
-
- 1 echo shapes
- 2 echo shapes after rotation s2RR
- 3 fall in Grid based on rotated shape and column s1LLc3
- 4 fall in Grid based on rotated shape and clear lines, above clear falls again 
- 5 can be solved with the order given? end with empty grid?
- 
 */

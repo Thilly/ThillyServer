@@ -93,6 +93,18 @@ window.thillyAdmin = {};
 			pushSubmit();
 	};
 	
+	this.submitChallenge = function(contestName, live, data){
+		var pushData = {
+			contestName: contestName,
+			live: live,
+			data: data
+		};
+		
+		thillyUtil.sendReceive(thillyIndex.mainSocket, 'pushChallenge', pushData, function(response){
+			alert(response);
+		});
+	};
+	
 	/** */
 	function pushSubmit(){
 		if(debug.trace)

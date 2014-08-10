@@ -40,7 +40,7 @@ buildWebServiceMap({'logging': logging,
 sockets.on('connection', function(socket){
 	logging.log.trace('In sockets.on("connection")');
 	logging.log.sockets(socket.id + ' connected');
-	
+	socket.user = {};
 	socket.sendCommand = sendCommand;
 	
 	/** */
