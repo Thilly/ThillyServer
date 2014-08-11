@@ -16,8 +16,8 @@ module.exports = function(deps){
 	crypto = require('./../thillyCrypto.js')(logging);
 	
 	return {
-		login			:	function(data, socket, exception){ login(data, socket, exception);},
-		register		:	function(data, socket, exception){ register(data, socket, exception);}
+		login		:	 login,
+		register	:	 register
 	};
 };
 

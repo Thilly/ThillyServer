@@ -11,16 +11,16 @@ module.exports = function(deps){
 	mongo = deps.mongo;
 		
 	return {
-		updatePage 		:	function(data, socket, exception){ updatePage(data, socket, exception);},
-		commentVote		:	function(data, socket, exception){ commentVote(data, socket, exception);},
-		picUpload		:	function(data, socket, exception){ picUpload(data, socket, exception);},
-		pushNewArticle	:	function(data, socket, exception){ pushNewArticle(data, socket, exception);},
-		pushNewComment	:	function(data, socket, exception){ pushNewComment(data, socket, exception);},
-		getComments		:	function(data, socket, exception){ getComments(data, socket, exception);},
-		getTemplate		:	function(data, socket, exception){ getTemplate(data, socket, exception);},
-		getPages		:	function(data, socket, exception){ getPages(data, socket, exception);},
-		getPageIDs		:	function(data, socket, exception){ getPageIDs(data, socket, exception);},
-		getPageDetails	:	function(data, socket, exception){ getPageDetails(data, socket, exception);}	
+		updatePage 		:	 updatePage,
+		commentVote		:	 commentVote,
+		picUpload		:	 picUpload,
+		pushNewArticle	:	 pushNewArticle,
+		pushNewComment	:	 pushNewComment,
+		getComments		:	 getComments,
+		getTemplate		:	 getTemplate,
+		getPages		:	 getPages,
+		getPageIDs		:	 getPageIDs,
+		getPageDetails	:	 getPageDetails
 	};
 };
 

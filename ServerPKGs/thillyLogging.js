@@ -5,7 +5,7 @@
  *	@author Nicholas 'Thilly' Evans
  */
 
- /** */ 
+/** */ 
 var files = {};
 
 /** */
@@ -13,6 +13,12 @@ var fileName;
 
 /** */
 var cache = [];
+
+/** */
+var memoryCache = [];
+
+/** */
+var loggingListener = false;
 
 /** */
 var logs = {
@@ -46,6 +52,8 @@ var flags = {
 	//a flag for writing the log to a file
 	mongo		:	true,	
 	//a flag for watching any mongo actions
+	memory		:	false,	
+	//a flag for logging memory usage
 	socketIO 	:	false,	
 	//a flag for watching socket.io messages
 	sockets		:	true,	
@@ -62,8 +70,11 @@ module.exports = function(options){
 
 	thisObj = {
 		log			: logs,
-		set 		: setFlag,
-		flags		: flags,
+		getFlags	: getFlags,
+		getLogCache	: getLogCache,
+		getMemoryCache : getMemoryCache,
+		setLoggingListener : setLoggingListener,
+		setFlags	: setFlags,
 		environment	: options.environment || 'test',
 		homeDomain 	: options.homeDomain || 'http://174.49.168.70',
 		port 		: options.port || 80
@@ -80,7 +91,11 @@ module.exports = function(options){
 	
 /** */  
 function log(flag, logString){
-	if(flags[flag]){
+	if(flag == 'memory'){
+		logMemory(logString);
+		return;
+	}			
+	if(flags[flag] || flag === true){
 		if(flags.display){
 			process.stdout.write(((thisObj)?(thisObj.environment + '\t'):'') + logString + '\n');
 		}
@@ -90,6 +105,53 @@ function log(flag, logString){
 		cache.push(logString);
 		if(cache.length > 100)
 			cache.shift();
+		if(loggingListener)
+			loggingListener.to('logging').emit('log', logString);
+	}
+}
+
+/** */
+function getFlags(){
+	return flags;
+}
+
+/** */
+function getLogCache(){
+	return cache;
+}
+
+/** */
+function getMemoryCache(){
+	return memoryCache;
+}
+
+/** */
+function setLoggingListener(socketChannel){
+	loggingListener = socketChannel;
+}
+
+/** */
+function setFlags(newFlags){
+	for(var eachFlag in newFlags)
+		setFlag(eachFlag, newFlags[eachFlag]);
+}
+
+/** */
+function logMemory(memoryStep){
+	if(flags.memory){
+		memoryCache.push(memoryStep);
+		if(memoryCache.length > 100)
+			memoryCache.shift();
+		if(loggingListener)
+			loggingListener.to('memory').emit('memory', logString);
+	}
+}
+
+/** */
+function setFlag(flag, value){
+	if(typeof flags[flag] != 'undefined'){
+		log(true, 'setting: ' + flag + ' to ' + value);
+		flags[flag] = value;
 	}
 }
 
@@ -103,11 +165,8 @@ function getTimeStamp(){
 	return dateString;
 }
 
-/** */
-function setFlag(flag, value){
-	if(flag)
-		if(!constFlags[flag]){
-			log('setting: ' + flag + ' to ' + value);
-			flags[flag] = value;
-		}
-}
+
+
+
+
+

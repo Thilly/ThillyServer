@@ -25,7 +25,8 @@ var files = new require('./thillyFiles.js')(logging);
 var server = require('http').createServer(files.fileHandler).listen(logging.port);
 
 /** */
-var sockets = require('socket.io').listen(server, {log: logging.flags.socketIO});
+var sockets = require('socket.io').listen(server, {log: logging.getFlags().socketIO});
+	logging.setLoggingListener(sockets);
 	logging.log.sockets('WebService has started on port: ' + logging.port + '\n');
 	
 /** */
@@ -38,19 +39,23 @@ buildWebServiceMap({'logging': logging,
 
 /** */
 sockets.on('connection', function(socket){
-	logging.log.trace('In sockets.on("connection")');
+	socketConnect(socket, 'sockets');
+});
+
+/** */
+function socketConnect(socket, channel){
+	logging.log.trace('In ' + channel + '.on("connection")');
 	logging.log.sockets(socket.id + ' connected');
-	socket.user = {};
 	socket.sendCommand = sendCommand;
 	
 	/** */
 	socket.on('command', function(data){
-		logging.log.trace('In socket.on("command")');
+		logging.log.trace('In ' + channel + '.on("command")');
 		logging.log.sockets('Recieved data from socket: ' + JSON.stringify(data));
 			
 		actionCommand(data, socket, webServiceMap);
 	});
-});
+};
 
 /** */
 function sendCommand(command, dataObject, callBack){//general send command function
@@ -74,7 +79,7 @@ function actionCommand(data, socket, functionMap){//general recieve command func
 		functionMap[data.command](data.value, socket, exception.ErrorHandle);
 	}
 	catch(error){
-		new exception.utility('exception when trying to call ' + data.command);
+		new exception.utilityException('exception when trying to call ' + data.command + ' : ' + error);
 	}
 }
 

@@ -20,11 +20,6 @@
 
 /** random client improvements
 	
-		clean up design with something nice
-			ide type colors (sublime/npp)
-			dark theme, light theme
-		namespace index.js with iife
-	
 	user profile stuff
 	give each user a public and private profile
 	link to public on each comment
@@ -33,12 +28,10 @@
 		with projection {userID: 1, points: 1, publicLink:1}
 		after comments are populated, run over comments and add title/link to each user
 	
-	graphics and UX	
-		build tabs for articles served as array
-			template
-			mongo
-			memory manager
-			contest
+	graphics and UX
+		clean up design with something nice
+		ide type colors (sublime/npp)
+		dark theme, light theme
 		css, lots of it
 		make the webby look good for a change
 		find inspiration deep inside :D
@@ -53,12 +46,7 @@
 		general settings - gear
 		profile button + active
 		
-	category:template = [
-	
-	]	
 Content TABS (refactor interaction to take/make tabs for all content, just in case)
-	template
-		feature complete
 
 	DB management 
 		thillyMongo.js
@@ -67,21 +55,12 @@ Content TABS (refactor interaction to take/make tabs for all content, just in ca
 			getCollections
 			getDocuments
 			getFields
-		use bottom to see mongo result
+		use bottom to see query as being built or mongo result
 
 	Diagnostic
 		thillyDiag.js
-			submit: change flags
 			getMemory: hook up socket to listen for memory outputs
-			getLog: hook up socket to listen for logging outputs
-		use bottom as viewport of memory or log
-	
-	contest management
-		thillyChallenge.js
-			init: get problem set names
-			submit: add new problem
-		bottom
-			show the results of the three soon to be inputs
+		use bottom as viewport of memory and log
 */
 	
 /** refactor admin.js and standard.js to be built during login

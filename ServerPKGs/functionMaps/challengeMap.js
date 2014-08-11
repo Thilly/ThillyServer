@@ -9,13 +9,12 @@ module.exports = function(deps){
 	mongo = deps.mongo;
 		
 	return {
-		getChallenge : function(data, socket, exception){getChallenge(data, socket, exception);},
-		getProblems : function(data, socket, exception){getProblems(data, socket, exception);},
-		getProblem : function(data, socket, exception){getProblem(data, socket, exception);},
-		codeSubmission : function(data, socket, exception){codeSubmission(data, socket, exception);},
-		getContests : function(data, socket, exception){getContests(data, socket, exception);},
-		getContest : function(data, socket, exception){getContest(data, socket, exception);},
-		pushChallenge : function(data, socket, exception){pushChallenge(data, socket, exception);}
+		getChallenge 	: getChallenge,
+		getProblems 	: getProblems,
+		codeSubmission 	: codeSubmission,
+		getContests 	: getContests,
+		getContest 		: getContest,
+		pushChallenge 	: pushChallenge
 	};
 };
 

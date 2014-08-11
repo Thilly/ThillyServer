@@ -1,6 +1,20 @@
 ChangeLog - Thilly.net V5 - Web Service
 
-10 August 2014 - 
+11 August 2014 - implementing the clientside diagnostic tools
+
+	functionMaps/diagMap.js
+		implemented most of the functionality for getting basic diagnostic information
+	
+	thillyLogging.js
+		implemented transmitting logging related information to listening clients
+		implemented getting log flags from logging
+		implemented changing log flags from client
+	
+	thillyServer.js
+		modified how sockets handle first connection
+	
+
+10 August 2014 - working on the contest application some
 
 	build.js
 		modified build script slightly to accomodate change in client javascript naming convention
@@ -15,7 +29,6 @@ ChangeLog - Thilly.net V5 - Web Service
 		implemented content management functions
 		implemented initial contest supply functions
 		locked down contest from sharing answers and testCases with non-admin, in template and in challenge
-		
 
 
 9 August 2014 - modified Mongo to handle tabs
