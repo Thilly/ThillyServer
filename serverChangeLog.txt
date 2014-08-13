@@ -1,5 +1,14 @@
 ChangeLog - Thilly.net V5 - Web Service
 
+12 August 2014 - finishing the functionality of the diag tools
+
+	thillyLogging.js
+		implemented most of the memory logging functionality here
+		
+	diagMap.js
+		implemented some handles to access and modify the memory logging
+		
+	
 11 August 2014 - implementing the clientside diagnostic tools
 
 	functionMaps/diagMap.js

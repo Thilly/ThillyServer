@@ -15,10 +15,14 @@ var fileName;
 var cache = [];
 
 /** */
-var memoryCache = [];
+var loggingListener = false;
 
 /** */
-var loggingListener = false;
+const KB = 1024;
+const MB = 1024*1024;
+const memoryInterval = 2000;
+var memoryTimer = false;
+var memoryCache = [];
 
 /** */
 var logs = {
@@ -75,6 +79,8 @@ module.exports = function(options){
 		getMemoryCache : getMemoryCache,
 		setLoggingListener : setLoggingListener,
 		setFlags	: setFlags,
+		startMemory : startMemory,
+		stopMemory  : stopMemory,
 		environment	: options.environment || 'test',
 		homeDomain 	: options.homeDomain || 'http://174.49.168.70',
 		port 		: options.port || 80
@@ -85,6 +91,8 @@ module.exports = function(options){
 	
 	fileName =  './Logging/' + thisObj.environment + getTimeStamp() + 'serverLog.log';
 	logs.files('Started Server log: ' + new Date().toString());
+	
+	startMemory();
 	
 	return thisObj;
 };
@@ -103,7 +111,7 @@ function log(flag, logString){
 			files.appendLog(fileName, '\n' + getTimeStamp() + ':\t' + logString);
 		}
 		cache.push(logString);
-		if(cache.length > 100)
+		if(cache.length > 150)
 			cache.shift();
 		if(loggingListener)
 			loggingListener.to('logging').emit('log', logString);
@@ -137,13 +145,34 @@ function setFlags(newFlags){
 }
 
 /** */
-function logMemory(memoryStep){
-	if(flags.memory){
-		memoryCache.push(memoryStep);
-		if(memoryCache.length > 100)
-			memoryCache.shift();
-		if(loggingListener)
-			loggingListener.to('memory').emit('memory', logString);
+function logMemory(memoryStep, lastMemory){
+	memoryCache.push(memoryStep);
+	if(memoryCache.length > 100)
+		memoryCache.shift();
+	if(loggingListener)
+		loggingListener.to('memory').emit('memory', memoryStep);
+	if(flags.display)//if want to see the server memory in the log
+	{
+		var outputMsg = '';
+		if(lastMemory.rss == 0)//otherwise it's the first allocation of memory
+		{
+			outputMsg += 'HU:' + memoryStep.heapUsed/MB + 'MB to start\n';
+			outputMsg += 'TH:' + memoryStep.heapTotal/MB + 'MB to start\n';
+			outputMsg += 'RS:' + memoryStep.rss/MB + 'MB to start';
+		}
+		else if(memoryStep.heapUsed - lastMemory.heapUsed < 0)//if memory dropped, garbage collection happened
+		{
+			outputMsg += 'HU:' + memoryStep.heapUsed/MB + 'MB after GC\n';
+			outputMsg += 'TH:' + memoryStep.heapTotal/MB + 'MB after GC\n';
+			outputMsg += 'RS:' + memoryStep.rss/MB + 'MB afterGC';
+		}
+		else//if not first or GC, report as change
+		{
+			outputMsg += 'HU:' + (memoryStep.heapUsed - lastMemory.heapUsed)/KB + 'KB change\n';
+			outputMsg += 'TH:' + (memoryStep.heapTotal - lastMemory.heapTotal)/KB + 'KB change\n';
+			outputMsg += 'RS:' + (memoryStep.rss - lastMemory.rss)/KB + 'KB change';
+		}
+		log(true, outputMsg);
 	}
 }
 
@@ -165,8 +194,32 @@ function getTimeStamp(){
 	return dateString;
 }
 
+/** */
+function stopMemory(){
+	clearInterval(memoryTimer);
+	memoryTimer = false;
+}
 
+/** */
+function startMemory(socket){
+	if(flags.memory)
+	{			
+		if(socket)
+			socket.emit('startMemory', memoryCache);
+		if(memoryTimer == false){	
+			var lastMemory = {
+						rss: 0,
+						heapUsed: 0,
+						heapTotal: 0
+						};
 
-
-
+			memoryTimer = setInterval(function(){
+				var myMem = process.memoryUsage();
+				logMemory(myMem, lastMemory);
+				lastMemory = myMem;
+			}, memoryInterval);
+		}
+	}
+	
+}
 
