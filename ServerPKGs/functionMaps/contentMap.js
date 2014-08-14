@@ -30,7 +30,7 @@ function updatePage(data, socket, exception){
 	files.readFile('./client/' + data, function(error, returnValue){
 		if(error)
 		{
-			logging.log.error('Error in updatePage: ' + error);
+			logging.log.errors('Error in updatePage: ' + error);
 			socket.emit('updatePage', {'error': error});
 		}
 		else
@@ -113,7 +113,7 @@ function commentVote(data, socket, exception){
 	
 	mongo.select('user', query, projection, function(error, result){//see if changing a vote
 		if(error)
-			logging.log.error(error);
+			logging.log.errors(error);
 		logging.log.trace('votequery returned: ' + JSON.stringify(result));
 		if(result.length > 0){
 			result = result[0];
@@ -163,7 +163,7 @@ function recordVote(commentObj, userData, voteExists){
 	
 	mongo.update('user',{userID: userData.userID},update,{w:1},function(error, result, second){//record the votes
 		if(error)
-			logging.log.error(error);
+			logging.log.errors(error);
 		else{
 			logging.log.trace('vote recorded: ' + modify*userData.vote);
 			recordPoints(userData, modify);
@@ -187,14 +187,14 @@ function recordPoints(userData, modify){
 	if(userData.commentID > 0)
 		mongo.update('user', {userID:userData.commenter}, update, {w:1}, function(error, result){
 			if(error)
-				logging.log.error(error);
+				logging.log.errors(error);
 			else
 				logging.log.trace(coll + ' points recorded for user: ' + userData.commenter);
 		});
 		
 	mongo.update(coll, query, update, {w:1}, function(error, result){
 			if(error)
-				logging.log.error(error);
+				logging.log.errors(error);
 			else
 				logging.log.trace(coll + ' points recorded for comment:' + userData.commentID);
 	});

@@ -92,7 +92,8 @@ module.exports = function(options){
 	fileName =  './Logging/' + thisObj.environment + getTimeStamp() + 'serverLog.log';
 	logs.files('Started Server log: ' + new Date().toString());
 	
-	startMemory();
+	if(flags.memory)
+		startMemory();
 	
 	return thisObj;
 };
@@ -202,23 +203,22 @@ function stopMemory(){
 
 /** */
 function startMemory(socket){
-	if(flags.memory)
-	{			
-		if(socket)
-			socket.emit('startMemory', memoryCache);
-		if(memoryTimer == false){	
-			var lastMemory = {
-						rss: 0,
-						heapUsed: 0,
-						heapTotal: 0
-						};
+	flags.memory = true;
+	if(socket)
+		socket.emit('startMemory', memoryCache);
+	if(memoryTimer == false){	
+		var lastMemory = {
+					rss: 0,
+					heapUsed: 0,
+					heapTotal: 0
+					};
 
-			memoryTimer = setInterval(function(){
-				var myMem = process.memoryUsage();
+		memoryTimer = setInterval(function(){
+			var myMem = process.memoryUsage();
+			if(flags.memory)
 				logMemory(myMem, lastMemory);
-				lastMemory = myMem;
-			}, memoryInterval);
-		}
+			lastMemory = myMem;
+		}, memoryInterval);
 	}
 	
 }

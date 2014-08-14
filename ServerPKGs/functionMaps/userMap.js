@@ -33,7 +33,7 @@ function login(data, socket, exception){
 		
 	function callBack(error, result){
 		if(error)
-			logging.log.error('error in login: ' + error);
+			logging.log.errors('error in login: ' + error);
 		else if(result.length == 0){
 			logging.log.sockets('login failed: no such user');		
 			socket.emit('login', {failed:'no such user'});
@@ -75,7 +75,7 @@ function register(data, socket, exception){
 	
 	mongo.select('user', {userName:data.userName.toLowerCase()}, {projection:{userID:1}}, function(error, result){
 		if(error)
-			logging.log.error('error in register select: ' + error);
+			logging.log.errors('error in register select: ' + error);
 		else if(result.length > 0){
 			logging.log.sockets('user name: ' + data.userName + ' taken.');
 			socket.emit('login', {failed:'user name taken'});
@@ -83,7 +83,7 @@ function register(data, socket, exception){
 		else{
 			mongo.insert('user', insertObj, {w:1}, function(error, result){
 				if(error)
-					logging.log.error('error in register: ' + error);
+					logging.log.errors('error in register: ' + error);
 				else{
 					logging.log.sockets('register completed successfully');
 					loginUser(insertObj, socket);

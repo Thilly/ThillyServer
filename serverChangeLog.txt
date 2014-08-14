@@ -1,5 +1,15 @@
 ChangeLog - Thilly.net V5 - Web Service
 
+14 August 2014 - fixed a few unnoticed bugs
+
+	thillyMongo.js
+		$set was clashing with a few other options
+			implemented a check to include the set only when the options arent present
+	
+	ServerPKGs/*
+		still had a few loggin.log.error in there, greped them to log.errors
+		
+
 12 August 2014 - finishing the functionality of the diag tools
 
 	thillyLogging.js

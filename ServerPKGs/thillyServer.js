@@ -90,14 +90,14 @@ function buildWebServiceMap(dependencies, serviceMap){
 	
 	fs.readdir('./ServerPKGs/functionMaps', function(error, files){
 		if(error)
-			logging.log.error(error);
+			logging.log.errors(error);
 		else{
 			for(var i = 0; i < files.length; i++){
 			
 				var tempFunctionMap = require('./functionMaps/'+files[i])(dependencies);
 				for(var func in tempFunctionMap){
 					if(typeof serviceMap[func] == 'function')
-						logging.log.error('ERROR WHILE BUILDING SERVICE MAP:: ' + func + ' already in use');
+						logging.log.errors('ERROR WHILE BUILDING SERVICE MAP:: ' + func + ' already in use');
 					else{
 						serviceMap[func] = tempFunctionMap[func];
 						logging.log.trace('adding : ' + func + ' to webServiceMap');

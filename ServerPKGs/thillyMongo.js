@@ -71,7 +71,7 @@ function select(collection, query, options, callBack){
 			
 		cursor.toArray(function(error, result){
 			if(error){
-				logging.log.error('error in select: ' + error);
+				logging.log.errors('error in select: ' + error);
 				new DBException(error, callBack);
 			}
 			else{
@@ -87,7 +87,7 @@ function insert(collection, query, options, callBack){
 	logging.log.trace('in insert: ' + collection);
 	collectionMap[collection].insert(query, options, function(error, result){
 			if(error){
-				logging.log.error('error in insert: ' + error);
+				logging.log.errors('error in insert: ' + error);
 				new DBException(error, callBack);
 			}
 			else{
@@ -103,6 +103,9 @@ function update(collection, selection, query, options, callBack){
 	var localQuery = {
 		$set: query
 	};
+	if(query['$addToSet'] || query['$pull'] || query['$inc'])//if query has set breaking options
+		localQuery = query;
+		
 	options.multi = true;
 	collectionMap[collection].update(selection, localQuery, options, function(error, result, writes){
 			if(error){
@@ -126,7 +129,7 @@ function init(callBack){
 
 	mongo.MongoClient.connect('mongodb://localHost:27017/thillyNet', function(error, dataBase){
 		if(error){
-			logging.log.error('not connected to thillyNet: ' + error);
+			logging.log.errors('not connected to thillyNet: ' + error);
 			new DBException(error, callBack);
 		}
 		else{//make into a promise, or some type of iterative process, this is getting stupid
