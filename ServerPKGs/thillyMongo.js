@@ -14,29 +14,23 @@ var objectID;
 var logging = {};
 
 /** */
-var contentCollection;
-
-/** */
-var commentCollection;
-
-/** */
-var userCollection;
-
-/** */
-var challengeCollection;
-
-/** */
-var submissionCollection;
-
-/** */
-var collectionMap = {};
+var dbMap = {}
+/*	DBname : {
+		db : dataBase, 
+		collectionName1 : collection1,
+		collectionName2 : collection2,
+		...
+		}
+*/
 
 /** */
 var toExport = {
 	'select'	:	select,
 	'insert'	:	insert,
 	'update'	:	update,
-	'parse'		:	parse
+	'parse'		:	parse,
+	'getDBNames':	getDBNames,
+	'getCollectionNames': getCollectionNames
 };
 
 /** */
@@ -60,32 +54,38 @@ function parse(objectString){
 /** */
 function select(collection, query, options, callBack){
 	logging.log.trace('in select: ' + collection);
-		
-	collectionMap[collection].find(query, options.projection, function(error, cursor){
-		if(options.skip)
-			cursor = cursor.skip(options.skip);
-		if(options.limit)
-			cursor = cursor.limit(options.limit);
-		if(options.sort)
-			cursor = cursor.sort(options.sort);
-			
-		cursor.toArray(function(error, result){
-			if(error){
-				logging.log.errors('error in select: ' + error);
-				new DBException(error, callBack);
-			}
-			else{
-				logging.log.mongo('select completed: ' + result.length);
-				callBack(error, result);	
-			}
+	if(assertMapping('thillyNet', collection)){
+		var coll = dbMap['thillyNet'][collection];
+		coll.find(query, options.projection, function(error, cursor){
+			if(options.skip)
+				cursor = cursor.skip(options.skip);
+			if(options.limit)
+				cursor = cursor.limit(options.limit);
+			if(options.sort)
+				cursor = cursor.sort(options.sort);
+				
+			cursor.toArray(function(error, result){
+				if(error){
+					logging.log.errors('error in select: ' + error);
+					new DBException(error, callBack);
+				}
+				else{
+					logging.log.mongo('select completed: ' + result.length);
+					callBack(error, result);	
+				}
+			});
 		});
-	});
+	}
+	else
+		DBException('unable to assert mapping of: thillyNet:' + collection, callBack);
 }
 
 /** */
 function insert(collection, query, options, callBack){
 	logging.log.trace('in insert: ' + collection);
-	collectionMap[collection].insert(query, options, function(error, result){
+	if(assertMapping('thillyNet', collection)){
+		var coll = dbMap['thillyNet'][collection];
+		coll.insert(query, options, function(error, result){
 			if(error){
 				logging.log.errors('error in insert: ' + error);
 				new DBException(error, callBack);
@@ -94,7 +94,10 @@ function insert(collection, query, options, callBack){
 				logging.log.mongo('insert completed: ' + result.length);
 				callBack(error, result);	
 			}
-	});
+		});
+	}
+	else
+		DBException('unable to assert mapping of: thillyNet:' + collection, callBack);
 }
 
 /** */
@@ -107,7 +110,9 @@ function update(collection, selection, query, options, callBack){
 		localQuery = query;
 		
 	options.multi = true;
-	collectionMap[collection].update(selection, localQuery, options, function(error, result, writes){
+	if(assertMapping('thillyNet', collection)){
+		var coll = dbMap['thillyNet'][collection];
+		coll.update(selection, localQuery, options, function(error, result, writes){
 			if(error){
 				logging.log.errors('error in update: ' + error);
 				new DBException(error, callBack);
@@ -116,52 +121,104 @@ function update(collection, selection, query, options, callBack){
 				logging.log.mongo('update completed: ' + result + ': ' + JSON.stringify(writes));
 				callBack(error, result, writes);	
 			}
-	});
+		});
+	}
+	else
+		DBException('unable to assert mapping of: thillyNet:' + collection, callBack);
+}
+
+/** */
+function getDBNames(){
+	logging.log.trace('in getDBNames');
+	
+	var names = [];
+	for(var eachDB in dbMap){
+		names.push(eachDB);
+	}
+	
+	return names;
+}
+
+/** */
+function getCollectionNames(dbName){
+	logging.log.trace('in getCollectionNames: ' + dbName);
+	
+	if(dbMap[dbName]){
+		var colls = [];
+		for(var eachColl in dbMap[dbName]){
+			colls.push(eachColl);
+		}
+		
+		return colls;
+	}
+	else
+		return [];
 }
 
 /*
 	Private
 */
+	//create map to DBs
+	//for each DB, 
+		//add map to collections
+		//keep for dynamic queries on any db/collection pair
+		//add functions to create DBs and Collections on fly
+/** */
+function mapDBs(dataBase, callBack){
+
+	dataBase.admin().listDatabases(function(error, database){
+		database = database.databases;
+		for(var i = 0; i < database.length; i++){
+			logging.log.mongo('DB found: ' + database[i].name);
+			var last = (i == database.length-1);
+			(function(name, loc, end){//capture current values with IIFE
+				mongo.MongoClient.connect(loc, function(error, aDB){
+					dbMap[name] = {//map each db to its own object
+						'db' : aDB,
+					}; 
+					aDB.collections(function(error, colls){
+						for(var j = 0; j < colls.length; j++){
+							logging.log.mongo('mapping collection ' + colls[j].collectionName + ' to ' + name);
+							//add each collection to it's corresponding db object
+							dbMap[name][colls[j].collectionName] = colls[j];	
+						}
+						if(end)//if last DB mapped, carry on
+							callBack();
+					});
+				});
+			})(database[i].name, 'mongodb://localHost:27017/' + database[i].name, last);	
+		}
+	});	
+}
 
 /** */
 function init(callBack){
 	logging.log.trace('in init');
-
+	
+	//gotta connect to something to get started with it
 	mongo.MongoClient.connect('mongodb://localHost:27017/thillyNet', function(error, dataBase){
 		if(error){
 			logging.log.errors('not connected to thillyNet: ' + error);
 			new DBException(error, callBack);
 		}
-		else{//make into a promise, or some type of iterative process, this is getting stupid
+		else{
 			logging.log.mongo('connected to thillyNet');
-			dataBase.createCollection('content', function(error, content){
-				contentCollection = content;
-				dataBase.createCollection('comment', function(error, comment){
-					commentCollection = comment;
-					dataBase.createCollection('user', function(error, user){
-						userCollection = user;
-						dataBase.createCollection('challenge', function(error, challenge){
-							challengeCollection = challenge;
-							dataBase.createCollection('submission', function(error, submission){
-								submissionCollection = submission;
-						
-								mongo = dataBase;
-								collectionMap =	{
-									'user' 		:	userCollection,
-									'comment'	:	commentCollection,
-									'content'	:	contentCollection,
-									'challenge'	:	challengeCollection,
-									'submission':	submissionCollection
-								};
-								if(typeof(callBack) == 'function')
-									callBack();
-							});
-						});
-					});
-				});
+			mapDBs(dataBase, function(){
+				logging.log.mongo('DB mapping complete');
+				if(typeof(callBack) == 'function')
+					callBack();
 			});
 		}
 	});
+}
+
+/** */
+function assertMapping(dbName, collName){
+	if(dbMap[dbName])
+		if(dbMap[dbName][collName])
+			return true;
+	
+	return false;
 }
 
 /** */

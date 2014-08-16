@@ -1,10 +1,6 @@
 /** random server library improvements
 	extend fileHandler to account for streams and any other file types that come up
-	extend thillyExceptions to handle errors cleanly (or at least provide the illusion of doing so)
 	create external modules for different states of socket commands
-	give thillyLogging hooks to modify logging from outside hardcoded values
-		implement a way for an admin to watch the log during runtime
-			add a stream, logging.log also broadcasts to the admin channel if anyone listening
 			
 	mongo cache 
 		om selects, memoize by query/projection.toString()
@@ -21,8 +17,9 @@
 /** random client improvements
 	
 	user profile stuff
-	give each user a public and private profile
-	link to public on each comment
+		**back burner**
+		give each user a public and private profile
+		link to public on each comment
 		create list of users when pulling comments
 		query all the users $all[userList], 
 		with projection {userID: 1, points: 1, publicLink:1}
@@ -39,7 +36,8 @@
 	create sprite sheet for buttons
 	X	up/down default
 	X	up/down active
-		x (close buttons)
+	X	x (close buttons)
+	X	-/+ minify, expand 
 	X	replyComment/active
 		minimap arrows
 		template tools + tools/hide
@@ -56,16 +54,14 @@ Content TABS (refactor interaction to take/make tabs for all content, just in ca
 			getDocuments
 			getFields
 		use bottom to see query as being built or mongo result
-
-	Diagnostic
-		thillyDiag.js
-			getMemory: hook up socket to listen for memory outputs
-		use bottom as viewport of memory and log
+	
+	make the template more of a wysiwyg thing
+		**back burner**
 */
 	
 /** refactor admin.js and standard.js to be built during login
-		**create assemble file in thillyFiles.js
-		**take array of filenames, keep appending till done, return final string
+		create and assemble file in thillyFiles.js
+		take array of filenames, keep appending till done, return creation
 	change userScript object = user || {};
 	serve user while updating that JS (onLogin)
 	start splitting up CSS, mobile (no leftscrollyBar, split up interaction.js also)
@@ -78,7 +74,7 @@ Content TABS (refactor interaction to take/make tabs for all content, just in ca
 			tap to jump
 		ThillyDefender	:	missle command
 			tap to fire missle
-		(*)				:	asteroids
+		(*)				:
 			twin stick shooter
 		match 3
 			tap to choose
@@ -95,7 +91,7 @@ Content TABS (refactor interaction to take/make tabs for all content, just in ca
 		match 3
 			click to choose
 		breakout
-			mouse / click	
+			ad
 			
 */
 

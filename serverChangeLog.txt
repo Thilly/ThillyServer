@@ -1,10 +1,21 @@
 ChangeLog - Thilly.net V5 - Web Service
+16 August 2014 - mongo mapping complete
+
+	thillyMongo.js
+		modified the init function to map each db and collection instead of that non-maintainable statically created 'callback-hell' I used to have
+			map[dbName: db][collName: collection]
+		implemented public function getDBNames
+		implemented public function getCollectionNames
+		removed all the now unused local variables
+	
+	functionMaps/mongoMap.js
+		new module to handle functions from MonGUI
 
 14 August 2014 - fixed a few unnoticed bugs
 
 	thillyMongo.js
 		$set was clashing with a few other options
-			implemented a check to include the set only when the options arent present
+			implemented a check to include the set only when the options aren't present
 	
 	ServerPKGs/*
 		still had a few loggin.log.error in there, greped them to log.errors

@@ -1,6 +1,6 @@
 thillyNet{//database
 
-/*		content{//collection
+/*		content{	//collection
 		//	_id: number,				(auto applied page _id)
 			pageID: number,				(date time stamp: 201406140)
 			category: text,				(category of the article, standard, games, bio, etc..)
@@ -13,7 +13,7 @@ thillyNet{//database
 		},
 */	
 	
-/*		comment{//collection
+/*		comment{	//collection
 		//	_id: number,				(auto applied comment _id)
 			pageID: number,				(date time stamp of page comment is on: 201406140)
 			commentText: bigText,		(plain text of article)
@@ -24,23 +24,23 @@ thillyNet{//database
 			userID: text,				(submitter)
 		},
 */
-		
-/*		user{//collection
+	
+/*		user{		//collection
 		//	_id: number,				(auto applied user _id)
 			userID: text,				(user choice, 'Some Random' for guest)
 			password: text,				(password, hashed)
 			contest: {
 				subs: [], 				(array of tries: indexes of submissions, array of results: indexes of successes)
 				results:[]
-			} 
+			}
 			upVotes: [{}],				(array of votes: [{pageID: commentID} ... ])
 			downVotes: [{}], 			''
 			points: number,				(total comment points user earned)
 			type: string				(type of user: (admin, standard, moderator))
 		}
 */	
-		
-/*		challenge{//collection
+	
+/*		challenge{	//collection
 		//	_id: number,				(auto applied challenge _id)
 			name: text,					(name of content or problem)
 			live: boolean,				(if this problem set is active or not)
@@ -54,7 +54,7 @@ thillyNet{//database
 		}
 */	
 	
-/*		submission{//collection
+/*		submission{	//collection
 		//	_id: number,				(auto applied submission _id)
 			content: text				(contents of submission)
 			result:	text				(result of submission, compile error, wrong answer...)
