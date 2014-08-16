@@ -7,9 +7,12 @@ ChangeLog - Thilly.net V5 - Web Service
 		implemented public function getDBNames
 		implemented public function getCollectionNames
 		removed all the now unused local variables
+		implemented a more generalized mongo function
+			will modify existing select/update/etc to stem from that function
 	
 	functionMaps/mongoMap.js
 		new module to handle functions from MonGUI
+		implemented getDBs/collections/aRecord
 
 14 August 2014 - fixed a few unnoticed bugs
 

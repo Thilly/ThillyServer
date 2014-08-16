@@ -13,6 +13,13 @@ var objectID;
 /** */
 var logging = {};
 
+var generalMap = {
+	'find' : true,
+	'update' : true,
+	'insert' : true,
+	'remove' : true
+};
+
 /** */
 var dbMap = {}
 /*	DBname : {
@@ -30,7 +37,8 @@ var toExport = {
 	'update'	:	update,
 	'parse'		:	parse,
 	'getDBNames':	getDBNames,
-	'getCollectionNames': getCollectionNames
+	'getCollectionNames': getCollectionNames,
+	'genericAction'	:	genericAction
 };
 
 /** */
@@ -45,6 +53,39 @@ module.exports = function(logObject, callBack){
 /*
 	Public
 */
+
+function genericAction(operation, dbName, coll, query, options, callBack){
+	if(generalMap[operation]){
+		if(assertMapping(dbName, coll)){
+			var coll = dbMap[dbName][coll];
+			
+			if(operation == 'find'){//replace select/update/insert/remove with these call through general
+				if(!options.projection)
+					options.projection = {};
+				coll.find(query, options.projection, function(error, cursor){
+					if(options.skip)
+						cursor = cursor.skip(options.skip);
+					if(options.limit)
+						cursor = cursor.limit(options.limit);
+					if(options.sort)
+						cursor = cursor.sort(options.sort);
+						
+					cursor.toArray(function(error, result){
+						if(error){
+							logging.log.errors('error in find ' + error);
+							new DBException(error, callBack);
+						}
+						else{
+							logging.log.mongo('find completed: ' + result.length);
+							callBack(error, result);	
+						}
+					});				
+				});
+			}
+	
+		}
+	}
+}
 
 /** */
 function parse(objectString){
