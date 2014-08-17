@@ -51,7 +51,8 @@ function socketConnect(socket, channel){
 	/** */
 	socket.on('command', function(data){
 		logging.log.trace('In ' + channel + '.on("command")');
-		logging.log.sockets('Recieved data from socket: ' + JSON.stringify(data));
+		if(data.command != 'login')
+			logging.log.sockets('Recieved data from socket: ' + JSON.stringify(data));
 			
 		actionCommand(data, socket, webServiceMap);
 	});

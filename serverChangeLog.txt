@@ -1,4 +1,18 @@
 ChangeLog - Thilly.net V5 - Web Service
+
+17 August 2014 - MonGUI well underway
+
+	thillyMongo.js
+		removed generic mongo function since was writing an entire mongo query each use anyway, was zero help
+		implemented path (db/coll) into the others
+	
+	all thillyMongo interactions
+		refactored to use the db.collection path adjustment
+	
+	mongoMap.js
+		started implementing the schema access and modification functions
+		
+
 16 August 2014 - mongo mapping complete
 
 	thillyMongo.js

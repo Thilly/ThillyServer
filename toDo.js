@@ -1,7 +1,13 @@
 /** random server library improvements
 	extend fileHandler to account for streams and any other file types that come up
 	create external modules for different states of socket commands
-			
+	
+	add a schema specific database
+	each collection will represent a database
+	each document will represent a specific collection
+	each record will be a mapping of a field name onto a regex pattern for pre-validation
+		before submit or changes
+				
 	mongo cache 
 		om selects, memoize by query/projection.toString()
 		Map to priority queue, on remove purge map
@@ -11,7 +17,7 @@
 	mongo backup - mongoDump
 		daily create backup db of all content currently hosted on mongo
 		move to different folder and archive it
-			keep last 2 weeks of backups 
+			keep last 2 weeks of backups
 */
 
 /** random client improvements

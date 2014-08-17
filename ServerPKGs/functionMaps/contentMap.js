@@ -63,7 +63,7 @@ function pushNewComment(data, socket, exception){
 	logging.log.mongo('text: ' + data.commentText);
 	logging.log.mongo('replyTo: ' + data.replyTo);
 	
-	mongo.insert('comment', data, {w:1}, function(error, result){
+	mongo.insert({db:'thillyNet', coll:'comment'}, data, {w:1}, function(error, result){
 		var msg = '';
 		if(error)
 			msg = 'error pushing new comment: ' + error;
@@ -86,7 +86,7 @@ function pushNewArticle(data, socket, exception){
 
 	var selection = {pageID: data.pageID, category: data.category};
 	if(socket.user.type == 'admin'){
-		mongo.update('content', selection, data, {upsert: true, w:1}, function(error, result){
+		mongo.update({db:'thillyNet', coll:'content'}, selection, data, {upsert: true, w:1}, function(error, result){
 			var msg = '';
 			if(error){
 				msg = 'error pushing new article: ' + error;
@@ -111,7 +111,7 @@ function commentVote(data, socket, exception){
 	var query = {userID:data.userID, '$or':[{'upVotes':{'$elemMatch':commentObj}}, {'downVotes':{'$elemMatch':commentObj}}]};
 	var projection = {projection:{_id:0, 'downVotes':1, 'upVotes':1}};
 	
-	mongo.select('user', query, projection, function(error, result){//see if changing a vote
+	mongo.select({db:'thillyNet', coll:'user'}, query, projection, function(error, result){//see if changing a vote
 		if(error)
 			logging.log.errors(error);
 		logging.log.trace('votequery returned: ' + JSON.stringify(result));
@@ -161,7 +161,7 @@ function recordVote(commentObj, userData, voteExists){
 			update = {'$addToSet':{'downVotes':commentObj}};
 	}
 	
-	mongo.update('user',{userID: userData.userID},update,{w:1},function(error, result, second){//record the votes
+	mongo.update({db:'thillyNet', coll:'user'},{userID: userData.userID},update,{w:1},function(error, result, second){//record the votes
 		if(error)
 			logging.log.errors(error);
 		else{
@@ -185,14 +185,14 @@ function recordPoints(userData, modify){
 		query = {pageID:userData.pageID};
 	}
 	if(userData.commentID > 0)
-		mongo.update('user', {userID:userData.commenter}, update, {w:1}, function(error, result){
+		mongo.update({db:'thillyNet', coll:'user'}, {userID:userData.commenter}, update, {w:1}, function(error, result){
 			if(error)
 				logging.log.errors(error);
 			else
 				logging.log.trace(coll + ' points recorded for user: ' + userData.commenter);
 		});
 		
-	mongo.update(coll, query, update, {w:1}, function(error, result){
+	mongo.update({db:'thillyNet', coll:coll}, query, update, {w:1}, function(error, result){
 			if(error)
 				logging.log.errors(error);
 			else
@@ -206,7 +206,7 @@ function getComments(data, socket, exception){
 	if(data.userName)
 		getVotes(data, socket, exception);
 			
-	mongo.select('comment', {pageID:data.pageID}, {projection : {}, sort: {date: 1}}, function(error, result){
+	mongo.select({db:'thillyNet', coll:'comment'}, {pageID:data.pageID}, {projection : {}, sort: {date: 1}}, function(error, result){
 		socket.sendCommand('getComments', {value:result, id:data.pageID});
 	});
 }
@@ -214,7 +214,7 @@ function getComments(data, socket, exception){
 /** */
 function getVotes(data, socket, exception){
 	logging.log.trace('In getVotes: ' + data.pageID + ':' + data.userName);
-	mongo.select('user', {userID: data.userName}, {projection : {_id: 0, upVotes: 1, downVotes: 1}}, function(error, result){
+	mongo.select({db:'thillyNet', coll:'user'}, {userID: data.userName}, {projection : {_id: 0, upVotes: 1, downVotes: 1}}, function(error, result){
 		result = result[0];
 		var votes = {
 			downVotes: [],
@@ -238,7 +238,7 @@ function getVotes(data, socket, exception){
 function getPageDetails(data, socket, exception){
 	logging.log.trace('In getPageDetails: ' + JSON.stringify(data));
 	
-	mongo.select('content', {pageID:data.pageID, category: data.category}, {projection : {}}, function(error, result){
+	mongo.select({db:'thillyNet', coll:'content'}, {pageID:data.pageID, category: data.category}, {projection : {}}, function(error, result){
 		if(result)
 			socket.emit('getPageDetails', result[0]);
 		else
@@ -250,7 +250,7 @@ function getPageDetails(data, socket, exception){
 function getPageIDs(data, socket, exception){
 	logging.log.trace('In getPageIDs');
 		
-	mongo.select('content', {}, {projection : {pageID:-1, category: 1}, sort:{pageID: -1}, limit: 10}, function(error, result){
+	mongo.select({db:'thillyNet', coll:'content'}, {}, {projection : {pageID:-1, category: 1}, sort:{pageID: -1}, limit: 10}, function(error, result){
 		socket.sendCommand('pageIDs', result);
 	});
 }
@@ -259,7 +259,7 @@ function getPageIDs(data, socket, exception){
 function getTemplate(data, socket, exception){
 	logging.log.trace('In getTemplates');
 
-	mongo.select('content', {category:'template'}, {projection : {}, sort:{pageID: -1}}, function(error, result){
+	mongo.select({db:'thillyNet', coll:'content'}, {category:'template'}, {projection : {}, sort:{pageID: -1}}, function(error, result){
 		socket.emit('getTemplate', result);
 	});
 
@@ -292,5 +292,5 @@ function getPages(data, socket, exception){
 	if(data.state != 'home')
 		query.category = data.state;
 		
-	mongo.select('content', query, options, callBack);	
+	mongo.select({db:'thillyNet', coll:'content'}, query, options, callBack);	
 }

@@ -13,13 +13,6 @@ var objectID;
 /** */
 var logging = {};
 
-var generalMap = {
-	'find' : true,
-	'update' : true,
-	'insert' : true,
-	'remove' : true
-};
-
 /** */
 var dbMap = {}
 /*	DBname : {
@@ -37,8 +30,7 @@ var toExport = {
 	'update'	:	update,
 	'parse'		:	parse,
 	'getDBNames':	getDBNames,
-	'getCollectionNames': getCollectionNames,
-	'genericAction'	:	genericAction
+	'getCollectionNames': getCollectionNames
 };
 
 /** */
@@ -54,49 +46,18 @@ module.exports = function(logObject, callBack){
 	Public
 */
 
-function genericAction(operation, dbName, coll, query, options, callBack){
-	if(generalMap[operation]){
-		if(assertMapping(dbName, coll)){
-			var coll = dbMap[dbName][coll];
-			
-			if(operation == 'find'){//replace select/update/insert/remove with these call through general
-				if(!options.projection)
-					options.projection = {};
-				coll.find(query, options.projection, function(error, cursor){
-					if(options.skip)
-						cursor = cursor.skip(options.skip);
-					if(options.limit)
-						cursor = cursor.limit(options.limit);
-					if(options.sort)
-						cursor = cursor.sort(options.sort);
-						
-					cursor.toArray(function(error, result){
-						if(error){
-							logging.log.errors('error in find ' + error);
-							new DBException(error, callBack);
-						}
-						else{
-							logging.log.mongo('find completed: ' + result.length);
-							callBack(error, result);	
-						}
-					});				
-				});
-			}
-	
-		}
-	}
-}
-
 /** */
 function parse(objectString){
 	return new objectID(objectString);
 }
 
 /** */
-function select(collection, query, options, callBack){
-	logging.log.trace('in select: ' + collection);
-	if(assertMapping('thillyNet', collection)){
-		var coll = dbMap['thillyNet'][collection];
+function select(path, query, options, callBack){
+	logging.log.trace('in select: ' + path.db + ':' + path.coll);
+	if(assertMapping(path.db, path.coll)){
+		if(!options.projection)
+			options.projection = {};
+		var coll = dbMap[path.db][path.coll];
 		coll.find(query, options.projection, function(error, cursor){
 			if(options.skip)
 				cursor = cursor.skip(options.skip);
@@ -118,14 +79,14 @@ function select(collection, query, options, callBack){
 		});
 	}
 	else
-		DBException('unable to assert mapping of: thillyNet:' + collection, callBack);
+		DBException('unable to assert mapping of: ' + path.db + ':' + path.coll, callBack);
 }
 
 /** */
-function insert(collection, query, options, callBack){
-	logging.log.trace('in insert: ' + collection);
-	if(assertMapping('thillyNet', collection)){
-		var coll = dbMap['thillyNet'][collection];
+function insert(path, query, options, callBack){
+	logging.log.trace('in insert: ' + path.coll);
+	if(assertMapping(path.db, path.coll)){
+		var coll = dbMap[path.db][path.coll];
 		coll.insert(query, options, function(error, result){
 			if(error){
 				logging.log.errors('error in insert: ' + error);
@@ -138,12 +99,12 @@ function insert(collection, query, options, callBack){
 		});
 	}
 	else
-		DBException('unable to assert mapping of: thillyNet:' + collection, callBack);
+		DBException('unable to assert mapping of: ' + path.db + ':' + path.coll, callBack);
 }
 
 /** */
-function update(collection, selection, query, options, callBack){
-	logging.log.trace('in update: ' + collection);
+function update(path, selection, query, options, callBack){
+	logging.log.trace('in update: ' + path.coll);
 	var localQuery = {
 		$set: query
 	};
@@ -151,8 +112,8 @@ function update(collection, selection, query, options, callBack){
 		localQuery = query;
 		
 	options.multi = true;
-	if(assertMapping('thillyNet', collection)){
-		var coll = dbMap['thillyNet'][collection];
+	if(assertMapping(path.db, path.coll)){
+		var coll = dbMap[path.db][path.coll];
 		coll.update(selection, localQuery, options, function(error, result, writes){
 			if(error){
 				logging.log.errors('error in update: ' + error);
@@ -165,7 +126,7 @@ function update(collection, selection, query, options, callBack){
 		});
 	}
 	else
-		DBException('unable to assert mapping of: thillyNet:' + collection, callBack);
+		DBException('unable to assert mapping of: ' + path.db + ':' + path.coll, callBack);
 }
 
 /** */
@@ -174,7 +135,8 @@ function getDBNames(){
 	
 	var names = [];
 	for(var eachDB in dbMap){
-		names.push(eachDB);
+		if(eachDB != 'schema')
+			names.push(eachDB);
 	}
 	
 	return names;
@@ -187,7 +149,8 @@ function getCollectionNames(dbName){
 	if(dbMap[dbName]){
 		var colls = [];
 		for(var eachColl in dbMap[dbName]){
-			colls.push(eachColl);
+			if(eachColl != 'db' && eachColl != 'system.indexes')
+				colls.push(eachColl);
 		}
 		
 		return colls;

@@ -42,7 +42,7 @@ function getChallenge(data, socket, exception){
 }
 
 function getProblems(data, socket, exception){
-	mongo.select('challenge', {live:true}, {projection:{_id: 0, 'problems.name': 1, 'problems.problemDetails':1}}, function(error, result){
+	mongo.select({db:'thillyNet', coll:'challenge'}, {live:true}, {projection:{_id: 0, 'problems.name': 1, 'problems.problemDetails':1}}, function(error, result){
 		if(error){
 			logging.log.errors(error);
 			socket.emit('getProblems', error);
@@ -69,7 +69,7 @@ function codeSubmission(data, socket, exception){
 
 function getContests(data, socket, exception){
 	logging.log.trace('in getContests');
-	mongo.select('challenge', {}, {projection: {contestName:1}}, function(error, result){
+	mongo.select({db:'thillyNet', coll:'challenge'}, {}, {projection: {contestName:1}}, function(error, result){
 		if(error)
 			logging.log.errors(error)
 		else if(result.length > 0)
@@ -88,7 +88,7 @@ function getContest(data, socket, exception){
 	}
 	if(data.contestName){
 		console.log('querying');
-		mongo.select('challenge', {contestName: data.contestName}, {projection: projection}, function(error, result){
+		mongo.select({db:'thillyNet', coll:'challenge'}, {contestName: data.contestName}, {projection: projection}, function(error, result){
 			if(error)
 				logging.log.errors(error)
 			else if(result.length > 0)
@@ -105,7 +105,7 @@ function pushChallenge(data, socket, exception){
 	if(socket.user.type != 'admin')
 		socket.emit('pushChallenge', 'Sorry, only Thilly can submit content at this time');
 	else{
-		mongo.update('challenge', {contestName: data.contestName}, {live: data.live, problems:data.data}, {upsert: true}, function(error, result, writes){
+		mongo.update({db:'thillyNet', coll:'challenge'}, {contestName: data.contestName}, {live: data.live, problems:data.data}, {upsert: true}, function(error, result, writes){
 			if(error){
 				logging.log.errors(error);
 				socket.emit('pushChallenge', error);

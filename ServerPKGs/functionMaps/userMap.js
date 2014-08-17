@@ -24,12 +24,12 @@ module.exports = function(deps){
 /** */
 function login(data, socket, exception){
 
-	logging.log.trace('In login: ' + data.userName + ' : ' + data.password + ' : ' + data.userString);
+	logging.log.trace('In login');
 	
 	if(data.userString)
-		mongo.select('user', {_id:mongo.parse(data.userString)}, {projection:{_id : 1, userID:1, password:1, type:1}}, callBack)
+		mongo.select({db:'thillyNet', coll:'user'}, {_id:mongo.parse(data.userString)}, {projection:{_id : 1, userID:1, password:1, type:1}}, callBack)
 	else
-		mongo.select('user', {userID:data.userName}, {projection:{_id : 1, userID:1, password:1, type:1}}, callBack)
+		mongo.select({db:'thillyNet', coll:'user'}, {userID:data.userName}, {projection:{_id : 1, userID:1, password:1, type:1}}, callBack)
 		
 	function callBack(error, result){
 		if(error)
@@ -73,7 +73,7 @@ function register(data, socket, exception){
 		type	:	'standard'
 	};
 	
-	mongo.select('user', {userName:data.userName.toLowerCase()}, {projection:{userID:1}}, function(error, result){
+	mongo.select({db:'thillyNet',coll:'user'}, {userName:data.userName.toLowerCase()}, {projection:{userID:1}}, function(error, result){
 		if(error)
 			logging.log.errors('error in register select: ' + error);
 		else if(result.length > 0){
@@ -81,7 +81,7 @@ function register(data, socket, exception){
 			socket.emit('login', {failed:'user name taken'});
 		}
 		else{
-			mongo.insert('user', insertObj, {w:1}, function(error, result){
+			mongo.insert({db:'thillyNet',coll:'user'}, insertObj, {w:1}, function(error, result){
 				if(error)
 					logging.log.errors('error in register: ' + error);
 				else{

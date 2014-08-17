@@ -12,10 +12,54 @@ module.exports = function(deps){
 	return {
 		'getDBs' : getDBs,
 		'getCollections' : getCollections,
-		'getOneDocument' : getOneDocument
+		'getOneDocument' : getOneDocument,
+		'pushSchema' :	pushSchema,
+		'getSchema' :	getSchema
 	};
 };
 
+function getSchema(data, socket, exception){
+	var path = {
+		'db': 'schema',
+		'coll': data.split('.')[0]
+	};
+	
+	var selection = {};
+	
+	mongo.select(path, {schema:path}, {}, function(error, result){
+		if(error)
+			socket.emit('getSchema', false);
+		else
+			socket.emit('getSchema', result[0] || {});
+	});
+}
+
+function pushSchema(data, socket, exception){
+
+	var path = {
+		'db': 'schema',
+		'coll': data.path.split('.')[0]
+	};
+	
+	var selection = {
+		'path': data.path
+	};
+	
+	var query = {
+		'pattern': data.pattern,
+		'description':data.desc,
+		'value' : data.value
+	};
+	
+	var options = {};
+
+	mongo.update(path, selection, query, options, function(error, result){
+		if(error)
+			socket.emit('pushSchema', false);
+		else
+			socket.emit('pushSchema', true);
+	});
+}
 
 function getDBs(data, socket, exception){
 	logging.log.trace('in getDBs');
@@ -33,10 +77,19 @@ function getCollections(data, socket, exception){
 
 function getOneDocument(data, socket, exception){
 	logging.log.trace('in getOneDocument: ' + data.db + ':' + data.coll);
-	mongo.genericAction('find', data.db, data.coll, {}, {limit: 1}, function(error, result){
+	var path = {
+		'db': data.db,
+		'coll':data.coll
+	};
+	
+	var queryData = {};
+	var options = {
+		projection: {},
+		limit: 1
+	};
+
+	mongo.select(path, queryData, options, function(error, result){
 		console.log(result);
 		socket.emit('getOneDocument', result[0]);
 	});
-
-
 }
