@@ -1,5 +1,16 @@
 ChangeLog - Thilly.net V5 - Web Service
 
+18 August 2014 - More MonGUI, schema is done
+	
+	thillyMongo.js
+		slight modifications to push schema properly
+		slight modifications to how some databases are hidden from schema editor
+	
+	build.js
+		added a self incrementing build number to the live builds
+			for fun and helping to keep caches up to date regardless of how fast I update js/css
+
+		
 17 August 2014 - MonGUI well underway
 
 	thillyMongo.js

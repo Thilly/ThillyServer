@@ -26,7 +26,7 @@ function getSchema(data, socket, exception){
 	
 	var selection = {};
 	
-	mongo.select(path, {schema:path}, {}, function(error, result){
+	mongo.select(path, {path:data}, {}, function(error, result){
 		if(error)
 			socket.emit('getSchema', false);
 		else
@@ -47,11 +47,12 @@ function pushSchema(data, socket, exception){
 	
 	var query = {
 		'pattern': data.pattern,
-		'description':data.desc,
-		'value' : data.value
+		'description':data.description,
+		'value' : data.value,
+		'readonly': data.readonly
 	};
 	
-	var options = {};
+	var options = {upsert: true};
 
 	mongo.update(path, selection, query, options, function(error, result){
 		if(error)

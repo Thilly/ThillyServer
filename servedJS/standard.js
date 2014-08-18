@@ -10,10 +10,19 @@ window.thillyAdmin = {};
 
 	/** */
 	this.admin = false;
-
+	
+	/** */
+	this.pushSchema = function(){
+		blankSubmit();
+	};
+	
 	/** */
 	this.submit = function(){
-		alert('Sorry, only Thilly can submit new content at this time');
+		blankSubmit();
 	};
 
+	function blankSubmit(){
+		alert('Sorry, only Thilly can mess with content at this time');
+	};
+	
 }).apply(window.thillyAdmin, [thillyLogging])

@@ -100,11 +100,3 @@ Content TABS (refactor interaction to take/make tabs for all content, just in ca
 			ad
 			
 */
-
-/** build script 
-
-	Append version numbers in build script, to alleviate browser caching problems
-		
-	Mainv29389.css
-	Minv73920.js
-*/

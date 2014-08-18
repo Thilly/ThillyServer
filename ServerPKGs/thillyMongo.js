@@ -23,6 +23,12 @@ var dbMap = {}
 		}
 */
 
+var hiddenDB = {
+	'schema' : true,
+	'admin' : true,
+	'local' : true
+};
+
 /** */
 var toExport = {
 	'select'	:	select,
@@ -135,7 +141,7 @@ function getDBNames(){
 	
 	var names = [];
 	for(var eachDB in dbMap){
-		if(eachDB != 'schema')
+		if(!hiddenDB[eachDB])
 			names.push(eachDB);
 	}
 	

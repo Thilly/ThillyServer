@@ -9,11 +9,13 @@ var sass = require('node-sass');
 var fileSys = require('fs');
 var minify = require('closurecompiler');
 
+var buildVersion;
 var work = [];
 var commands = '';
 
+
 var buildJS = {
-	'live' : liveJS,
+	'live' : getBuildVersion,
 	'test' : testJS
 	};
 
@@ -57,6 +59,23 @@ function testCSS(fromPath, toPath, jsFiles){
 			}
 		}
 		rootDir(fromPath.replace('styleSheets/',''), toPath.replace('styleSheets/',''), jsFiles, cssFiles);
+	});
+}
+
+function getBuildVersion(fromPath, toPath){
+	fileSys.readFile('./buildVersion.txt', function(error, versionNum){
+		buildVersion = parseInt(versionNum);
+		buildVersion++;
+		fileSys.writeFile('./buildVersion.txt', buildVersion, function(error, written){
+			if(!error){
+				console.log('build version: ' + buildVersion);
+				liveJS(fromPath, toPath)
+			}
+			else{
+				console.log('Error: ' + error);
+				console.log('Build aborted');
+			}
+		});
 	});
 }
 
@@ -136,6 +155,9 @@ function buildHTML(fromPath, toPath, jsFiles, cssFiles){
 
 function parseSass(data, toPath, fileName){
 
+	if(buildVersion)
+		fileName= fileName.replace('.css', buildVersion + '.css');
+	
 	if(data['fileName']){
 		sass.renderFile({
 			file: data['fileName'],
@@ -167,12 +189,12 @@ function compileJS(files, toPath){
 	minify.compile(files,{}, function(error, result){
 		if(error){
 			console.log('Error in compileJS:' + error);
-			console.log('\tfile: ' + toPath + 'min.js: NOT CREATED');
+			console.log('\tfile: ' + toPath + 'min' + buildVersion + '.js : NOT CREATED');
 		}
 		else{
-			console.log('\tfile: ' + toPath + 'min.js');
-			fileSys.writeFile(toPath + 'min.js', result);
+			console.log('\tfile: ' + toPath + 'min' + buildVersion + '.js');
+			fileSys.writeFile(toPath + 'min' + buildVersion + '.js', result);
 		}
 	});
-	return 'min.js';
+	return 'min' + buildVersion + '.js';
 }

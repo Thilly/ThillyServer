@@ -93,6 +93,7 @@ window.thillyAdmin = {};
 			pushSubmit();
 	};
 	
+	/** */
 	this.submitChallenge = function(contestName, live, data){
 		var pushData = {
 			contestName: contestName,
@@ -102,6 +103,16 @@ window.thillyAdmin = {};
 		
 		thillyUtil.sendReceive(thillyIndex.mainSocket, 'pushChallenge', pushData, function(response){
 			alert(response);
+		});
+	};
+	
+	/** */
+	this.pushSchema = function(schemaObj){
+		thillyUtil.sendReceive(thillyIndex.mainSocket, 'pushSchema', schemaObj, function(response){
+			if(response)
+				alert('schema modification successful');
+			else
+				alert('schema modification failed');
 		});
 	};
 	
