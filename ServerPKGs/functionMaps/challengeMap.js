@@ -34,7 +34,7 @@ function getChallenge(data, socket, exception){
 					logging.log.errors('error in getChallenge: ' + error.errmsg);
 				else{
 					response.change = result.toString();
-					socket.emit('getChallenge', response);
+					socket.sendCommand(data.command, response);
 				}
 			});
 		}
@@ -45,11 +45,11 @@ function getProblems(data, socket, exception){
 	mongo.select({db:'thillyNet', coll:'challenge'}, {live:true}, {projection:{_id: 0, 'problems.name': 1, 'problems.problemDetails':1}}, function(error, result){
 		if(error){
 			logging.log.errors(error);
-			socket.emit('getProblems', error);
+			socket.sendCommand(data.command, error);
 		}
 		else{
 			logging.log.mongo('getProblems successful');
-			socket.emit('getProblems', result)
+			socket.sendCommand(data.command, result)
 		}
 	})
 }
@@ -60,9 +60,9 @@ function codeSubmission(data, socket, exception){
 	console.log('language: '+data.language);
 	console.log('problem: '+data.problem);
 	
-	socket.sendCommand('getSubResults', {text: 'nothing is going to happen', tone: 'good'});
+	socket.sendCommand(data.command, {text: 'nothing is going to happen', tone: 'good'});
 	setTimeout(function(){
-		socket.sendCommand('getSubResults', {text: 'told ya not hooked up yet', tone: 'error'});
+		socket.sendCommand(data.command, {text: 'told ya not hooked up yet', tone: 'error'});
 		}, 1000);
 	
 }
@@ -73,9 +73,9 @@ function getContests(data, socket, exception){
 		if(error)
 			logging.log.errors(error)
 		else if(result.length > 0)
-			socket.emit('getContests', result);
+			socket.sendCommand(data.command, result);
 		else
-			socket.emit('getContests', false);
+			socket.sendCommand(data.command, false);
 	});
 }
 
@@ -92,27 +92,27 @@ function getContest(data, socket, exception){
 			if(error)
 				logging.log.errors(error)
 			else if(result.length > 0)
-				socket.emit('getContest', result);
+				socket.sendCommand(data.command, result);
 			else
-				socket.emit('getContest', false);
+				socket.sendCommand(data.command, false);
 		});
 	}
 	else
-		socket.emit('getContest', false);
+		socket.sendCommand(data.command, false);
 }
 
 function pushChallenge(data, socket, exception){
 	if(socket.user.type != 'admin')
-		socket.emit('pushChallenge', 'Sorry, only Thilly can submit content at this time');
+		socket.sendCommand(data.command, 'Sorry, only Thilly can mess with content at this time');
 	else{
 		mongo.update({db:'thillyNet', coll:'challenge'}, {contestName: data.contestName}, {live: data.live, problems:data.data}, {upsert: true}, function(error, result, writes){
 			if(error){
 				logging.log.errors(error);
-				socket.emit('pushChallenge', error);
+				socket.sendCommand(data.command, error);
 			}
 			else{
 				logging.log.mongo('pushChallenge successful: ' + result);
-				socket.emit('pushChallenge', 'update successful')
+				socket.sendCommand(data.command, 'update successful')
 			}
 		});
 	}

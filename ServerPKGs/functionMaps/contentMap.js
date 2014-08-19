@@ -17,6 +17,7 @@ module.exports = function(deps){
 		pushNewArticle	:	 pushNewArticle,
 		pushNewComment	:	 pushNewComment,
 		getComments		:	 getComments,
+		getVotes		:	 getVotes,
 		getTemplate		:	 getTemplate,
 		getPages		:	 getPages,
 		getPageIDs		:	 getPageIDs,
@@ -31,25 +32,25 @@ function updatePage(data, socket, exception){
 		if(error)
 		{
 			logging.log.errors('Error in updatePage: ' + error);
-			socket.emit('updatePage', {'error': error});
+			socket.sendCommand(data.command, {'error': error});
 		}
 		else
-			socket.emit('updatePage', {'value':returnValue.toString()});
+			socket.sendCommand(data.command, {'value':returnValue.toString()});
 	});
 }
 
 /** */
 function picUpload(data, socket, exception){
 	logging.log.trace('In picUpload: ' + data.name);
-	var fileName = 'client/source/images/' + data.name;
+	var fileName = 'client/' + logging.environment + '/images/' + data.name;
 	files.writeFile(fileName, data.file, function(error, file){
 		if(error)
 			logging.log.errors('error in picUpload: ' + error);
 		else
 		{
-			var filePath = file.replace('client/source/','');
+			var filePath = file.replace('client/' + logging.environment + '/images/','');
 			logging.log.trace('picUploaded: ' + file);
-			socket.sendCommand('picUploaded', {name:data.name, path:filePath});
+			socket.sendCommand(data.command, {name:data.name, path:filePath});
 		}
 	});
 
@@ -90,17 +91,16 @@ function pushNewArticle(data, socket, exception){
 			var msg = '';
 			if(error){
 				msg = 'error pushing new article: ' + error;
-				socket.sendCommand('articlePushed', {msg:msg});
 			}
 			else{
 				msg = 'New article pushed: ' + data.tabs[0].title;
-				socket.sendCommand('articlePushed', {msg:msg});
 			}
+			socket.sendCommand(data.command, {msg:msg});
 			logging.log.mongo(msg);
 		});		
 	}
 	else
-		socket.sendCommand('articlePushed', {msg:'Sorry, only Thilly can submit new content at this time'});
+		socket.sendCommand(data.command, {msg:'Sorry, only Thilly can submit new content at this time'});
 }
 
 /** */
@@ -203,11 +203,9 @@ function recordPoints(userData, modify){
 /** */
 function getComments(data, socket, exception){
 	logging.log.trace('In getComments: ' + data.pageID + ':' + data.userName);
-	if(data.userName)
-		getVotes(data, socket, exception);
-			
+		
 	mongo.select({db:'thillyNet', coll:'comment'}, {pageID:data.pageID}, {projection : {}, sort: {date: 1}}, function(error, result){
-		socket.sendCommand('getComments', {value:result, id:data.pageID});
+		socket.sendCommand(data.command, {value:result, id:data.pageID});
 	});
 }
 
@@ -230,7 +228,7 @@ function getVotes(data, socket, exception){
 				votes.upVotes.push(result.upVotes[j]);	
 			}
 		}
-		socket.sendCommand('getVotes', {value:votes, id:data.pageID});
+		socket.sendCommand(data.command, {value:votes, id:data.pageID});
 	});
 }
 
@@ -240,9 +238,9 @@ function getPageDetails(data, socket, exception){
 	
 	mongo.select({db:'thillyNet', coll:'content'}, {pageID:data.pageID, category: data.category}, {projection : {}}, function(error, result){
 		if(result)
-			socket.emit('getPageDetails', result[0]);
+			socket.sendCommand(data.command, result[0]);
 		else
-			socket.emit('getPageDetails');
+			socket.sendCommand(data.command);
 	});
 }
 
@@ -251,7 +249,7 @@ function getPageIDs(data, socket, exception){
 	logging.log.trace('In getPageIDs');
 		
 	mongo.select({db:'thillyNet', coll:'content'}, {}, {projection : {pageID:-1, category: 1}, sort:{pageID: -1}, limit: 10}, function(error, result){
-		socket.sendCommand('pageIDs', result);
+		socket.sendCommand(data.command, result);
 	});
 }
 
@@ -260,7 +258,7 @@ function getTemplate(data, socket, exception){
 	logging.log.trace('In getTemplates');
 
 	mongo.select({db:'thillyNet', coll:'content'}, {category:'template'}, {projection : {}, sort:{pageID: -1}}, function(error, result){
-		socket.emit('getTemplate', result);
+		socket.sendCommand(data.command, result);
 	});
 
 }
@@ -271,7 +269,7 @@ function getPages(data, socket, exception){
 		
 	var callBack = function(error, result){
 		logging.log.mongo('returned from select: ' + result.length);
-		socket.sendCommand('getPages', result);
+		socket.sendCommand(data.command, result);
 	};
 	
 	var query = {

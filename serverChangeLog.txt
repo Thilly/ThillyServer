@@ -1,5 +1,12 @@
 ChangeLog - Thilly.net V5 - Web Service
 
+19 August 2014 - refactored socket connections
+	
+	most js files
+		refactored sockets to enable serialization of events and parallel events
+		updated files to reflect new format
+		
+
 18 August 2014 - More MonGUI, schema is done
 	
 	thillyMongo.js

@@ -24,15 +24,14 @@ module.exports = function(deps){
 /** */
 function startLogging(data, socket, exception){
 	logging.log.trace('In startLogging');
-	socket.emit('startLogging', logging.getLogCache());
+	socket.sendCommand(data.command, logging.getLogCache());
 	socket.join('logging');
-};
+}
 
 /** */
 function getFlags(data, socket, exception){
 	logging.log.trace('in getFlags');
-	socket.emit('getFlags', logging.getFlags());
-
+	socket.sendCommand(data.command, logging.getFlags());
 }
 
 /** */

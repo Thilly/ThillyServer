@@ -1,4 +1,10 @@
 /** random server library improvements
+	
+	mongo backup - mongoDump
+		daily create backup db of all content currently hosted on mongo
+		move to different folder and archive it
+			keep last 2 weeks of backups
+
 	extend fileHandler to account for streams and any other file types that come up
 	create external modules for different states of socket commands
 	
@@ -13,11 +19,6 @@
 		Map to priority queue, on remove purge map
 		max 100, let oldest fall off
 			Cache[query] -> array[idx]
-	
-	mongo backup - mongoDump
-		daily create backup db of all content currently hosted on mongo
-		move to different folder and archive it
-			keep last 2 weeks of backups
 */
 
 /** random client improvements

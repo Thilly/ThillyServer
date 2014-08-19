@@ -28,9 +28,9 @@ function getSchema(data, socket, exception){
 	
 	mongo.select(path, {path:data}, {}, function(error, result){
 		if(error)
-			socket.emit('getSchema', false);
+			socket.sendCommand(data.command, false);
 		else
-			socket.emit('getSchema', result[0] || {});
+			socket.sendCommand(data.command, result[0] || {});
 	});
 }
 
@@ -56,9 +56,9 @@ function pushSchema(data, socket, exception){
 
 	mongo.update(path, selection, query, options, function(error, result){
 		if(error)
-			socket.emit('pushSchema', false);
+			socket.sendCommand(data.command, false);
 		else
-			socket.emit('pushSchema', true);
+			socket.sendCommand(data.command, true);
 	});
 }
 
@@ -66,14 +66,14 @@ function getDBs(data, socket, exception){
 	logging.log.trace('in getDBs');
 	
 	var response = mongo.getDBNames();
-	socket.emit('getDBs', response);
+	socket.sendCommand(data.command, response);
 };
 
 function getCollections(data, socket, exception){
 	logging.log.trace('in getCollections: ' + data);
 	
 	var response = mongo.getCollectionNames(data);
-	socket.emit('getCollections', response);
+	socket.sendCommand(data.command, response);
 };
 
 function getOneDocument(data, socket, exception){
@@ -91,6 +91,6 @@ function getOneDocument(data, socket, exception){
 
 	mongo.select(path, queryData, options, function(error, result){
 		console.log(result);
-		socket.emit('getOneDocument', result[0]);
+		socket.sendCommand(data.command, result[0]);
 	});
 }

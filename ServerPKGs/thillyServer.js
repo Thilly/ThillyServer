@@ -77,6 +77,8 @@ function sendCommand(command, dataObject, callBack){//general send command funct
 function actionCommand(data, socket, functionMap){//general recieve command function
 	logging.log.trace('In actionCommand');
 	try{
+		data.value.command = ''+data.command;
+		data.command = data.command.replace(/\d+/.exec(data.command)[0], '');
 		functionMap[data.command](data.value, socket, exception.ErrorHandle);
 	}
 	catch(error){

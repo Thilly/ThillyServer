@@ -63,35 +63,46 @@ window.thillyAdmin = {};
 			var file = URItoBlob(uploadUs[picSource]);
 			var fileName = pageID + (uploadTotal++ + oldPictures.length) + '.' + file.extension;
 			uploadUs[picSource] = fileName;
-			thillyIndex.mainSocket.sendCommand('picUpload', {name: fileName, file: file.data});
+			thillyUtil.sendReceive(thillyIndex.mainSocket, 'picUpload', {name: fileName, file: file.data}, picUploaded);
 		}
-		
+	
 		if(uploadTotal == 0 && !thumbSent)
-			pushSubmit();
+			pushArticle();
 	};
 	
 	/** */
-	this.picUploaded = function(data, socket){
+	function picUploaded(data, socket){
 		if(debug.trace)
 			debug.log('in picUploaded: ' + data.path);
 		var picList = document.getElementsByClassName('controlBox');
 		for(var aPic in picList){
 			if(picList[aPic].nodeName === 'DIV'){
 				var temp = picList[aPic].children[0].src;
+				var tempPicBox = picList[aPic];
 				if(uploadUs[temp] == data.name){
+					
 					picList[aPic].children[0].src = data.path;
 					picList[aPic].parentNode.id = '';
 					picList[aPic].parentNode.className = 'articlePicture';
 					picList[aPic].parentNode.style.float = picList[aPic].style.float;
+					replaceContentInTabs(picList[aPic].id, picList[aPic].innerHTML);
 					picList[aPic].outerHTML = picList[aPic].innerHTML;
+					
 					uploadTotal--;
 				}
 			}
 		}
 		
 		if(uploadTotal == 0)
-			pushSubmit();
+			pushArticle();
 	};
+	
+	function replaceContentInTabs(id, newPic){
+		for(var i = 0; i < updateTabs.length; i++){
+			var lookForMe = '<div id="tempPic'+ id + '"></div>';
+			updateTabs[i].content = updateTabs[i].content.replace(lookForMe, newPic);
+		}	
+	}
 	
 	/** */
 	this.submitChallenge = function(contestName, live, data){
@@ -117,9 +128,9 @@ window.thillyAdmin = {};
 	};
 	
 	/** */
-	function pushSubmit(){
+	function pushArticle(){
 		if(debug.trace)
-			debug.log('in pushSubmit');
+			debug.log('in pushArticle');
 		var pics = [];
 		for(var aPic in uploadUs)
 		{
@@ -137,7 +148,9 @@ window.thillyAdmin = {};
 		if(uploadObj.pageID.length == 8)
 			uploadObj.pageID += uploadObj.category.toLowerCase();
 			
-		thillyIndex.mainSocket.sendCommand('pushNewArticle', uploadObj);
+		thillyUtil.sendReceive(thillyIndex.mainSocket,'pushNewArticle', uploadObj, function(data){
+			alert(data.msg);
+		});
 		document.getElementById('templateTextInput').value = uploadObj.tabs[0].content;
 	}
 

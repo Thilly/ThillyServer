@@ -205,7 +205,7 @@ function stopMemory(){
 function startMemory(socket){
 	flags.memory = true;
 	if(socket)
-		socket.emit('startMemory', memoryCache);
+		socket.sendCommand('startMemory', memoryCache);
 	if(memoryTimer == false){	
 		var lastMemory = {
 					rss: 0,
