@@ -81,14 +81,14 @@ window.thillyAdmin = {};
 				var tempPicBox = picList[aPic];
 				if(uploadUs[temp] == data.name){
 					
-					picList[aPic].children[0].src = data.path;
+					picList[aPic].children[0].src = 'images/' + data.path;
 					picList[aPic].parentNode.id = '';
 					picList[aPic].parentNode.className = 'articlePicture';
 					picList[aPic].parentNode.style.float = picList[aPic].style.float;
 					replaceContentInTabs(picList[aPic].id, picList[aPic].innerHTML);
 					picList[aPic].outerHTML = picList[aPic].innerHTML;
 					
-					uploadTotal--;
+					uploadTotal -= 1;
 				}
 			}
 		}
@@ -137,6 +137,7 @@ window.thillyAdmin = {};
 			pics.push(uploadUs[aPic]);
 		}
 		oldPictures = pics.concat(oldPictures);
+		getTabContent();
 		var uploadObj = {
 			pageID 		: 	document.getElementById('comboBox').value,
 			tabs		:	updateTabs,
@@ -154,6 +155,13 @@ window.thillyAdmin = {};
 		document.getElementById('templateTextInput').value = uploadObj.tabs[0].content;
 	}
 
+	/** */
+	function getTabContent(){
+		for(var i = 0; i < updateTabs.length; i++){
+			updateTabs[i].content = document.getElementById('tabSpace' + i).innerHTML;
+		}
+	}
+	
 	/** */
 	function URItoBlob(dataURI){
 		if(debug.trace)

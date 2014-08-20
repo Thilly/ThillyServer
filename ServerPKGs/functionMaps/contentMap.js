@@ -42,18 +42,22 @@ function updatePage(data, socket, exception){
 /** */
 function picUpload(data, socket, exception){
 	logging.log.trace('In picUpload: ' + data.name);
-	var fileName = 'client/' + logging.environment + '/images/' + data.name;
-	files.writeFile(fileName, data.file, function(error, file){
-		if(error)
-			logging.log.errors('error in picUpload: ' + error);
-		else
-		{
-			var filePath = file.replace('client/' + logging.environment + '/images/','');
-			logging.log.trace('picUploaded: ' + file);
-			socket.sendCommand(data.command, {name:data.name, path:filePath});
-		}
-	});
-
+	var environments = ['test','live','source']
+	for(var i = 0; i < environments.length; i++){
+		var fileName = 'client/' + environments[i] + '/images/' + data.name;
+		files.writeFile(fileName, data.file, function(error, file){
+			if(error)
+				logging.log.errors('error in picUpload: ' + error);
+			else
+			{
+				if(file.indexOf(logging.environment >= 0)){
+					var filePath = file.replace('client/' + logging.environment + '/images/','');
+					logging.log.trace('picUploaded: ' + file);
+					socket.sendCommand(data.command, {name:data.name, path:filePath});
+				}
+			}
+		});
+	}
 }
 
 /** */

@@ -1,5 +1,11 @@
 ChangeLog - Thilly.net V5 - Web Service
 
+20 August 2014 - fixed bug related to no pics in tabs
+
+	contentMap.js
+		fixed another bug where an uploaded file was not being propagated to each environment
+		
+
 19 August 2014 - refactored socket connections
 	
 	most js files
