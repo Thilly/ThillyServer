@@ -81,6 +81,7 @@ module.exports = function(options){
 		setFlags	: setFlags,
 		startMemory : startMemory,
 		stopMemory  : stopMemory,
+		stopLogging	: stopLogging,
 		environment	: options.environment || 'test',
 		homeDomain 	: options.homeDomain || 'http://174.49.168.70',
 		port 		: options.port || 80
@@ -115,43 +116,50 @@ function log(flag, logString){
 		if(cache.length > 150)
 			cache.shift();
 		if(loggingListener)
-			loggingListener.to('logging').emit('log', logString);
+			loggingListener.to('logging').emit('command', {command: 'log', value:logString});//refactor to proper method
 	}
 }
 
 /** */
 function getFlags(){
+	logs.trace('in getFlags');
 	return flags;
 }
 
 /** */
 function getLogCache(){
+	logs.trace('in getLogCache');
 	return cache;
 }
 
 /** */
 function getMemoryCache(){
+	logs.trace('in getMemoryCache');
 	return memoryCache;
 }
 
 /** */
 function setLoggingListener(socketChannel){
+	logs.trace('in setLoggingListener');
 	loggingListener = socketChannel;
 }
 
 /** */
 function setFlags(newFlags){
+	logs.trace('in setFlags: ' + newFlags.length);
 	for(var eachFlag in newFlags)
 		setFlag(eachFlag, newFlags[eachFlag]);
 }
 
 /** */
 function logMemory(memoryStep, lastMemory){
+	logs.trace('in logMemory');
 	memoryCache.push(memoryStep);
 	if(memoryCache.length > 100)
 		memoryCache.shift();
 	if(loggingListener)
-		loggingListener.to('memory').emit('memory', memoryStep);
+		loggingListener.to('memory').emit('command', {command: 'memory', value:memoryStep});//refactor to proper method
+		
 	if(flags.display)//if want to see the server memory in the log
 	{
 		var outputMsg = '';
@@ -179,6 +187,7 @@ function logMemory(memoryStep, lastMemory){
 
 /** */
 function setFlag(flag, value){
+	logs.trace('in setFlag: ' + flag + ':' + value);
 	if(typeof flags[flag] != 'undefined'){
 		log(true, 'setting: ' + flag + ' to ' + value);
 		flags[flag] = value;
@@ -187,6 +196,7 @@ function setFlag(flag, value){
 
 /** */  
 function getTimeStamp(){
+	logs.trace('in getTimeStamp');
 	var dateStamp = new Date();
 	var dateString = (dateStamp.getDate() > 8)?(dateStamp.getDate()):('0'+dateStamp.getDate());
 	dateString += (dateStamp.getHours() > 9)?(dateStamp.getHours()):('0'+dateStamp.getHours());
@@ -197,15 +207,23 @@ function getTimeStamp(){
 
 /** */
 function stopMemory(){
+	logs.trace('in stopMemory');
 	clearInterval(memoryTimer);
 	memoryTimer = false;
 }
 
 /** */
-function startMemory(socket){
+function stopLogging(){
+	logs.trace('in stopLogging');
+	//if anything for cleanup needs to happen
+}
+
+/** */
+function startMemory(socket, command){
+	logs.trace('in startMemory');
 	flags.memory = true;
 	if(socket)
-		socket.sendCommand('startMemory', memoryCache);
+		socket.sendCommand(command, memoryCache);
 	if(memoryTimer == false){	
 		var lastMemory = {
 					rss: 0,

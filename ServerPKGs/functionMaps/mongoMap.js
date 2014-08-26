@@ -21,12 +21,12 @@ module.exports = function(deps){
 function getSchema(data, socket, exception){
 	var path = {
 		'db': 'schema',
-		'coll': data.split('.')[0]
+		'coll': data.path.split('.')[0]
 	};
 	
 	var selection = {};
 	
-	mongo.select(path, {path:data}, {}, function(error, result){
+	mongo.select(path, {path:data.path}, {}, function(error, result){
 		if(error)
 			socket.sendCommand(data.command, false);
 		else
@@ -70,9 +70,9 @@ function getDBs(data, socket, exception){
 };
 
 function getCollections(data, socket, exception){
-	logging.log.trace('in getCollections: ' + data);
+	logging.log.trace('in getCollections: ' + data.db);
 	
-	var response = mongo.getCollectionNames(data);
+	var response = mongo.getCollectionNames(data.db);
 	socket.sendCommand(data.command, response);
 };
 

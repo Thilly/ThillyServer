@@ -1,5 +1,16 @@
 ChangeLog - Thilly.net V5 - Web Service
 
+
+25 August 2014 - fixed a few bugs caused by refactoring
+
+	diagMap.js
+		updated to actually respond to the send command properly
+	
+	thillyLogging.js
+		updated to emit messages to channels through proper means
+			will be refactored into proper method later
+
+
 20 August 2014 - fixed bug related to no pics in tabs
 
 	contentMap.js

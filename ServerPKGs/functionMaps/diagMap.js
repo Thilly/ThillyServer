@@ -14,6 +14,7 @@ module.exports = function(deps){
 	/** */
 	return {
 		startLogging	:	startLogging,
+		stopLogging		:	stopLogging,
 		startMemory		:	startMemory,
 		stopMemory		:	stopMemory,
 		getFlags		:	getFlags,
@@ -29,6 +30,29 @@ function startLogging(data, socket, exception){
 }
 
 /** */
+function stopLogging(data, socket, exception){
+	logging.log.trace('in stopLogging');
+	socket.leave('logging');
+	logging.stopLogging();
+	socket.sendCommand(data.command, {});
+}
+
+/** */
+function startMemory(data, socket, exception){
+	logging.log.trace('In startMemory: ' + data.command);	
+	logging.startMemory(socket, data.command);
+	socket.join('memory');
+}
+
+/** */
+function stopMemory(data, socket, exception){
+	logging.log.trace('In stopMemory');		
+	socket.leave('memory');
+	logging.stopMemory();
+	socket.sendCommand(data.command, {});
+}
+
+/** */
 function getFlags(data, socket, exception){
 	logging.log.trace('in getFlags');
 	socket.sendCommand(data.command, logging.getFlags());
@@ -38,20 +62,6 @@ function getFlags(data, socket, exception){
 function updateFlag(data, socket, exception){
 	logging.log.trace('In updateFlags: ' + data);	
 	logging.setFlags(data);
-}
-
-/** */
-function stopMemory(data, socket, exception){
-	logging.log.trace('In stopMemory: ' + data);		
-	socket.leave('memory');
-	logging.stopMemory();
-}
-
-/** */
-function startMemory(data, socket, exception){
-	logging.log.trace('In startMemory: ' + data);	
-	logging.startMemory(socket);
-	socket.join('memory');
 }
 
 

@@ -27,7 +27,7 @@ var server = require('http').createServer(files.fileHandler).listen(logging.port
 /** */
 var sockets = require('socket.io').listen(server, {log: logging.getFlags().socketIO});
 	logging.setLoggingListener(sockets);
-	logging.log.sockets('WebService has started on port: ' + logging.port + '\n');
+	logging.log.sockets('WebService has started on port: ' + logging.port);
 	
 /** */
 var webServiceMap = {};
