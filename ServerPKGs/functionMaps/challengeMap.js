@@ -1,6 +1,6 @@
 /** */
 var logging, files, mongo;
-
+var contestTimeout = 3 * 1000;//3 seconds
 /** */
 module.exports = function(deps){
 	
@@ -56,15 +56,53 @@ function getProblems(data, socket, exception){
 
 function codeSubmission(data, socket, exception){
 	logging.log.trace('in codeSubmission');
-	console.log('code: '+data.code);
-	console.log('language: '+data.language);
-	console.log('problem: '+data.problem);
+	logging.log.contest(socket.user.userID + ' submitted a problem for ' + data.problem + ' using ' + data.language);
 	
+	mongo.select({db:'thillyNet', coll:'challenge'},
+		{'problems.name':data.problem},
+		{projection:{'problems':{$elemMatch:{'name':data.problem}}, '_id':0, 'problems.problemDetails':0, 'live':0}},
+		function(error, result){
+			if(error)
+				logging.log.mongo(error);
+			else if(result.length){
+				result = result[0];
+				data.testData = result.problems[0];
+				data.testData.contestName = result.contestName;
+				startCompiler(data, socket, exception);
+			}
+			else
+				socket.sendCommand(data.command, {text: 'Select a problem to submit', tone: 'error', last: true});
+	});
+	
+//	saveSubmission(data, socket);
+/*
 	socket.sendCommand(data.command, {text: 'nothing is going to happen', tone: 'good'});
 	setTimeout(function(){
-		socket.sendCommand(data.command, {text: 'told ya not hooked up yet', tone: 'error'});
+		socket.sendCommand(data.command, {text: 'told ya not hooked up yet', tone: 'error', last: true});
 		}, 1000);
+*/
+}
+
+function saveSubmission(data, socket){
+	logging.log.trace('in saveSubmission');
 	
+	var toQuery = {
+		user : socket.user.userID,
+		problem: data.problem
+	};
+
+	var toPush = {
+		code: data.code,
+		language : data.language,
+		result : data.result
+	};
+
+	mongo.update({db:'thillyNet', coll:'submission'}, toQuery, {$push: toPush}, function(error, result){
+		if(error)
+			logging.log.mongo(error);
+		else
+			logging.log.mongo(result);
+	});
 }
 
 function getContests(data, socket, exception){
@@ -102,6 +140,8 @@ function getContest(data, socket, exception){
 }
 
 function pushChallenge(data, socket, exception){
+	logging.log.trace('in pushChallenge');
+	
 	if(socket.user.type != 'admin')
 		socket.sendCommand(data.command, 'Sorry, only Thilly can mess with content at this time');
 	else{
@@ -118,5 +158,48 @@ function pushChallenge(data, socket, exception){
 	}
 }
 
+function startCompiler(data, socket, exception){
+	logging.log.trace('in startCompiler');
+	var compiler = require('child_process').fork('./ServerPKGs/ChildProcesses/compiler.js');
+	var tooLong = setTimeout(function(){compiler.kill('SIGTERM');}, contestTimeout);
+		socket.sendCommand(data.command, {text: 'Compilation beginning...', tone: 'neutral', last: false});
+		compiler.send({msg: 'contestData', data:data});
+	
+	compiler.on('exit', function(code, signal){
+		logging.log.contest('Compiler exit signal: ' + signal);
+		clearTimeout(tooLong);
+		if(signal == 'SIGTERM')
+			socket.sendCommand(data.command, {text: 'Submission took too long', tone: 'error', last: true});
+	});
+	
+	compiler.on('message', function(msg){
+		if(msg.reason == 'compError'){
+			socket.sendCommand(data.command, {text: msg.error, tone: 'error', last: true});
+			compiler.kill('SIGINT');	
+		}
+		if(msg.reason == 'running')
+			socket.sendCommand(data.command, {text: 'Compilation Completed, running submission...', tone: 'neutral', last: false});
+		if(msg.reason == 'finished'){
+			socket.sendCommand(data.command, {text: 'Running Completed, checking response...', tone: 'neutral', last: false});
+			compiler.kill('SIGINT');
+			data.response = msg.data;
+			startDiffer(data, socket, exception);
+		}
+	});
+}
+
+function startDiffer(data, socket, exception){
+	logging.log.trace('in startDiffer');
+	var differ = require('child_process').fork('./ServerPKGs/ChildProcesses/differ.js');
+		differ.send({answer:data.testData.answer, output:data.response});
+		differ.on('message', function(msg){
+		logging.log.contest(JSON.stringify(msg));	
+			differ.kill('SIGINT');
+			if(msg.numWrong == 0)
+				socket.sendCommand(data.command, {text: 'Checking Completed, Correct Answer', tone: 'good', last: true});			
+			else
+				socket.sendCommand(data.command, {text: 'Checking Completed, Wrong Answer: ' + msg.numWrong + ' incorrect', tone: 'good', last: true});
+		});
+}
 
 

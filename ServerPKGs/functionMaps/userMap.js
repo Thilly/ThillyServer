@@ -41,7 +41,7 @@ function login(data, socket, exception){
 		else if(data.userString == result[0]._id)
 			loginUser(result[0], socket, data.command);
 		else if(result[0].password == crypto.createHash(data.password)){
-			loginUser(result[0], socket);
+			loginUser(result[0], socket, data.command);
 		}
 		else{
 			logging.log.sockets('login failed: wrong password');

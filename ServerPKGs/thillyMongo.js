@@ -168,11 +168,7 @@ function getCollectionNames(dbName){
 /*
 	Private
 */
-	//create map to DBs
-	//for each DB, 
-		//add map to collections
-		//keep for dynamic queries on any db/collection pair
-		//add functions to create DBs and Collections on fly
+
 /** */
 function mapDBs(dataBase, callBack){
 

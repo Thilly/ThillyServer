@@ -26,6 +26,8 @@ var memoryCache = [];
 
 /** */
 var logs = {
+	contest		: 	function(msg){log('contest', msg);},
+	//a flag for watching the flow of submissions
 	debug		:	function(msg){log('debug', msg);},
 	//a flag for watching current area of work
 	errors		:	function(msg){log('errors', msg);},	
@@ -44,6 +46,8 @@ var logs = {
 
 /** */
 var flags = {
+	contest		:	true,
+	//a flag for watching the contest submissions
 	debug		:	false,
 	//a flag for watching current area of work
 	display		:	true,	
@@ -52,7 +56,7 @@ var flags = {
 	//a flag for watching for errors
 	files		:	false,	
 	//a flag for watching file i/o
-	logging		:	false,	
+	logging		:	true,	
 	//a flag for writing the log to a file
 	mongo		:	true,	
 	//a flag for watching any mongo actions
@@ -64,6 +68,11 @@ var flags = {
 	//a flag for watching socket events
 	trace		: 	true	
 	//a flag for watching the flow of the program, basically debug flag
+};
+
+/** */
+var dontLog = {
+	trace : true	
 };
 
 /** */
@@ -90,7 +99,7 @@ module.exports = function(options){
 	files = require('./thillyFiles.js');
 	files = new files(thisObj);
 	
-	fileName =  './Logging/' + thisObj.environment + getTimeStamp() + 'serverLog.log';
+	fileName =  './Logging/' + thisObj.environment + '' + getTimeStamp().replace(/:/g,'') + 'serverLog.log';
 	logs.files('Started Server log: ' + new Date().toString());
 	
 	if(flags.memory)
@@ -109,7 +118,7 @@ function log(flag, logString){
 		if(flags.display){
 			process.stdout.write(((thisObj)?(thisObj.environment + '\t'):'') + logString + '\n');
 		}
-		if(flags.logging){
+		if(flags.logging && !dontLog[flag]){
 			files.appendLog(fileName, '\n' + getTimeStamp() + ':\t' + logString);
 		}
 		cache.push(logString);
@@ -198,10 +207,10 @@ function setFlag(flag, value){
 function getTimeStamp(){
 	logs.trace('in getTimeStamp');
 	var dateStamp = new Date();
-	var dateString = (dateStamp.getDate() > 8)?(dateStamp.getDate()):('0'+dateStamp.getDate());
-	dateString += (dateStamp.getHours() > 9)?(dateStamp.getHours()):('0'+dateStamp.getHours());
-	dateString += (dateStamp.getMinutes() > 9)?(dateStamp.getMinutes()):('0'+dateStamp.getMinutes());
-	dateString += (dateStamp.getSeconds() > 9)?(dateStamp.getSeconds()):('0'+dateStamp.getSeconds());
+	var dateString = '' + ((dateStamp.getDate() > 8)?(dateStamp.getDate()):('0'+dateStamp.getDate()));
+	dateString += ':' + ((dateStamp.getHours() > 9)?(dateStamp.getHours()):('0'+dateStamp.getHours()));
+	dateString += ':' + ((dateStamp.getMinutes() > 9)?(dateStamp.getMinutes()):('0'+dateStamp.getMinutes()));
+	dateString += ':' + ((dateStamp.getSeconds() > 9)?(dateStamp.getSeconds()):('0'+dateStamp.getSeconds()));
 	return dateString;
 }
 

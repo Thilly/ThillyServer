@@ -12,7 +12,7 @@ var logging = require('./thillylogging.js')(options);
 
 /** */
 var mongo = new require('./thillyMongo.js')(logging, function(){
-	logging.log.mongo('MongoDB has started\n');
+	logging.log.mongo('MongoDB has started');
 });
 
 /** */
@@ -51,8 +51,8 @@ function socketConnect(socket, channel){
 	/** */
 	socket.on('command', function(data){
 		logging.log.trace('In ' + channel + '.on("command")');
-		if(data.command != 'login')
-			logging.log.sockets('Recieved data from socket: ' + JSON.stringify(data));
+		if(!data.command.match(/login\d*/))//dont log the login info
+			logging.log.sockets('Received data from socket: ' + JSON.stringify(data));
 			
 		actionCommand(data, socket, webServiceMap);
 	});

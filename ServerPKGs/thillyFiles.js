@@ -245,6 +245,7 @@ function appendFile(fileName, dataToWrite, callback){
  *	@param {function} callback (Optional)The action to take after the append is finished
  */	
 function appendLog(fileName, dataToWrite, callback){
+	logging.log.trace('In appendLog');
 	try{	
 		var buffer = new Buffer(dataToWrite);
 		files.open(fileName, 'a', function(error, fd){//open the file or create if not there yet
