@@ -79,7 +79,8 @@ function buildC(data){
 function compileC(fileName, callBack){
 
 	var outName = fileName.replace('.cpp', '.exe');
-	var compile = require('child_process').exec('g++ -o ' + outName +' ' + fileName, function(compError, stdout, stderr){	
+	var compile = require('child_process').exec('g++ -o ' + outName +' ' + fileName, function(compError, stdout, stderr){
+		fileSys.unlink(fileName);
 		if(compError){
 			var regex = new RegExp(fileName, 'g');
 			stderr = stderr.replace(regex, '\n-');
@@ -97,7 +98,6 @@ function runC(fileName, input){
 	var response = '', stderror = '';
 	var testing = require('child_process');
 		testing = testing.exec(fileName.replace('.', 'C:/ThillyServer'), function(testError, stdout, stderr){
-			fileSys.unlink(fileName.replace('.exe','.cpp'));
 			fileSys.unlink(fileName);
 			if(testError)
 				process.send({reason:'compError', error:testError});
@@ -121,8 +121,8 @@ function buildJava(data){
 			console.log(error);
 		else{
 			fileName = newName;
-			compileJava(fileName, function(progName){
-				runJava(progName, data.testData.testCases);
+			compileJava(fileName, function(){
+				runJava(data.testData.testCases);
 			});
 		}
 	});
@@ -130,29 +130,29 @@ function buildJava(data){
 
 /** */
 function compileJava(fileName, callBack){
-	var compile = require('child_process').exec('javac ' + fileName, function(compError, stdout, stderr){	
+	var compile = require('child_process').exec('javac ' + fileName, function(compError, stdout, stderr){
+		fileSys.unlink(fileName);
 		if(compError){
 			stderr = stderr.replace(/\..*\.java/g, '\n-');
 			process.send({reason:'compError', error:stderr});
 		}
 		else{
-			fileSys.unlink(fileName);
 			process.send({reason:'running'});
-			callBack('C:\\ThillyServer\\ServerPKGs\\ChildProcesses\\temp\\aSubmission');
+			callBack();
 		}
 	});
 }
 
 /** */
-function runJava(fileName, input){
+function runJava(input){
 	var response = '', stderror = '';
 	var testing = require('child_process');
 		testing = testing.exec('java -cp C:\\ThillyServer\\ServerPKGs\\ChildProcesses\\temp\ aSubmission', function(testError, stdout, stderr){
+			fileSys.unlink('./ServerPKGs/ChildProcesses/temp/aSubmission.class');
 			if(testError)
 				process.send({reason:'compError', error:testError});
 			else
 				process.send({reason:'finished', data:response});
-			fileSys.unlink(fileName + '.class');
 		});
 	
 	testing.stdin.write(input);

@@ -1,5 +1,23 @@
 ChangeLog - Thilly.net V5 - Web Service
 
+15 September 2014 - implementing the score board to the contest
+
+	challengeMap.js
+		implemented saving contest submissions and results
+		implemented retrieving contest results
+		updated the contest submission process to alert scoreboard on successful
+		refactored to be generalized with current live problems
+	
+	userMap.js
+		modified registering to include the set of submissions
+		
+	
+12 September 2014 - fixing a bug with registering accounts
+
+	userMap.js
+		fixed bug regarding not logging users that were freshly registered
+		
+
 8 September 2014 - getting the contest online finally
 
 	challengeMap.js

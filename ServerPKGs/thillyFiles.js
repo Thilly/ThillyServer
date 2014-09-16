@@ -46,6 +46,8 @@ function fileHandler(req, res){
 	logging.log.trace('In fileHandler');
 	
 	var filePath = req.url;
+	if(filePath.indexOf('?') > -1)
+		filePath = filePath.split('?')[0];
 	if(filePath == '/')//if first request
 		filePath = './client/' + logging.environment + '/index.html';
 		//give main page

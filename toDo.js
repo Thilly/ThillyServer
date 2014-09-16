@@ -1,5 +1,8 @@
 /** random server library improvements
 	
+	add an array to every user
+	
+	
 	mongo backup - mongoDump
 		daily create backup db of all content currently hosted on mongo
 		move to different folder and archive it

@@ -14,10 +14,10 @@ module.exports = function(deps){
 		codeSubmission 	: codeSubmission,
 		getContests 	: getContests,
 		getContest 		: getContest,
-		pushChallenge 	: pushChallenge
+		pushChallenge 	: pushChallenge,
+		getProblemHistory : getProblemHistory
 	};
 };
-
 
 function getChallenge(data, socket, exception){
 	logging.log.trace('in getChallenge');
@@ -73,36 +73,29 @@ function codeSubmission(data, socket, exception){
 			else
 				socket.sendCommand(data.command, {text: 'Select a problem to submit', tone: 'error', last: true});
 	});
-	
-//	saveSubmission(data, socket);
-/*
-	socket.sendCommand(data.command, {text: 'nothing is going to happen', tone: 'good'});
-	setTimeout(function(){
-		socket.sendCommand(data.command, {text: 'told ya not hooked up yet', tone: 'error', last: true});
-		}, 1000);
-*/
 }
 
 function saveSubmission(data, socket){
 	logging.log.trace('in saveSubmission');
 	
 	var toQuery = {
-		user : socket.user.userID,
-		problem: data.problem
+		userID : socket.user.userID,
+		problem	: data.problem,
+		time	: new Date().getTime()
 	};
 
 	var toPush = {
-		code: data.code,
+		code	: data.code,
 		language : data.language,
-		result : data.result
+		result 	: data.result,
+		response : data.response
 	};
 
-	mongo.update({db:'thillyNet', coll:'submission'}, toQuery, {$push: toPush}, function(error, result){
-		if(error)
-			logging.log.mongo(error);
-		else
-			logging.log.mongo(result);
-	});
+	mongo.update({db:'thillyNet', coll:'submission'}, toQuery, toPush, {upsert:true});
+}
+
+function recordWin(data, socket){
+	mongo.update({db:'thillyNet', coll:'user'}, {userID:socket.user.userID}, {$addToSet:{submissions:data.problem}}, {});
 }
 
 function getContests(data, socket, exception){
@@ -161,24 +154,30 @@ function pushChallenge(data, socket, exception){
 function startCompiler(data, socket, exception){
 	logging.log.trace('in startCompiler');
 	var compiler = require('child_process').fork('./ServerPKGs/ChildProcesses/compiler.js');
-	var tooLong = setTimeout(function(){compiler.kill('SIGTERM');}, contestTimeout);
+	var tooLong;
 		socket.sendCommand(data.command, {text: 'Compilation beginning...', tone: 'neutral', last: false});
 		compiler.send({msg: 'contestData', data:data});
 	
 	compiler.on('exit', function(code, signal){
 		logging.log.contest('Compiler exit signal: ' + signal);
 		clearTimeout(tooLong);
-		if(signal == 'SIGTERM')
+		if(signal == 'SIGTERM'){
 			socket.sendCommand(data.command, {text: 'Submission took too long', tone: 'error', last: true});
+			data.result = 'timeout';
+			saveSubmission(data, socket);
+		}
 	});
 	
 	compiler.on('message', function(msg){
 		if(msg.reason == 'compError'){
 			socket.sendCommand(data.command, {text: msg.error, tone: 'error', last: true});
+			data.message = msg.error;
 			compiler.kill('SIGINT');	
 		}
-		if(msg.reason == 'running')
+		if(msg.reason == 'running'){
 			socket.sendCommand(data.command, {text: 'Compilation Completed, running submission...', tone: 'neutral', last: false});
+			tooLong = setTimeout(function(){compiler.kill('SIGTERM');}, contestTimeout);
+		}
 		if(msg.reason == 'finished'){
 			socket.sendCommand(data.command, {text: 'Running Completed, checking response...', tone: 'neutral', last: false});
 			compiler.kill('SIGINT');
@@ -193,13 +192,50 @@ function startDiffer(data, socket, exception){
 	var differ = require('child_process').fork('./ServerPKGs/ChildProcesses/differ.js');
 		differ.send({answer:data.testData.answer, output:data.response});
 		differ.on('message', function(msg){
-		logging.log.contest(JSON.stringify(msg));	
+			logging.log.contest(JSON.stringify(msg));	
 			differ.kill('SIGINT');
-			if(msg.numWrong == 0)
-				socket.sendCommand(data.command, {text: 'Checking Completed, Correct Answer', tone: 'good', last: true});			
-			else
-				socket.sendCommand(data.command, {text: 'Checking Completed, Wrong Answer: ' + msg.numWrong + ' incorrect', tone: 'good', last: true});
+			if(msg.numWrong == 0){
+				socket.sendCommand(data.command, {text: 'Checking Completed, Correct Answer', tone: 'good', last: true});
+				data.result = 'Correct Answer';
+				recordWin(data, socket);
+			}
+			else{
+				socket.sendCommand(data.command, {text: 'Checking Completed, Wrong Answer: ' + msg.numWrong + ' incorrect', tone: 'error', last: true});
+				data.result = 'Wrong Answer';
+			}
+			saveSubmission(data, socket);
 		});
 }
 
+function getProblemHistory(data, socket, exception){
+	if(socket.user){
+		mongo.select({db:'thillyNet', coll:'user'}, {userID:socket.user.userID}, {projection:{'submissions' : 1}}, function(error, result){
+			if(error)
+				logging.log.mongo(error)
+			else{
+				socket.sendCommand(data.command, result[0].submissions)
+			}
+		});
+	}		
+}
 
+function getSubmission(data, socket, exception){
+	var query = {
+		userID : data.userID,
+		problem : data.problemName
+	};
+	
+	var options = {
+		limit : 1,
+		sort: {time: -1},
+		projection: {code: 1, result: 1, response: 1}
+	};
+	
+	mongo.select({db:'thillyNet', coll:'submission'}, query, options, function(error, result){
+		if(error)
+			logging.log.mongo(error);
+		else
+			logging.log.mongo(result);
+	});
+	
+}

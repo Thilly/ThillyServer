@@ -70,7 +70,8 @@ function register(data, socket, exception){
 		userName:	data.userName.toLowerCase(),
 		password:	crypto.createHash(data.password),
 		points	:	0,
-		type	:	'standard'
+		type	:	'standard',
+		submissions: []
 	};
 	
 	mongo.select({db:'thillyNet',coll:'user'}, {userName:data.userName.toLowerCase()}, {projection:{userID:1}}, function(error, result){
@@ -86,7 +87,7 @@ function register(data, socket, exception){
 					logging.log.errors('error in register: ' + error);
 				else{
 					logging.log.sockets('register completed successfully');
-					loginUser(insertObj, socket);
+					loginUser(insertObj, socket, data.command);
 				}
 			});
 		}

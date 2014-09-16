@@ -125,7 +125,7 @@ function log(flag, logString){
 		if(cache.length > 150)
 			cache.shift();
 		if(loggingListener)
-			loggingListener.to('logging').emit('command', {command: 'log', value:logString});//refactor to proper method
+			loggingListener.to('logging').emit('command', {command: 'log0', value:logString});//refactor to proper method
 	}
 }
 
@@ -167,7 +167,7 @@ function logMemory(memoryStep, lastMemory){
 	if(memoryCache.length > 100)
 		memoryCache.shift();
 	if(loggingListener)
-		loggingListener.to('memory').emit('command', {command: 'memory', value:memoryStep});//refactor to proper method
+		loggingListener.to('memory').emit('command', {command: 'memory0', value:memoryStep});//refactor to proper method
 		
 	if(flags.display)//if want to see the server memory in the log
 	{

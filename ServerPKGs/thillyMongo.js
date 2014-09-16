@@ -71,7 +71,6 @@ function select(path, query, options, callBack){
 				cursor = cursor.limit(options.limit);
 			if(options.sort)
 				cursor = cursor.sort(options.sort);
-				
 			cursor.toArray(function(error, result){
 				if(error){
 					logging.log.errors('error in select: ' + error);
@@ -79,7 +78,8 @@ function select(path, query, options, callBack){
 				}
 				else{
 					logging.log.mongo('select completed: ' + result.length);
-					callBack(error, result);	
+					if(typeof callBack == 'function')
+						callBack(error, result);	
 				}
 			});
 		});
@@ -100,7 +100,8 @@ function insert(path, query, options, callBack){
 			}
 			else{
 				logging.log.mongo('insert completed: ' + result.length);
-				callBack(error, result);	
+				if(typeof callBack == 'function')
+					callBack(error, result);	
 			}
 		});
 	}
@@ -127,7 +128,8 @@ function update(path, selection, query, options, callBack){
 			}
 			else{
 				logging.log.mongo('update completed: ' + result + ': ' + JSON.stringify(writes));
-				callBack(error, result, writes);	
+				if(typeof callBack == 'function')
+					callBack(error, result, writes);	
 			}
 		});
 	}
