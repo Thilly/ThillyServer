@@ -1,5 +1,14 @@
 ChangeLog - Thilly.net V5 - Web Service
 
+17 September 2014 - implementing distributed game serving
+
+	gameMap.js
+		implemented the ability to see the games on the server
+		implemented the ability to grab a game off of the server
+	servedJS/games
+		placed a test game on the server (distSnake.js)
+		
+
 15 September 2014 - implementing the score board to the contest
 
 	challengeMap.js
