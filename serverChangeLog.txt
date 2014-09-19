@@ -1,5 +1,10 @@
 ChangeLog - Thilly.net V5 - Web Service
+19 September 2014 - implementing first pass of first game
 
+	distSnake.js
+		roughed out the functionality for a single player game just to test out rendering and serving
+		
+		
 17 September 2014 - implementing distributed game serving
 
 	gameMap.js
