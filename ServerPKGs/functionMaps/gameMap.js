@@ -17,9 +17,11 @@ module.exports = function(deps){
 		for(var i = 0; i < rawGameList.length; i++){
 			var gameName = rawGameList[i].replace('.js','');
 			gameList.push(gameName);
-			files.readFile('./servedJS/games/' + rawGameList[i], function(error, data){
-				gameMap[gameName] = data.toString();
-			});
+			(function(name, idx){
+				files.readFile('./servedJS/games/' + rawGameList[idx], function(error, data){
+				gameMap[name] = data.toString();
+				});
+			})(gameName, i);
 		}
 	});
 	
@@ -35,7 +37,7 @@ function getGameList(data, socket, exception){
 }
 
 function getAGame(data, socket, exception){
-	logging.log.trace('in getAGame : ' + data.gameName);
+	logging.log.trace('in getAGame : ' + data.gameName);	
 	socket.sendCommand(data.command, gameMap[data.gameName]);
 
 }
