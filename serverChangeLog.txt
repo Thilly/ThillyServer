@@ -1,5 +1,12 @@
 ChangeLog - Thilly.net V5 - Web Service
 
+18 October 2014 - implemented first pass of all base controllers
+
+	controllerTest.js
+		implemented event handling for each controller
+		implemented ability to switch between controllers for testing
+		
+
 17 October 2014 - slightly modified how controllers are built
 	
 	controllerTest.js
