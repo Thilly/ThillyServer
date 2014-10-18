@@ -1,4 +1,17 @@
 ChangeLog - Thilly.net V5 - Web Service
+
+17 October 2014 - slightly modified how controllers are built
+	
+	controllerTest.js
+		implemented a type and arguments(if applicable) to each controller being built
+
+		
+16 October 2014 - begin creating generalized controller
+	
+	servedJS/games/controllerTest.js
+		created new file for the implementation of the controller(s)
+
+		
 19 September 2014 - implementing first pass of first game
 
 	distSnake.js

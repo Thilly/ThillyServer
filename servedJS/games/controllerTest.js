@@ -5,21 +5,35 @@ window.currentGame = {};
 (function(debug){
 	
 	var controller = {};
-
+	var canvas;
+	
 	this.init = function(){
-		controller = new thillyController(true);
-		controller.create('dPad', 'dPad');
+	
+		controller = new thillyController(thillyLogging);
+		canvas = document.getElementById('gameCanvas');
 		
-		document.addEventListener('up', function(){
+		var left = {
+			type: 'dPad',
+			args: {}
+		};
+		
+		var right = {
+			type: 'dPad',
+			args: {}
+		};
+		
+		controller.create(left, right);
+		
+		canvas.addEventListener('up', function(){
 			console.log('up');
 		});
-		document.addEventListener('down', function(){
+		canvas.addEventListener('down', function(){
 			console.log('down');
 		});
-		document.addEventListener('left', function(){
+		canvas.addEventListener('left', function(){
 			console.log('left');
 		});
-		document.addEventListener('right', function(){
+		canvas.addEventListener('right', function(){
 			console.log('right');
 		});		
 	};
