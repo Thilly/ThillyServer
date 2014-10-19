@@ -4,26 +4,43 @@ window.currentGame = {};
 /** */
 (function(debug){
 	
-	var theSnake = new aSnake('green', 'UserName', {xPos:100, yPos:100});
+	var theSnakes = [];
+	var snakeMap = {};
 	
 	this.frameRate = 3;
 
 	this.init = function(){
+		thillyUtil.send(thillyGame.gameSocket, 'introduce', {host:true});
+		
 		thillyLayers.clear();
 		thillyLayers.addLayer('base', 0, function(layer){
-			layer.addObject(theSnake);
+			layer.addObject(theSnakes);
 		});
 		
 		thillyLayers.addLayer('fruit', 1, function(layer){
 			layer.addObject(new aFruit());
 		});
 		
-		window.onkeydown = function(event){
-			if(event.keyCode == 82)//'r'
-				theSnake.turnRight();
-			if(event.keyCode == 76)//'l'
-				theSnake.turnLeft();
-		};
+		thillyGame.gameSocket.on('command', function(data){
+			console.log('command recieved: ' + JSON.stringify(data));
+			if(data.command === 'introduce'){
+				var newPlayer = new aSnake('green', data.value.name, {xPos:Math.random()*100, yPos:Math.random()*100}); 
+				theSnakes.push(newPlayer);
+				snakeMap[data.value.name] = newPlayer;
+			}
+			if(data.command === 'control'){
+				if(data.value.control === 'Left')
+					snakeMap[data.value.player].turnLeft();
+				else
+					snakeMap[data.value.player].turnRight();
+			}
+			if(data.command == 'leaving'){
+				delete snakeMap[data.value.player];
+				for(var i = 0; i < theSnakes.length; i++)
+					if(theSnakes[i].name == data.value.player)
+						theSnakes.splice(i,1);
+			}
+		});
 	};
 	
 	function aFruit(canvas){
@@ -55,6 +72,7 @@ window.currentGame = {};
 		
 		var color = inColor;
 		var name = inName;
+		this.name = name;
 		var length = 3;
 		var segments = [{xPos: startPos.xPos, yPos: startPos.yPos}];
 		var width = 25;

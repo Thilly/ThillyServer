@@ -2,8 +2,11 @@
 var logging, files, mongo;
 
 /** */
-var gameMap = {};
+var gameNameMap = {};
+var controllerMap = {};
 var gameList = [];
+
+var activeGameMap = {};//between ports 62300 - 62400
 
 /** */
 module.exports = function(deps){
@@ -19,7 +22,10 @@ module.exports = function(deps){
 			gameList.push(gameName);
 			(function(name, idx){
 				files.readFile('./servedJS/games/' + rawGameList[idx], function(error, data){
-				gameMap[name] = data.toString();
+					gameNameMap[name] = data.toString();
+				});
+				files.readFile('./servedJS/controllers/' + rawGameList[idx], function(error, data){
+					controllerMap[name] = data.toString();
 				});
 			})(gameName, i);
 		}
@@ -27,7 +33,8 @@ module.exports = function(deps){
 	
 	return {
 		getGameList	:	getGameList,
-		getAGame	:	getAGame
+		getAGame	:	getAGame,
+		playAGame	:	playAGame
 	};
 };
 
@@ -37,7 +44,23 @@ function getGameList(data, socket, exception){
 }
 
 function getAGame(data, socket, exception){
-	logging.log.trace('in getAGame : ' + data.gameName);	
-	socket.sendCommand(data.command, gameMap[data.gameName]);
+	logging.log.trace('in getAGame : ' + data.gameName);
+	var portNum = 62300 + Math.floor(Math.random() * 100);
+	var child = require('child_process');
+		child = child.fork('./ServerPKGs/ChildProcesses/gameServer.js', [portNum]);
+		child.on('message', function(childData){
+			if(childData.msg === 'end'){
+				child.kill('SIGTERM');
+				console.log('closing gameserver: ' + portNum);
+				delete activeGameMap[portNum];
+			}
+			if(childData.msg === 'start'){
+				socket.sendCommand(data.command, {js:gameNameMap[data.gameName], port:portNum});
+			}
+		});
+}
 
+function playAGame(data, socket, exception){
+	logging.log.trace('in playAGame : ' + data.gameName);	
+	socket.sendCommand(data.command, {js:controllerMap[data.gameName], port: data.port});
 }

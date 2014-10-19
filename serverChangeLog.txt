@@ -1,5 +1,13 @@
 ChangeLog - Thilly.net V5 - Web Service
 
+19 October 2014 - linked up controller and first game (snake)
+
+	implemented differing file structure for controllers and host application
+	created new file serverPKGs/ChildProcesses/gameServer.js
+		implemented child server for game specific applications
+		implemented first pass of game specific functions and communication protocols
+		
+
 18 October 2014 - implemented first pass of all base controllers
 
 	controllerTest.js
