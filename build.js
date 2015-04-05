@@ -1,19 +1,55 @@
+/** build.js
+	build is the script that adjusts all the raw files and moves, compiles, minifies, and parses any scripts needed for deploying the client.
+*/
+
+/** paths
+	paths are the relative paths to the individual deployments.
+*/
 var paths = {
 		src : './client/source/',
 		test : './client/test/',
 		live : './client/live/'
 	};
 	
+/** exec
+	exec is a peice of the node child_process library. It is used for running CLI applications.
+*/	
 var exec = require('child_process').exec;
+/** sass
+	sass is a community module, it is used to create css from sass.
+
+*/
 var sass = require('node-sass');
+/**
+	fileSys
+	fileSys is the node standard library for interacting with the file system
+*/
 var fileSys = require('fs');
+
+/** minify
+	minify is a compiler created by google that takes the clientside JS and minifies it to create smaller file transfers.
+*/
 var minify = require('closurecompiler');
 
+/** buildVersion
+	buildVersion is the current iteration since using the build script.
+*/
 var buildVersion;
+
+/** work
+	work is an array of functions created for each step the build script needs to do before exiting.
+*/
 var work = [];
+
+/** commands
+	commands are the arguments passed in from the command line
+*/
 var commands = '';
 
+/** buildJS
+	buildJS is a function map with different functions for starting build process to the different environments
 
+*/
 var buildJS = {
 	'live' : getBuildVersion,
 	'test' : testJS
@@ -29,11 +65,16 @@ var buildJS = {
 for(var i in work)
 	build(work[i]);
 	
+/** build
+	build takes the environment and the relative paths to create a function for further processing
+*/	
 function build(environment){
 	console.log('beginning build: ' + environment);
 	buildJS[environment](paths['src']+'javaScript/', paths[environment]+'javaScript/');
 }
-
+/** testJS
+	testJS moves the files into the correct directory and assembles the index.html for the test environment.
+*/
 function testJS(fromPath, toPath){
 	var jsFiles = [];
 	console.log('building JS: ' + fromPath + ': ' + toPath);
@@ -46,6 +87,9 @@ function testJS(fromPath, toPath){
 	});
 }
 
+/** testCSS
+	testCSS parses through the sass files and finishes assembling the index.html for the test environment.
+*/
 function testCSS(fromPath, toPath, jsFiles){
 	var cssFiles = [];
 	var totalSCSS = '';
@@ -62,6 +106,9 @@ function testCSS(fromPath, toPath, jsFiles){
 	});
 }
 
+/** getBuildVersion
+	getBuildVersion reads the current build version number from a file, increments it, and then puts that number back in the same file. The build version number will be used elsewhere in the program.
+*/
 function getBuildVersion(fromPath, toPath){
 	fileSys.readFile('./buildVersion.txt', function(error, versionNum){
 		buildVersion = parseInt(versionNum);
@@ -79,6 +126,9 @@ function getBuildVersion(fromPath, toPath){
 	});
 }
 
+/** liveJS
+	liveJS is a function that compiles the totality of the clientside JS. This minifies it, and the google closure compiler optimizes the code wherever it can. The new JS file is included into the index.html.
+*/
 function liveJS(fromPath, toPath){
 	var jsFiles = [];
 	var append = [];
@@ -92,6 +142,9 @@ function liveJS(fromPath, toPath){
 	liveCSS(fromPath.replace('javaScript/','styleSheets/'), toPath.replace('javaScript/','styleSheets/'), append);
 }
 
+/** liveCSS
+	liveCSS reads and parses through all of the sass files and creates a single css document that is included in the index.html.
+*/
 function liveCSS(fromPath, toPath, jsFiles){
 	var cssFiles = [];
 	var totalSCSS = '';
@@ -109,6 +162,9 @@ function liveCSS(fromPath, toPath, jsFiles){
 	});
 }	
 
+/** rootDir
+	rootDir finishes assembling the index.html from all of the different files being used by this version of the client.
+*/
 function rootDir(fromPath, toPath, jsFiles, cssFiles){
 	console.log('building HTML: ' + fromPath + ': ' + toPath);
 	fileSys.readdir(fromPath, function(error, files){
@@ -124,6 +180,9 @@ function rootDir(fromPath, toPath, jsFiles, cssFiles){
 	moveStuff(fromPath+'challenge/', toPath+'challenge/');
 }
 
+/** moveStuff
+	moveStuff takes a file name and a destination and just copies the file over to the new destination.
+*/
 function moveStuff(fromPath, toPath){
 	console.log('moving file: ' + fromPath + ': ' + toPath);
 	var moveFiles = {};
@@ -133,6 +192,9 @@ function moveStuff(fromPath, toPath){
 	});
 }
 
+/** copyFile
+	copyFile is a small helper function around the actual file copy process
+*/
 function copyFile(from, to){
 	fileSys.readFile(from, function(error, data){
 		if(!error){
@@ -142,6 +204,9 @@ function copyFile(from, to){
 	});
 }
 
+/**	buildHTML
+	buildHTML writes all of the included filenames into the index.html before capping it with the meta tags.
+*/
 function buildHTML(fromPath, toPath, jsFiles, cssFiles){
 	var top = '<!doctype HTML>\n<html>\n\t<head>';
 	for(var i = 0; i < jsFiles.length; i++)
@@ -153,6 +218,9 @@ function buildHTML(fromPath, toPath, jsFiles, cssFiles){
 	});
 }
 
+/** parseSass 
+	parseSass takes all of the sass files and runs them through a sass interpreter to generate the raw css.
+*/
 function parseSass(data, toPath, fileName){
 
 	if(buildVersion)
@@ -185,6 +253,9 @@ function parseSass(data, toPath, fileName){
 	return fileName;
 };
 
+/** compileJS
+	compileJS runs the js files through the google closure js optimizer/minifier.
+*/
 function compileJS(files, toPath){
 	minify.compile(files,{}, function(error, result){
 		if(error){

@@ -58,7 +58,7 @@ var flags = {
 	//a flag for watching file i/o
 	logging		:	true,	
 	//a flag for writing the log to a file
-	mongo		:	true,	
+	mongo		:	false,	
 	//a flag for watching any mongo actions
 	memory		:	false,	
 	//a flag for logging memory usage
@@ -92,7 +92,7 @@ module.exports = function(options){
 		stopMemory  : stopMemory,
 		stopLogging	: stopLogging,
 		environment	: options.environment || 'test',
-		homeDomain 	: options.homeDomain || 'http://174.49.168.70',
+		homeDomain 	: options.homeDomain || 'http://192.168.1.50',
 		port 		: options.port || 80
 	};
 	

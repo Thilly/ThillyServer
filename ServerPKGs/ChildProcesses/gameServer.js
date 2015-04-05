@@ -21,8 +21,12 @@ sockets.on('connection', function(socket){
 	socket.sendCommand = sendCommand;
 	
 	socket.on('disconnect', function(){
-		console.log('socket left ' + JSON.stringify(this.player));
-		host.sendCommand('leaving', this.player);
+		if(this !== host){
+			host.sendCommand('leaving', this.player);
+			console.log('socket left ' + JSON.stringify(this.player));
+		}
+		else
+			process.send({msg:'end'});
 	});
 	
 	/** */

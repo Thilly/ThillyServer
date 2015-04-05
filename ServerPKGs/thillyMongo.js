@@ -1,19 +1,25 @@
 /** thillyMongo.js
- * @module thillyMongo
- * @author Nicholas 'Thilly' Evans
- * @description My personal library for eventually managing mongo stuff related to thilly.net
- */
+	thillyMongo is a module that wraps the node-mongo API and generalizes it to be easier to use throughout my program.
+*/
 
-/** */
+/** mongo
+	mongo will be instantiated as the mongoDB API library for node
+*/
 var mongo;
 
-/** */
+/** objectID
+	objectID will be instantiated as the objectID parsing function which returns a mongo DB entry from an objectID string.
+*/
 var objectID;
 
-/** */
+/** logging
+	logging is the thillyLogging module/dependency
+*/
 var logging = {};
 
-/** */
+/** dbMap
+	dbMap is an object representing the dynamc schema of this instance of mongoDB
+*/
 var dbMap = {}
 /*	DBname : {
 		db : dataBase, 
@@ -23,23 +29,32 @@ var dbMap = {}
 		}
 */
 
+/** hiddenDB
+	hiddenDB are a few collections that need to be hidden from the dbMap schema
+*/
 var hiddenDB = {
 	'schema' : true,
 	'admin' : true,
 	'local' : true
 };
 
-/** */
+/** toExport
+	toExport is a small function map that will be revealed as the public interface for this module
+*/
 var toExport = {
 	'select'	:	select,
 	'insert'	:	insert,
 	'update'	:	update,
 	'parse'		:	parse,
 	'getDBNames':	getDBNames,
-	'getCollectionNames': getCollectionNames
+	'getCollectionNames': getCollectionNames,
+	'backup'	:	mongoBackup,
+	'restore'	:	mongoRestore
 };
 
-/** */
+/** where the module is opened up publicly and where it is instantiated.
+	sort of like a constructor in classical languages
+*/
 module.exports = function(logObject, callBack){
 	mongo = require('mongodb');
 	objectID = mongo.ObjectID;
@@ -165,6 +180,27 @@ function getCollectionNames(dbName){
 	}
 	else
 		return [];
+}
+
+/** */
+function mongoBackup(){
+	var exec = require('child_process').exec;
+	var dts = Date.now();
+	var mongoDump =	exec('mongodump --db thillyNet --out ./MongoBackup/' + dts);
+	console.log('backing up at: ' + dts);
+	mongoDump.on('close', function(code){
+		console.log(code);
+	});
+}
+
+/** */
+function mongoRestore(date){
+	var exec = require('child_process').exec;
+	var mongoRe = exec('mongorestore --db thillyNet ./MongoBackup/' + date);
+	console.log('restoring');
+	mongoRe.on('close', function(code){
+		console.log(code);
+	});
 }
 
 /*

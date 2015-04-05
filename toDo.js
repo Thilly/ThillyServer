@@ -1,7 +1,8 @@
 /** random server library improvements
 	
 	add an array to every user
-	
+
+	extend thillyFiles with fs.readdir()
 	
 	mongo backup - mongoDump
 		daily create backup db of all content currently hosted on mongo

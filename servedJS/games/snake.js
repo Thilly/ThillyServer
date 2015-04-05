@@ -15,6 +15,7 @@ window.currentGame = {};
 		thillyLayers.clear();
 		thillyLayers.addLayer('base', 0, function(layer){
 			layer.addObject(theSnakes);
+			layer.addObject(new portNum(thillyGame.currentPort));
 		});
 		
 		thillyLayers.addLayer('fruit', 1, function(layer){
@@ -186,5 +187,15 @@ window.currentGame = {};
 		}
 	}
 	
+	function portNum(number){
+	
+		var port = number;
+		
+		this.drawMe = function(context, dt){
+			context.font = '24px Calibri';
+			context.fillStyle = 'black';
+			context.fillText('Session# ' + port, 100, 100);
+		}
+	}
 	
 }).apply(window.currentGame, [window.thillyLogging]);

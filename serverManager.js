@@ -1,16 +1,29 @@
-/** */
+/** serverManager.js
+	This process is first launched in order to launch, monitor, re-launch and spawn multiple threads for the actual webserver.
+	
+	command arguments:
+		test : create test (local) server
+		live : create live (internet accessible) server
+ */
+ 
+/** child
+	child is a node library that holds the utility for creating multiple processes and threads
+*/
 var child = require('child_process');
 
-/** */
-var	events = require('events');
-
-/** */
+/** manager 
+	manager is an object that houses the functionality to start creating server threads
+*/
 var manager = new myServers();
 
-/** */
+/** commands
+	commands is created from the command line argument, it will be a string containing test and/or live
+*/
 var commands = '';
 
-/** */
+/** work
+	work is an array of server objects created for each command line argument
+*/
 var work = [];
 
 	commands += process.argv.slice(2).join('');
@@ -23,13 +36,19 @@ var work = [];
 	for(var i in work)
 		manager.startAServer(work[i]);
 	
-/** */	
+/** myServers()
+	myServers is a sub function that takes the command arguments and creates child processes based on the environment it should be running in.
+ */	
 function myServers(){
 
-	/** */
+	/** processes
+		A map of the running projects
+	*/
 	this.processes = {};
 
-	/** */
+	/** startAServer
+		startAServer links the messaging between a server child-process and the main serverManager process
+	*/
 	this.startAServer = function(type){
 
 		var that = this;
