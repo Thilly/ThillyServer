@@ -49,7 +49,8 @@ var toExport = {
 	'getDBNames':	getDBNames,
 	'getCollectionNames': getCollectionNames,
 	'backup'	:	mongoBackup,
-	'restore'	:	mongoRestore
+	'restore'	:	mongoRestore,
+	'getCount'	:	getCount
 };
 
 /** where the module is opened up publicly and where it is instantiated.
@@ -66,6 +67,25 @@ module.exports = function(logObject, callBack){
 /*
 	Public
 */
+
+/** */
+function getCount(path, query, callBack){
+	logging.log.trace('in getCount: ' + path.coll);
+	if(assertMapping(path.db, path.coll)){
+		var coll = dbMap[path.db][path.coll];
+		coll.count(query, function(error, result){	
+			if(error){
+				logging.log.errors('error in getCount: ' + error);
+				new DBException(error, callBack);
+			}
+			else{
+				logging.log.mongo('getCount completed: ' + result);
+				if(typeof callBack == 'function')
+					callBack(error, result);	
+			}
+		});
+	}
+}
 
 /** */
 function parse(objectString){
@@ -116,7 +136,9 @@ function insert(path, query, options, callBack){
 			else{
 				logging.log.mongo('insert completed: ' + result.length);
 				if(typeof callBack == 'function')
-					callBack(error, result);	
+					callBack(error, result);
+				else
+					return true;
 			}
 		});
 	}

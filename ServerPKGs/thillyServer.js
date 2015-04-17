@@ -16,15 +16,26 @@ var options = {
  */
 var logging = require('./thillylogging.js')(options);
 
+/** neural
+	is the neural network that exists in its own process on the server
+*/
+var neural = [];
+	for(var i = 0; i < 3; i++){
+		neural[i] = require('child_process').fork('./ServerPKGs/thillyNeural.js', ['normal']);
+		neural[i].on('message', function(data){
+			if(webServiceMap[data.msg])
+				webServiceMap[data.msg](data.value);
+		});
+	}
+	
 /** mongo
 	mongo is an abstraction of the node-mongo interface to help generalize queries for my specific implementations. it is built from the thillyMongo module by passing the logging module
-*/
+*/	
 var mongo = new require('./thillyMongo.js')(logging, function(){
 	logging.log.mongo('MongoDB has started');
 	var threeDays = 3*24*60*60*1000;
 	setInterval(mongo.backup, threeDays);
 	logging.log.mongo('MongoDB backup schedule begun');
-	
 });
 
 /** exception
@@ -42,6 +53,8 @@ var files = new require('./thillyFiles.js')(logging);
 */
 var server = require('http').createServer(files.fileHandler).listen(logging.port);
 
+
+
 /** sockets
 	sockets is the community library socket.io and it controls streaming data to and from the server
 */
@@ -56,7 +69,8 @@ var webServiceMap = {};
 
 buildWebServiceMap({'logging': logging,
 					'files': files,
-					'mongo': mongo
+					'mongo': mongo,
+					'neural': neural
 					}, webServiceMap);	
 
 sockets.on('connection', function(socket){
@@ -125,8 +139,7 @@ function buildWebServiceMap(dependencies, serviceMap){
 		if(error)
 			logging.log.errors(error);
 		else{
-			for(var i = 0; i < files.length; i++){
-			
+			for(var i = 0; i < files.length; i++){			
 				var tempFunctionMap = require('./functionMaps/'+files[i])(dependencies);
 				for(var func in tempFunctionMap){
 					if(typeof serviceMap[func] == 'function')

@@ -58,7 +58,7 @@ var flags = {
 	//a flag for watching file i/o
 	logging		:	true,	
 	//a flag for writing the log to a file
-	mongo		:	false,	
+	mongo		:	true,	
 	//a flag for watching any mongo actions
 	memory		:	false,	
 	//a flag for logging memory usage
