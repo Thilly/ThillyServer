@@ -1,6 +1,12 @@
 ChangeLog - Thilly.net V5 - Web Service
 
-29 January 2016 - pulling fresh, seeing if i can get some work done at home
+29 January 2016 - re-establishing this repository
+
+    fixed build script to create directories when placing files
+    fixed mongo restore (OMG so glad it worked after nudge, couldn't stand to blow away my db again)
+    merged Client into thillyServer since it was same general application
+        added source images to git also
+
 
 19 October 2014 - linked up controller and first game (snake)
 
@@ -8,6 +14,7 @@ ChangeLog - Thilly.net V5 - Web Service
 	created new file serverPKGs/ChildProcesses/gameServer.js
 		implemented child server for game specific applications
 		implemented first pass of game specific functions and communication protocols
+
 
 18 October 2014 - implemented first pass of all base controllers
 
