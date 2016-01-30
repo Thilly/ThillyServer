@@ -1,0 +1,25 @@
+ChangeLog - Challenge v2 (integrated)
+
+5 April 2015 - Forgot about this
+	I completely forgot about the changelog for the contest. It's been moving along quite a bit actually:
+	
+	-multiple languages supported : JS/Java/C++
+	-integrated with mongoDB for saving attempts/success
+	-integrated with mongoDB for uploading/modifying/activating current problems
+	-new problem sets created
+	
+
+2 Aug 2014  - Getting back into it
+	Haven't touched the contest in quite a while. It served its purpose as it is but now it's time to migrate it into this webApp
+	Committed old stuff into git, starting from nearly nothing with the webApp integration.
+	
+	things that will change:
+		moving to Mongo for storage and thilly.net user integration
+		bringing contest specific news and what-not into the feed
+		hopefully get it running with JS/Java submissions as well
+		add functionality to add problems using the template
+	
+	things planned to reuse:
+		most of the shape/structure of the old app (login screen, contest layout, etc)
+		the overall flow with the contests, chat, user/admin assistance
+		

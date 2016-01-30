@@ -1,0 +1,62 @@
+	
+<div class="challenge" id="challengeWrapper">
+	<span class="loggedOut block">
+		<span class="out">
+			<!-- LoginPage -->
+			<pre id="changeLog"></pre>
+			<div id="challengeLogin" class="popup login">
+				Please login or <span class="register" onclick="thillyUtil.register(this.parentNode)">register</span> to participate in the competition.
+				<div id="loginTextInputs">
+					<div>
+						<label>Username:
+							<input id="userNameInput" type="text" placeholder="User Name" required pattern=".{4,}">
+						</label>
+					</div>
+					<div>
+						<label>Password:
+							<input id="passwordInput" type="password" placeholder="Password" required pattern=".{4,}">
+						</label>
+					</div>
+				</div>
+				<div id="reenterBox">
+					<label>Re-enter Password:
+						<input id="reenterInput" type="password" placeholder="Re-enter Password" required pattern=".{4,}">
+					</label>
+				</div>
+				<div id="errorMessage" class="errorMessage"></div>
+				<div class="popupControls">
+					<span  class="inlineButton" id="cancelRegisterButton" onclick="thillyUtil.register(this.parentNode.parentNode)" style="visibility:hidden;">Back</span>
+					<span  class="inlineButton" id="submitLoginButton" onclick="thillyUtil.login(this.parentNode.parentNode)">Login</span>
+				</div>
+			</div>
+		</span>
+		<span class="in">
+			<!-- ContestPage -->
+			<div class = "leftBar">
+				<a onClick = "thillyUtil.logOut()">Logout</a></br>
+				<a href="https://www.google.com/" target="_blank">Other links</a></br>
+				<a href="http://thilly.net/" target="_blank">Thilly.net</a></br>
+			</div>
+			<div class = "rightBar" id = "rightBar">
+				<div id = "chatBox"></div>
+				<input id="inputChat" placeholder="type here to chat, enter to send" onkeypress="chatSend(event, this.form)"></input>
+			</div>
+			<div class = "centerWrapper">
+				<textarea id="codeWindow">Paste code here, make sure to overwrite everything and also paste all of your code.</textarea>
+				<label for="problemList">Problem List</label>
+				<select name="problemList" id = "problemList" onchange="thillyChallenge.checkSelect(this)"></select>			
+				<label for="languages">Languages</label>
+				<select name="languages" id = "languages">
+					<option>JavaScript</option>
+					<option>C++</option>
+					<option>Java</option>
+				</select>			
+				<span class="inlineButton" id = "submitButton" onClick = "thillyChallenge.submitProblem()">Submit</span>
+				<span class="inlineButton" id = "clearButton" onClick = "thillyChallenge.clearBox()">Clear</span>
+				<span id = "challengeID">Team Name: NOT LOGGED IN </span>
+				<div class="alert" id="results"></div>
+				<div class="alert" id="score"></div>
+			</div>
+		</span>
+	</span>
+</div>

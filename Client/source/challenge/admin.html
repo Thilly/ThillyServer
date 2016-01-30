@@ -1,0 +1,27 @@
+<div class = "leftBar">
+	<a onClick = "logOut()">Logout</a></br>
+	<a href="https://www.google.com/">Other links</a></br>
+	<a href="http://thilly.net/">Thilly.net</a></br>
+	<div id="serverFlags">Logging:</div>
+</div>
+<div class = "rightBar" id = "rightBar" >
+	<div id = "chatBox"></div>
+	<input id="inputChat" placeholder="type here to chat, enter to send" onkeypress="chatSend(event, this.form)"></input>
+</div>
+<div class = "centerWrapper">
+	<div class = "Center">
+		<textarea id="code">Paste code here, make sure to overwrite everything and also paste all of your code.</textarea>
+	</div>
+	<div class = "Center">
+		<select id = "problem" onMouseUp = "checkSelect()"></select>
+		<button id = "submit" onClick = "sendSub()">Submit</button>
+		<button id = "clear" onClick = "clearBox()">Clear</button>
+		<div id = "team">Team Name: NOT LOGGED IN </div>
+	</div>
+	<div class="Center">
+		<div class="alert" id="results"></div>
+		<canvas id="memoryLog" width="960" height="160"></canvas>
+		<div class="alert" id="score"></div>
+		<div class="alert" id="scoreBoard"></div>
+	</div>
+</div>

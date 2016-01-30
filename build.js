@@ -227,7 +227,7 @@ function parseSass(data, toPath, fileName){
 		fileName= fileName.replace('.css', buildVersion + '.css');
 	
 	if(data['fileName']){
-		sass.renderFile({
+		sass.render({
 			file: data['fileName'],
 			outFile: toPath + fileName,
 			success: function(css){
@@ -239,7 +239,7 @@ function parseSass(data, toPath, fileName){
 		});
 	}
 	else if(data['data']){
-		sass.renderFile({
+		sass.render({
 			data: data['data'],
 			outFile: toPath + fileName,
 			success: function(css){

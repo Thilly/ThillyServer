@@ -1,0 +1,88 @@
+/* mongo.scss */
+.schemaWrapper{
+	width: 100%;
+	padding-top: 3em;
+	position: relative;
+	display: inline-block;
+	
+	.mongoList{
+		float:left;
+		width: 150px;
+		height: 100%;
+		
+		&.filled{
+			border-top: 1px solid black;
+		}
+		
+		.mongoClickable{
+			background-color: grey;
+			margin: .25em .5em;
+			height: 1.5em;
+			line-height:1.5em;
+			width: 120px;
+			border-radius: .2em;
+			text-align: center;
+			text-overflow: ellipsis;
+			overflow: hidden;
+			cursor: pointer;
+			
+			&.selected{
+				position: absolute;
+				top: .5em;
+				background-color:blue;
+			}
+			
+			&.selected + .mongoClickable{
+				margin-top: 2em;
+			}
+			
+			&:hover{
+				background-color: darkblue;
+			}
+		}
+		
+		&:after{
+			clear:both;
+		}
+	}
+
+}
+
+.mongoSchema{
+	
+	min-height: 240px;
+	box-sizing: border-box;
+	
+	&.filled{
+		border-top: 1px solid black;
+		border-bottom: 1px solid black;
+	}
+	
+	.schemaEdit{
+		
+		margin-top:1em;
+		display: block;
+		background-color: #fff;
+		border: initial;
+	
+		&:focus:invalid{
+			box-shadow: 0px 0px 15px #dd0000;
+		}
+
+		&:valid{
+			box-shadow: 0px 0px 15px #00dd00;
+		}
+	}
+	
+	.schemaEditDisabled{
+		
+		margin-top:1em;
+		display: block;
+		pointer-events:none;
+		background-color:#666;
+		border: 0;
+		box-sizing: border-box;
+		box-shadow: 0px 0px 15px #444;
+	}
+}
+	

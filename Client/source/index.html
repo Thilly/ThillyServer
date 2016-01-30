@@ -1,0 +1,64 @@
+	
+		<script src="https://cdn.socket.io/socket.io-1.0.0.js"></script>
+		<meta name="Description" content="Thilly.net is a small collection of programming projects, experiments, mistakes and mostly just a place to post my stuff :D">
+	</head>
+	<body>
+		<div id="modal" class="modalBackground">
+			<div id="popupLogin" class="popup login">
+				To login, enter name and password or <span class="register" onclick="thillyUtil.register(this.parentNode)">register</span>
+				<div id="loginTextInputs">
+					<div>
+						<label>Username:
+							<input id="userNameInput" type="text" placeholder="User Name" required pattern=".{4,}">
+						</label>
+					</div>
+					<div>
+						<label>Password:
+							<input id="passwordInput" type="password" placeholder="Password" required pattern=".{4,}">
+						</label>
+					</div>
+				</div>
+				<div id="reenterBox">
+					<label>Re-enter Password:
+						<input id="reenterInput" type="password" placeholder="Re-enter Password" required pattern=".{4,}">
+					</label>
+				</div>
+				<div id="errorMessage" class="errorMessage"></div>
+				<div class="popupControls">
+					<span  class="inlineButton" onclick="thillyUtil.cancel(this.parentNode.parentNode)">Cancel</span>
+					<span  class="inlineButton" id="cancelRegisterButton" onclick="thillyUtil.register(this.parentNode.parentNode)" style="visibility:hidden;">Back</span>
+					<span class="inlineButton" id="submitLoginButton" onclick="thillyUtil.login(this.parentNode.parentNode)">Login</span>
+				</div>
+				<div class="icon-sm exit" onclick="thillyUtil.cancel(this.parentNode)"></div>
+			</div>
+		</div>
+		
+		<div class="pageTopper">
+			<div class="topContent" id="topContent"></div>
+			<noscript>
+				<div class="noScript">I'm sorry, without JavaScript this site is basically broken. Well not even basically, it is entirely broken and useless. I'm just one guy experimenting with a bunch of things, unfortunately at this moment, graceful degradation is not one of them. Again, I'm bad, sorry.
+				</div>
+			</noscript>
+			<div class="navBar" id="navBar">
+				<span id="homeNav" class="navEle current" onclick="thillyIndex.goToState(this)" data-link="home">Home</span>
+				<span id="gamesNav" class="navEle" onclick="thillyIndex.goToState(this)" data-link="games">Games</span>
+				<span id="neuralNav" class="navEle" onclick="thillyIndex.goToState(this)" data-link="neural">NeuralNet</span>
+				<span id="challengeNav" class="navEle" onclick="thillyIndex.goToState(this)" data-link="challenge">Challenge</span>
+				<span id="bioNav" class="navEle" onclick="thillyIndex.goToState(this)" data-link="bio">About Me</span>
+				<span id="templateNav" class="navEle" onclick="thillyIndex.goToState(this)" data-link="template">Content</span>
+			</div>
+		</div>
+		
+		<div class="leftCol" id="leftBar">
+			<div class="pointer">
+				<span class="arrow right"></span>
+				<span class="arrow left"></span>
+			</div>
+		</div>
+		
+		<div class="content" id="content"></div>
+		<div class="footer" id="footer">
+			Footer Go Here
+		</div>
+	</body>
+</html>

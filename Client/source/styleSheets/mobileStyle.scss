@@ -1,0 +1,14 @@
+/* */
+.leftCol{
+	display: none;
+}
+
+.content{
+
+	padding-top:20%;
+	width: 100%;
+	
+	& .article {
+		width:80%;
+	}
+}

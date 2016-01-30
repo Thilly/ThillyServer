@@ -1,0 +1,150 @@
+.challenge{
+	height: 100%;
+	width: 100%;
+	overflow: hidden;
+	
+	& .popup.login{
+		position: relative;
+	}
+	
+	/* left box Things */
+	.leftBar, .rightBar{
+		
+		display: none;	/* temp while chat is hooked up */
+
+		width: 10%;
+		height: 600px;
+		float: left;
+		background-color: lightblue;
+	}
+
+	.leftBar > a{
+		cursor: pointer;
+		font-size:1.5em;
+	}
+
+	/* chat box things */
+	.rightBar{
+		width: 30%;
+		float: right;
+		position: relative;
+		
+		& #chatBox{
+			position: absolute;
+			width: 100%;
+			height:95%;
+			overflow: auto;
+			overflow-x: hidden;
+		}
+		
+		& #chatBox #Thilly{/* rename the child to admin for extensibility */
+			color: #999900;
+			font-weight: bold;
+		}
+		
+		& #inputChat{
+			position: absolute;
+			height:4%;
+			width: 100%;
+			box-sizing:border-box;
+			bottom: 0px;
+			left: 0px;
+			background-color: white;
+		}			
+	}
+	
+	/* center col things */
+	.centerWrapper{
+		width: 60%;
+		height: 100%;
+		
+	/*	float: left; */
+		margin: auto;
+		
+		& #codeWindow{
+			height: 400px;
+			max-height: 85%;
+			border: none;
+			padding: 1em;
+			box-sizing:border-box;
+			width:100%;			
+			resize: vertical;
+		}
+
+		& select{
+			width: 10em;		
+		}		
+	}
+	
+	#team{
+		margin: auto;
+		height: 26px;
+		width:45%;
+		float:right;
+		text-align: center;
+		line-height: 26px;
+	}
+	
+	.alert{
+		width: 100%;
+		overflow: auto;
+		overflow-x: hidden;
+		max-height: 250px;
+		
+		&.error{
+			background-color: #990000;
+		}
+		
+		&.neutral{
+			background-color: #18635A;
+		}
+		
+		&.good{
+			background-color: #006600;
+		}
+		
+		.problemResult{
+			padding: 10px;
+			display: inline-block;
+			
+			& + .problemResult{
+				margin-left:1em;
+			}
+			
+			&.fail{
+				background-color: #990000;
+			}
+			
+			&.success{
+				background-color: #006600;
+			}
+		}
+	}
+
+	/* background */
+	pre{
+		overflow-x: hidden;
+		white-space: pre-wrap;
+	}
+	
+	#changeLog{
+		width: 100%;
+		position: absolute;
+		height: 92%;
+		overflow: auto;
+	}
+
+	/* Memory */
+	#memoryLog{
+		width: 100%;
+		height: 160px;
+		margin-top: 15px;
+		float: left;
+	}
+	
+	/*Flags*/
+	#aFlag{
+		width:100%;
+		float:left;
+	}
+}

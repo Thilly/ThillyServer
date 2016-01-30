@@ -1,0 +1,637 @@
+ChangeLog - Thilly.net V5 - Client 
+
+19 October 2014 - finished hooking up first game to controller
+
+	JS:
+		linked snake up to distributed controller
+		created host specific protocols for hosting an instance of a game
+		slightly modified how drawables are drawn at the lowest piece (a single drawable) to account for adding piles of objects at once
+		
+	CSS:
+		modified how buttons look for playing and hosting a game
+	
+	HTML:
+		implemented play and host buttons to distinguish between game request
+		implemented login lock to games (player distinguishing)
+		
+	
+
+18 October 2014 - finished first pass of basic controllers
+
+	JS:
+		implemented stick, touch, 1,2,4button and the test controllers
+		generalized handling of events
+		
+
+17 October 2014 - finished functionality of dpad
+
+	JS:
+		implemented touch handling on dPad controller
+		implemented arguments for each controller object (if applicable)
+		modified how events are dispatched
+		
+
+16 October 2014 - implementing generalized controllers
+
+	JS:
+		created new module (thillyController)
+		implemented drawing of the dPad
+		implemented basic testing of controller interface
+		implemented basic handling of mouse and touch events
+
+19 September 2014 - implementing the first game (distSnake)
+
+	JS: 
+		implemented the first pass of served js for the first iteration of the snake game
+		still need to finish server commands and hosting / joining
+		
+
+17 September 2014 - implementing the graphics library
+	
+	JS:
+		merged the thillyDrawable, thillyRender and thillyLayers modules
+			**not finished, still flushing out functionality
+		implemented a game module to act as launch point for game library
+	
+	HTML:
+		implemented the creation of gameTile 'buttons'
+	
+	CSS:
+		created a basic 'button' for the gameTiles
+		
+
+15 September 2014 - implementing the contest scoreboard
+
+	JS:
+		implemented the handles for the contest scoreboard
+		
+	HTML:
+		modified layout of scoreboard from last version
+	
+	CSS:
+		updated styling for the scoreboard with new layout
+		
+
+8 September 2014 - bringing the contest online finally
+	
+	JS:
+		implemented the handles for participating in the contest
+	
+	HTML:
+		re-arranged the alerts in the contest
+	
+	CSS:
+		minor changes to contest styling
+
+
+
+25 August 2014 - fixed a few bugs and refactored sendRecieve
+
+	JS:
+		refactored all socket i/o to go through sendCommand and action command
+		created a serializing method in thillyUtil to keep track of pending requests and listeners
+		
+	
+20 August 2014 - fixed bug regarding tabs and pics
+
+	JS:
+		refactored upload function to regex through source and replace temp div with actual source
+		refactored tabs so they are built from templateView source during submission
+	
+	HTML:
+		refactored tab structure in template
+			all tabs are on page at once, just display:none for inactive tabs
+			
+	CSS:
+		created specific rules for tabbage in template
+
+
+19 August 2014 - refactored socket connections
+	
+	JS:
+		refactored sockets to be one of three connections
+			send and forget
+			wait for one reply
+			wait for persistent replies
+			
+		discovered that my tabs broke pictures badly
+			working on a fix to that bug
+
+
+18 August 2014 - more MonGUI, schema is done
+
+	JS:
+		finished the schema retrieve, modification, push, and prevent mod when readonly
+		implemented a helper for creating dynamic login walls
+		filled in the schema for the template to match against when rest of operations are built
+		
+	HTML:
+		re-structured how schema is displayed
+	
+	CSS:
+		re-styled how schema is displayed
+		
+	
+17 August 2014 - MonGUI getting closer
+
+	JS:
+		implemented some general-ness of the subsequent layers for showing nested documents
+		fixed a bug in thillyUtil.replaceClasses that caused IE to hang
+		implemented retrieving the current schema
+		implemented the form inputs to modify the current schema
+	
+	HTML:
+		modified the MonGUI template to start with 8 layers, any more and I think I'm mongoing wrong
+		modified wrappers of the form fields on the login menus to not rely on css for structure
+		implemented a lot of dynamic HTML regarding editing/viewing the schema
+	
+	CSS:
+		fixed an issue I introduced regarding labels in the login screen
+		implemented some rules for how disabled inputs are handled
+		
+
+16 August 2014 - began wiring up the mongui
+
+	JS:
+		implemented the init, getDBs/Collections/records/schema functions in 5-mongo.js
+	
+	HTML:
+		modified the mongui template to have a few fields ready to roll
+		added buttons for different operations in mongui
+		
+	CSS:
+		created mongo.scss for the mongui specific styles
+
+
+14 August 2014 - chill day just tidying some things up
+	
+	JS:
+		implemented titles to most of the icon buttons
+		modified comment login to be an 'inlineButton small'
+	
+	HTML:
+		added the icon for the close button
+		modified how inputs are labeled and structured a bit
+	
+	CSS:
+		implemented some pretty form UX to inputs in logins
+		brought back the css 'bounce' on mouseover for icons
+		
+
+12 August 2014 - finishing up diagnostic stuff
+
+	JS:
+		implemented memory logging
+		
+	HTML:
+		added a description meta tag, well find out if I did it right
+		
+		
+11 August 2014 - flushing out diagnostic stuff
+
+	JS:
+		implemented diagnostic initialization
+		implemented getting and viewing server logs in the client
+		implemented getting logging flags from server
+		implemented changing logging flags from server
+	
+	HTML:
+		modified how checkboxes are created
+		modified how log/memory is displayed
+
+	
+10 August 2014 - flushing out the content management
+
+	JS:
+		modified naming convention of source files, numeric prefix
+			1 first to load
+			...
+			5 last to load
+		changed serverside build script to strip numbers from testFiles
+		implemented content management utility for the challenge
+		implemented initial contest problem querying functions
+	
+	HTML:
+		implemented bases for diagnostic, challenge, and mongo
+	
+	CSS:
+		moved all of the colors to variables so I can more easily switch between color schemes when that time comes
+		
+	
+9 August 2014 - dynamic tabs on articles
+
+	JS:
+		whole bunch of re-arranging, refactoring, and new functions to address tab generation and switching
+		nearly everything got touched in some capacity
+		added new stub for mongoDB interface
+	
+	HTML:
+		modified template to add and modify tabs of articles, 
+	
+	CSS:
+		implemented new rules for tabs
+		
+
+4 August 2014 - fix 2 major bugs
+	
+	JS: 
+		fixed a bug that would cause browser hang with replaceClasses
+		fixed a bug that would handle login incorrectly
+		
+
+3 August 2014 - integrating contest
+	
+	JS: 
+		modified how login works to allow for contest to have its own login as well, mroe general now at least
+		implemented new file, 8challenge.js to take care of the challenge state and specific operations
+		fixed a couple of bugs introduced/related by changing login
+		fixed an unnoticed bug with the new breadcrumbs
+		started serving the contest/challenge
+		login works for contest as well as site
+		implemented basic functionality stubs for contest submissions and requests
+		implemented adding tabs to articles
+	
+	HTML:
+		modified logins a little bit
+			changed buttons
+		implemented tabs to articles
+		modified template to content management
+		
+	CSS:
+		included the contest specific stylesheet
+		heavilly modified contest styling
+		implemented tabs to css
+		
+
+2 August 2014 - fixed three bugs
+
+	JS:
+		fixed a bug that threw the scroll to top of page when dragging the minimap
+		fixed a bug involving URL parsing because IE is dumb
+		fixed a bug involving pre-existing thumbnails (again)
+
+		
+31 July 2014 - modified style, fixed bugs, and code isolation
+
+	JS:
+		refactored index to be an IIFE and namespace it to thillyIndex
+		updated rest of JS to use new index functions/variables
+	
+	HTML:
+		updated nav onclick to use new index goToState()
+		added an apologetic noScript message
+	
+	CSS:
+		pulled leftCol away from edge of screen
+		rounded each corner slightly
+		modified styling of nav bar and breadcrumb
+		
+
+30 July 2014 - changed DNS, webby is officially live
+
+	JS: 
+		resolved a few bugs regarding the left panel and scrolling in different browsers
+		modified the check browser function to get browser and version number
+		
+	HTML: 
+		changed 404 a little bit to go to origin regardless of testing or live
+		placed a default picture for thumbnails, removed other (redundant) pictures
+	
+	CSS:
+		changed to a serifless font, getting irratating to look at
+		modified a few styles with popup window
+		modified article pictures to scale properly and not go outside of article bounds
+		
+
+27 July 2014 - couple of bugs before 'release'
+	
+	JS:
+		fixed a bug related to submitting content under different environments
+	
+	HTML:
+		added some content about me and about the site
+		
+
+25 July 2014 - making the client work in different environments
+
+	JS:
+		fixed a bunch of bugs in regards to race conditions when JS is minified
+	
+	HTML:
+		created 2 environments
+			port 80: live environment, compressed and minified stuff
+			port 8080: test environment, local only, non-minified
+		
+		
+22 July 2014 - cleaning up loose ends while styling
+
+	JS: 
+		changed page query to send what pages client has, to get all with no dupes (set of pageIDs)
+		changed way template is served, now comes from mongo to enable it to be edited from the template 
+			yes, the template can be edited from the template
+		changed a bunch of links and how links are formed since re-arranged server file system
+		implemented 404 page
+
+21 July 2014 - Back to work on the template and a bunch of random functionality even getting to some styling
+	
+	RandomThoughts:
+		I will probably be able to deploy and leave up within a week, like within in actual week
+		also it actually works pretty damn good in IE (10+) and FF, good enough for me
+	
+	JS:
+		implemented linking between tabs (games, bio, template)
+		refactored state changing for categories and dateString
+		implemented first pass on adding template tools
+		created generic function to create template tools easily
+		implemented adding different categories of pages
+		implemented selecting different categories to edit
+		refactored nested linking
+		modified how template pageIDs are handled
+		implemented zero points when page is created
+		refactored pageIDs to not collide with comments
+			Its working but I don't like this way, will probably be refactored again
+		fixed a bug regarding dynamic links and duplicate articles
+	
+	HTML:
+		pulled out some functionality from static html to JS to be built at run
+	
+	CSS: 
+		modified buttons, separated inlineButton from comment controls
+		modified look of navEles
+		implemented first few sprites for vote(up/down) and reply button
+		implemented small animation on mouseover for comment buttons
+		refactored the animations to a separate file for working, will deploy as one
+		implemented css for point/points
+		
+
+20 July 2014 - last bit of commenting functionality
+	
+	JS:
+		implemented local responses of actions
+			on vote change color/points
+			on comment display comment without response from server (assume it went through)
+		added login to comments, still no logout :D
+		removed comment object, using iterative approach this time, no need for recursive structure, as fun as it is
+			
+	HTML:
+		restructured comment wrappers
+		
+	CSS: 
+		implemented coloring up/down votes
+		refactored comment styling structure a bit
+		cleaned up put comments/reminders by the base rules
+
+19 July 2014 - finishing up backend of comments
+
+	JS:
+		implemented the ability to up/down vote comments and articles
+		still somewhat rough on front end, still need to apply local updates and feedback on voting 
+	
+	HTML:
+		implemented points for the articles
+	
+	CSS:
+		a few minor tweaks just for pretties
+		
+18 July 2014 - more on comments
+
+	JS:
+		implemented ability to view and post comments
+		refactored some of comments.js, 
+			more to come still during local caching and local publishing
+		minor changes in util/states
+	
+	HTML:
+		implemented comment structuring
+	
+	CSS:
+		some basic testing for comment styling
+
+17 July 2014 - Flushing out commenting
+	
+	JS:
+		implemented buttons to add structure and query for comments 
+		still rough nearly pseudo code for thillyComments
+		
+	HTML:
+		refactored structure of articles
+		
+	CSS:
+		removed index.css, will probably rename interaction.css in future
+		refactored the content of the articles to have their own rule separate from structure
+		implemented some first pass rules for comments
+
+16 July 2014 - Back after a break
+
+	JS:
+		implemented a rough outline of the commenting mechanisms
+	
+	HTML:
+	
+	CSS:
+
+30 June 2014 - Refactoring to block unwarranted content pushes
+
+	JS: 
+		refactored submission to admin.js
+		implemented a message to let std users know they cant submit
+		refactored user cookie and cached logins to be more secure
+		implemented a message to alert user status of content push
+		
+	HTML:
+	
+	CSS:
+	
+
+28 June 2014 - Template is nearly finished
+	
+	JS:
+		implemented picture uploading to server
+		implemented article uploading to server
+		implemented ability to edit old articles
+		modified way interaction generates articles
+		added some new hooks from index to template to handle uploading from socket
+	
+	HTML:
+		slight style changes, no structure
+	
+	CSS:
+		slight style changes, no structure
+
+
+27 June 2014 - Picture preloading is getting there
+	
+	JS:
+		more work with picture preloading
+		refactored pictureHolder to better track multiple images
+		implemented ratio as an attribute to preview the image full size
+		began work on picture controls (float left right none)
+		
+		
+	HTML:
+		some minor tweeks to get the pictures to sit right
+	
+	CSS:
+		added selectors for pictures in document
+
+
+26 June 2014 - much better state monitoring pattern
+
+	JS:
+		implemented a states module to handle the switching of states much cleaner
+		implemented local picture previewing
+		implemented a central logging function to possibly dump logs somewhere in the future
+		fixed some issues that arose with history hijacking after state changes
+	
+	HTML:
+		implemented logged classes that toggle controls if user is logged in or out
+		most onclicks were changed for state handler
+	
+	CSS:
+		implemented more styles to assist in keeping template clean while holding pictures
+		
+
+25 June 2014 - keeping client aware of logged-in-ness
+
+	JS: 
+		implemented local storage for login variables (name, type for now)
+		
+	HTML:
+		buttons change based on logged in or not
+	
+	CSS:
+
+24 June 2014 - implementing login functionality
+
+	JS:
+		implemented ability for users to create accounts and login
+		implemented first pass of error reporting of login issues
+		implemented ability to completely separate admin functions from standard user
+		
+	HTML:
+		refactored appearance of login box
+		added error message
+	
+	CSS:
+		refactored appearance of login box
+		added error message
+		
+	
+23 June 2014 - implementing login boxes and other UX
+
+	JS:
+		login/register/cancel to thillyUtil have been kinda started just to get the functionality started
+	
+	HTML:
+		added a modal window to the index that can be shown and hidden
+		added one box to the modal window for logging in
+		the modal window forces focus and cannot get away without acknowledging it
+		added some functionality and buttons to the loginPopup
+		fixed a just-now-noticed bug with double nested divs in the template view
+		
+	CSS:
+		many changes to flush out the modal, popup windows, buttons, etc.
+		
+
+18 June 2014 - slight mods to template preparing to implement usability
+	
+	JS: 
+		implemented a bit more functionality to the init of the template
+		date is now autofill
+	
+	HTML:
+		adjusted structure of templates and plan on changing the internals of the articles
+		added buttons to layout of template controls
+	
+	CSS:
+		added some padding to the articles, were too wide
+		added some padding and increased the size of tools on template
+		
+
+17 June 2014 - template gogo
+
+	JS:
+		modified all queries to be more general and hopefully safer on the server
+		implemented some of the templating functionality (viewing old records is available)
+	
+	HTML:
+		changed the content of the template 'pullIns' a little bit
+	
+	CSS:
+		added some styles for the templates
+		
+
+16 June 2014 - histoy / static links
+
+	JS: 
+		implemented specific query instead of just order
+		implemented creation of static links on scroll or click
+		implemented dynamic linking back to an article
+		few bug fixes introduced with static linking and specific querying
+	
+	
+15 June 2014 - Start on the template
+
+Started migrating towards the template for my CMS, I want it as natural as a normal article.
+
+	JS:
+		added a template.js to be served when working with the CMS
+		fixed a bug that cropped up with the adding and removing of articles when loading the template
+		added the behaviour for the home button
+		got the "template" to serve and display correctly before I start working on the functionality of it
+	
+	HTML:
+		added a template.html to be served when modifying or adding a new page
+		added the link for the 'home' button
+	
+	CSS:
+		maybe fixed the footer, was kinda wonky with the dynamic sizing.
+		added a variable for the navBars, so i can make sure top and bottom are the same height, or at least relative
+
+		
+14 June 2014 - Mongo queries from client
+
+worked on forming requests to the DB from the client
+
+	JS:
+		implemented a getPages request to get news
+		implemented a getPages acknowledgement to receive the news
+		refactored action commands a bit
+		added a bunch of garbage to help support in ie9/10 
+			that's good enough IMO I don't care about ie8, I don't feel like writing my webby twice
+
+
+13 June 2014 - Complete refactor of client scripts
+
+Worked on namespacing the client JS into a nice little framework, namespaced IIFEs
+	
+	HTML:
+
+	JS:
+		adjusted normalizing functions to scroll better/cleaner and allow to grab more articles
+		implemented a (empty for now) request to get more articles on click of bottom button, or drag over
+		Util, Logging, Interaction are all abstracted away into a nice structure that's mostly hidden from public
+		removed test for time being
+
+	CSS:
+		made slight adjustments to style
+	
+
+12 June 2014 - Complete redesign of layout and initial creation of framework
+
+Made it somewhat emulate the document/minimap thing of sublime text type navigation.
+	
+	Layout:
+		implemented splashImg 100% window size
+		implemented sticky header bar immediately following splashImg
+		implemented single page of content, 'endless' scroll
+		implemented minimap on left for thumbs of content (like v4)
+		implemented pointers to current content in minimap
+		
+	Interaction:
+		implemented normalization between minimap and content pane on click / drag / scroll
+		implemented ability to add additional articles
+		
+	Design:
+		no final theme implementations at this time
+		only colored to show structure		

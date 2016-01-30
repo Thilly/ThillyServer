@@ -1,0 +1,753 @@
+$textColor: #dddddd;
+$navTextColor: #32BEC5;
+$buttonTextColor: #dddddd;
+$buttonDisabledTextColor: #666666;
+$buttonActiveText: #dddddd;
+$buttonBackgroundColor: #444222;
+$buttonActiveBackgroundColor: #222444;
+$buttonDisabledBackgroundColor: #333111;
+$farBackgroundColor: #3C3C3C;
+$backgroundColor:#817D79;
+$popupBackgroundColor: #AAA;
+$contentColor: #005500;
+$contentColorHighlight: #007700;
+$contentColorInactive: #004400;
+$aBoxColor: #000099;
+$commentBackgroundEven: #555555;
+$commentBackgroundOdd: #666666;
+$commentDividerColor: #444444;
+$navHeight : 4em;
+$arrowSize: 1em;
+$arrowColor: red;
+
+/* initial/global stuff */
+body, html{
+	width: 100%;
+	height:100%;
+	margin:auto;
+	padding:0;
+	background-color: $farBackgroundColor;
+	color: $textColor;
+	font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
+}
+
+.gameTile{
+	display: inline-block;
+	height: 150px;
+	width: 150px;
+	border: 1px solid white;
+	text-align: center;
+	margin: 3em;
+	line-height: 138px;
+	cursor: pointer;
+	
+	&:hover{
+		color:black;
+		background-color:white;
+	}
+	
+	.hostTile, .playTile{
+		display: none;
+	}	
+}
+
+.gameTile.selected{
+	.hostTile, .playTile{
+		display: block;
+		border: 1px solid white;
+		line-height: 14px;
+		padding: 10px;
+		margin-top: 1em;
+		
+		&:hover{
+			color: white;
+			background-color: black;
+		}
+	}	
+}
+
+/* spriteSheet */
+.icon{
+	background: url("/images/resources/Sprites.png") 0 0;
+	height: 32px;
+	width: 32px;
+	border: none;
+	padding: 0;
+	margin-left: 1em;
+	cursor: pointer;
+	display:inline-block;
+	vertical-align: middle;
+	
+	&.voteUp{
+		background-position: 0 0;
+		
+		&.upVoted{
+			background-position-y: -32px;
+		}
+	}
+	
+	&.voteDown{
+		background-position: -32px 0;
+		
+		&.downVoted{
+			background-position-y: -32px;	
+		}
+	}
+	
+	&.reply{
+		background-position: -64px 0;
+	}
+	
+	&.options{
+	 	background-position:  -96px 0;
+	}
+	
+	&:hover{
+		background-position-y: -32px;
+		-webkit-animation: smallBounce .2s;
+		animation: smallBounce .2s;
+	}
+}
+
+.icon-sm{
+	background: url("/images/resources/Sprites-sm.png") 0 0;
+	height: 24px;
+	width: 24px;
+	border: none;
+	margin-left: 1em;
+	cursor: pointer;
+	display: inline-block;
+	vertical-align: middle;
+	
+	&.exit{
+		background-position: 0 0;
+	}
+	
+	&.minify{
+		background-position: -24px 0;	
+	}
+	
+	&.expand{
+		background-position: -48px 0;	
+	}
+	
+	&:hover{
+		background-position-y: -24px;
+		-webkit-animation: smallBounce .2s;
+		animation: smallBounce .2s;		
+	}
+}
+
+/* tabs */
+.tabs{
+	position: absolute;
+	height: 2em;
+	top: 0;
+	left: 0em;
+	padding-left:2em;
+	transform: rotate(90deg);
+	transform-origin: top left;
+	
+	& .tab{
+		width: auto;
+		height: 2.2em;
+		overflow: hidden;
+		text-align: center;
+		padding: 0 1em;
+		margin-left: .5em;
+		cursor: pointer;
+		background-color: $contentColorInactive;
+		border-radius: 0 0 .4em .4em;
+		display: inline-block;
+		
+		&:hover{
+			background-color: $contentColorHighlight;
+		}
+	}
+	
+	& .tab.selected{
+		background-color:$contentColor;
+	}
+
+}
+
+/* splash area */
+.pageTopper{
+	position:relative;
+	background-color:$backgroundColor;
+	height:100%;
+	width:100%;
+	z-index:3;
+	
+	& .topContent{
+		height: 100%;
+		width: 100%;	
+	}
+}
+
+/* minimap styling */
+.leftCol{
+	position:fixed;
+	left:3%;
+	top:0;
+	height:100%;
+	width:10%;
+	overflow-y: hidden;
+	
+	.spacer{
+		height:50%;
+	}
+	
+	.pointer{
+		width:10%;
+		position:fixed;
+		top:50%;
+		left:3%;
+		z-index:2;
+		pointer-events: none;
+	}
+	
+	.aBox{
+		border-radius: .4em;
+		height: 8em;
+		width: 90%;
+		margin:auto;
+		margin-bottom: .5em;
+		background-repeat:no-repeat;
+		background-color: $aBoxColor;
+		background-size: contain;
+		opacity:.5;
+		transition: all 1s ease;
+	}
+
+	.aBox:hover{
+		opacity:1;
+	}
+}
+
+/* topBar styles */
+.navBar{
+	background: linear-gradient($backgroundColor, #545250);
+	height: $navHeight;
+	width:100%;
+	position:absolute;
+	bottom:0px;
+	
+	&.stuck{
+		position:fixed;
+		top:0px;
+		height: 2em;
+		font-size: 1em;
+		transition: all .5s;
+		
+		& .navEle{
+			font-size: 1em;
+			line-height: 1.75em;
+			transition: all .5s;
+			
+			&:hover, &.current{
+				background: linear-gradient($backgroundColor, $farBackgroundColor);
+				font-size: 1.5em;
+				line-height: 1.2em;
+			}		
+		}
+	}
+	
+	& .navEle{
+		float:left;
+		text-align: center;
+		font-size: 1.5em;
+		line-height: 2.75em;
+		height: 100%;
+		width: (1/6)*100%;
+		color: $navTextColor;
+		cursor: pointer;
+		transition: all .5s;
+		
+		&:hover, &.current{
+			background: linear-gradient($backgroundColor, $farBackgroundColor);
+		}
+	}
+}
+
+/* bottom bar styles */
+.footer{
+	background: linear-gradient($backgroundColor, #545250);
+	height: $navHeight;
+	width:100%;
+	margin-top: -$navHeight;
+}
+
+/* prevent action outside of modal */
+.modalBackground{
+	height:100%;
+	width:100%;
+	position:fixed;
+	background-color: rgba(0,0,0,.5);
+	visibility: hidden;
+	display:table;
+	z-index: 5;
+}
+
+/* generalized popup styling */
+.popup {
+	position: relative;
+	margin: auto;
+	margin-top: 15%;
+	height: 25%;
+	max-height: 35%;
+	max-width: 35%;
+	font-size: 1.5em;
+	background-color: #AAA;
+	padding: 1.5em;
+	min-height: 250px;
+	min-width: 550px;
+	border-radius: 0.2em;
+	
+	& .errorMessage{
+		color: red;
+		height: 1em;
+		width: 100%;
+	}
+	
+	& .exit{
+		position: absolute;
+		top: 0.5em;
+		right: 0.5em;
+		height: 1em;
+		width: 1em;
+		cursor: pointer;
+	}		
+	
+	& .popupControls{
+		width:100%;
+		text-align: center;
+		display: inline-block;
+	}	
+}
+
+/* input stuff */
+label{
+
+	font-size: 18px;
+/*	
+	float: left;
+	width: 60%;
+*/
+	text-align: right;
+	display: inline-block;
+	
+	&:after{
+		clear:both;
+	}
+	
+	input{
+		
+		margin-top:1em;
+		
+		&:focus:invalid{
+			box-shadow: 0px 0px 6px #bb0000;
+		}
+
+		&:valid{
+			box-shadow: 0px 0px 6px #00bb00;
+		}
+	}
+}
+
+/* login Popup*/
+.login{
+
+	& #reenterBox{
+		visibility: hidden;
+	}
+	
+	& .register{
+		cursor: pointer;
+		color: #444444;
+		
+		&:hover{
+			color: #448844;
+		}
+	}
+}
+
+/* individual article styles, pages */
+.content{
+
+	padding-top:20%;
+	width: 90%;
+	margin-left: 10%;
+	
+	& .article {
+		min-height: 150px;
+		width:70%;
+		margin: auto;
+		margin-bottom: 20%;
+		background-color: $contentColor;
+		padding: 2em;
+		font-size: 1.25em;
+		line-height: 2em;
+		position:relative;
+		border-radius: .2em;
+		
+		& .articlePicture{
+		
+			padding: 1em;
+			
+			& > img{
+				height: auto;
+				max-width:95%;
+			}
+		
+			&:after{
+				clear:both;
+			}
+		}
+		
+		&  .articleContent{
+			overflow: hidden;
+			
+			.tabSpace{
+				display:none;
+				
+				&.selected{
+					display:block;
+				}
+			}
+			
+			&>h1{
+				font-size: 2em;
+				margin-top: 0em;
+			}
+			
+			&>p, &>pre{
+				margin-bottom:3em;
+			}
+		}
+		
+		& li + li{
+			margin-top: 1em;
+		}
+		
+		& pre{
+			overflow-x: auto;
+		}
+	}
+			
+	/* template specific styles */
+	& .templateInputLarge{
+		display: block;
+		margin: auto;
+		width: 90%;
+		max-width: 90%;
+		resize:none;
+		border-radius: .2em;
+	}
+
+	.templateInputLarge + .templateInputLarge{
+		margin-top: 1.2em;
+	}
+	
+	& .templateInputSmall{
+		font-size: 1.5em;
+		margin: .5em;
+		float: left;
+		border-radius: .2em;
+	}
+	
+	& .templateInputTiny{
+		font-size: 1.5em;
+		margin-left: .5em;
+		margin-bottom: .5em;
+	}
+	
+	& .templateTabList{
+		display: inline-block;
+		height: auto;
+	}
+	
+	& .templateOptionsButton{
+		float: right;
+		
+		& .templateOptionsMenu{
+			position: absolute;
+			display: none;
+			margin-left: -4em;
+			width: 6em;
+			background-color: #bbbb11;
+		}
+		
+		& span.templateOption{
+			width:2em;
+			height:2em;
+			display: inline-block;
+			background-color: #11bb11;
+			text-align: center;
+		
+			&:hover{
+				background-color: #11bbbb;
+			}
+		}
+		
+		& span.templateOption.twoWide{
+			width:4em;
+		}
+		
+		& span.templateOption.threeWide{
+			width:6em;
+		}
+	}
+}
+
+/* controls and buttons */
+.inlineButton{
+	cursor: pointer;
+	color: $buttonTextColor;
+	display: inline-block;
+	background-color: $buttonBackgroundColor;
+	font-size: 1.5em;	
+	margin: .5em;
+	padding: .3em;
+	border-radius: .2em;
+	
+	&:hover{
+		background-color: $buttonActiveBackgroundColor;		
+	}
+	
+	&.selected{
+		background-color: $buttonActiveBackgroundColor;
+	}
+	
+	&.disabled{
+		background-color: $buttonDisabledBackgroundColor;
+		color: $buttonDisabledTextColor;
+		cursor: default;
+		pointer-events: none;
+	}
+	
+	&.small{
+		font-size: 1em;	
+		margin: .25em;
+		padding: .15em;
+	}
+	
+	& + .inlineButton{
+		margin-left: 0;
+	}
+}
+
+/* minimap arrows */
+.arrow{
+
+	height: 0;
+	width: 0;
+	border: $arrowSize solid transparent;
+	margin-top: -$arrowSize;
+	
+	&.left{
+		border-right: $arrowSize solid $arrowColor;
+		float: right;
+	}
+	
+	&.right{
+		border-left: $arrowSize solid $arrowColor;
+		float: left;
+	}
+}
+
+/* toggle state of logged in */
+.loggedIn{
+
+	& > .in{
+		display: inline;
+	}
+	
+	& > .out{
+		display: none;
+	}
+	
+	&.block{	
+		height:100%;
+		width:100%;
+		display:inline-block;
+		
+		& > .in{
+			height:100%;
+			width:100%;
+			display:inline-block;
+		}
+	}
+}
+
+/* toggle state of logged out */
+.loggedOut{
+
+	& > .out{
+		display: inline;
+	}
+	
+	& > .in{
+		display: none;
+	}
+	
+	&.block{
+		height:100%;
+		width:100%;
+		display:inline-block;
+		
+		& > .out{
+			height:100%;
+			width:100%;
+			display:inline-block;
+		}
+	}
+}
+
+/* template picture tiles */
+.pictureList{
+
+	width: 90%;
+	overflow: auto;
+	margin: auto;
+	
+	& > .imgBox{
+		margin:.5em;
+		float:left;
+		cursor:pointer;
+	}
+}
+
+/* thing ontop of comments, 'show/hide comments' */
+.articleTools{
+	width: 100%;
+	background-color: #666666;
+	border-radius: .2em;
+	
+	& .articleControl{
+		margin-left: 1em;
+		cursor: pointer;
+		
+		&:hover{
+			color:blue;
+		}
+	}
+	
+	& .points{
+		margin-right: .5em;
+		float: right;
+		font-size: 1.5em;
+		
+		&:after{
+			content: attr(after);
+			clear:both;
+		}
+	}
+	
+	& .articleMetadata.points{
+		font-size: 2em;
+	}
+	
+	& .commentControl{
+		margin-left: 1em;
+		padding: 2px;
+		cursor: pointer;
+		
+		&.upVoted{
+			color: blue;
+		}
+		
+		&.downVoted{
+			color: red;
+		}
+		
+		&:hover{
+			color:blue;
+		}
+	}
+	
+	& .commentMetadata{
+		margin-left: 1em;
+		font-size: .75em;
+		
+		&.upVoted{
+			color: blue;
+		}
+		
+		&.downVoted{
+			color: red;
+		}
+	}
+}
+
+/* an entire articles comments */
+.commentContainer{
+
+	& .replyTools{
+		margin-left: 1em;
+	}
+}
+
+/* one comment box */
+.commentWrapper{
+	overflow: hidden;
+	border-top: 1px solid $commentDividerColor;
+	margin-bottom: .3em;
+	
+	& .commentWrapper{
+		width: 99%;
+		float:right;
+	
+		&:after{
+			clear: both;
+		}
+	}
+		
+	& > .commentText{
+		margin-left: 1em;
+	}
+}
+
+/* noScript */
+.noScript{
+	position: absolute;
+	top: 40%;
+	left: 30%;
+	font-size: 1.5em;
+	max-width: 40%;
+	text-align: center;
+}
+
+/* 404 stuff */
+.content404, .head404{
+	margin-top: 6%;
+	font-size: 2em;
+	width: 100%;
+	text-align:center;
+}
+
+.img404{
+	margin:auto;
+	cursor: pointer;
+	height: 512px;
+	width: 512px;
+	left: 35%;
+	top: 30%;
+}	
+
+/* Zebra Stripes on comments */
+.commentWrapper,
+.commentWrapper .commentWrapper .commentWrapper,
+.commentWrapper .commentWrapper .commentWrapper .commentWrapper .commentWrapper,
+.commentWrapper .commentWrapper .commentWrapper .commentWrapper .commentWrapper .commentWrapper .commentWrapper,
+.commentWrapper .commentWrapper .commentWrapper .commentWrapper .commentWrapper .commentWrapper .commentWrapper .commentWrapper .commentWrapper{
+	background-color: $commentBackgroundOdd;
+}
+
+.commentWrapper .commentWrapper,
+.commentWrapper .commentWrapper .commentWrapper .commentWrapper,
+.commentWrapper .commentWrapper .commentWrapper .commentWrapper .commentWrapper .commentWrapper,
+.commentWrapper .commentWrapper .commentWrapper .commentWrapper .commentWrapper .commentWrapper .commentWrapper .commentWrapper,
+.commentWrapper .commentWrapper .commentWrapper .commentWrapper .commentWrapper .commentWrapper .commentWrapper .commentWrapper .commentWrapper .commentWrapper{
+	background-color: $commentBackgroundEven;
+}
