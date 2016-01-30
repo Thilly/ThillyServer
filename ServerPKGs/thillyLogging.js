@@ -46,7 +46,7 @@ var logs = {
 
 /** */
 var flags = {
-	contest		:	true,
+	contest		:	false,
 	//a flag for watching the contest submissions
 	debug		:	false,
 	//a flag for watching current area of work
@@ -54,7 +54,7 @@ var flags = {
 	//a flag for displaying current logging
 	errors		:	true,	
 	//a flag for watching for errors
-	files		:	false,	
+	files		:	false,
 	//a flag for watching file i/o
 	logging		:	true,	
 	//a flag for writing the log to a file
@@ -64,9 +64,9 @@ var flags = {
 	//a flag for logging memory usage
 	socketIO 	:	false,	
 	//a flag for watching socket.io messages
-	sockets		:	true,	
+	sockets		:	false,
 	//a flag for watching socket events
-	trace		: 	true	
+	trace		: 	false
 	//a flag for watching the flow of the program, basically debug flag
 };
 

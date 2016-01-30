@@ -186,10 +186,24 @@ function rootDir(fromPath, toPath, jsFiles, cssFiles){
 function moveStuff(fromPath, toPath){
 	console.log('moving file: ' + fromPath + ': ' + toPath);
 	var moveFiles = {};
-	fileSys.readdir(fromPath, function(error, files){
-		for(var i = 0; i < files.length; i++)
-			copyFile(fromPath + files[i], toPath + files[i]); 
+	fileSys.readdir(toPath, function(error, files){
+		if(!error) {
+			fileSys.readdir(fromPath, function(error, files){
+				for(var i = 0; i < files.length; i++)
+				copyFile(fromPath + files[i], toPath + files[i]);
+			});
+		} else {
+			fileSys.mkdir(toPath, function(error){
+				if(error) {
+					console.log('error creating directory: ' + toPath);
+				} else {
+					moveStuff(fromPath, toPath);
+				}
+			});
+		}
 	});
+
+
 }
 
 /** copyFile
@@ -230,24 +244,32 @@ function parseSass(data, toPath, fileName){
 		sass.render({
 			file: data['fileName'],
 			outFile: toPath + fileName,
-			success: function(css){
-				console.log('\tfile: ' + css);
-			},
-			error: function(error){
-				console.log('\tERROR: ' + error);
-			},
+		}, function(error, result){
+			if (error) {
+				console.log('error creating css file: ' + fileName);
+			} else {
+				fileSys.writeFile(toPath + fileName, result.css, function(error){
+					if (error) {
+						console.log('error putting css file: ' + error);
+					}
+				});
+			}
 		});
 	}
 	else if(data['data']){
 		sass.render({
 			data: data['data'],
 			outFile: toPath + fileName,
-			success: function(css){
-				console.log('\tfile: ' + css);
-			},
-			error: function(error){
-				console.log('\tERROR: ' + error);
-			},
+		}, function(error, result){
+			if (error) {
+				console.log('error creating css file: ' + fileName);
+			} else {
+				fileSys.writeFile(toPath + fileName, result.css, function(error){
+					if (error) {
+						console.log('error putting css file: ' + error);
+					}
+				});
+			}
 		});
 	}
 	return fileName;

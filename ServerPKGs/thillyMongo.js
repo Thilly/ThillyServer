@@ -218,7 +218,7 @@ function mongoBackup(){
 /** */
 function mongoRestore(date){
 	var exec = require('child_process').exec;
-	var mongoRe = exec('mongorestore --db thillyNet ./MongoBackup/' + date);
+	var mongoRe = exec('mongorestore --db thillyNet ./MongoBackup/' + date + '/thillyNet');
 	console.log('restoring');
 	mongoRe.on('close', function(code){
 		console.log(code);
