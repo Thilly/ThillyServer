@@ -1,5 +1,7 @@
 ChangeLog - Thilly.net V5 - Web Service
 
+29 January 2016 - pulling fresh, seeing if i can get some work done at home
+
 19 October 2014 - linked up controller and first game (snake)
 
 	implemented differing file structure for controllers and host application
