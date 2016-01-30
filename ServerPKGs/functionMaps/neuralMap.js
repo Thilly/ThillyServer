@@ -39,7 +39,7 @@ function getTests(data, socket, exception){
 /** */
 function trainNetwork(data, socket, exception){
 	console.log('starting query to train network:');
-	mongo.select({db:'thillyNet', coll:'neural'}, {okayed:true}, {limit:1000}, function(error, neuralDat){
+	mongo.select({db:'thillyNet', coll:'neural'}, {okayed:true}, {limit:3000}, function(error, neuralDat){
 		console.log('retreived query to train');
 		var requestHash = socket.id;
 		while(pendingRequests[requestHash])

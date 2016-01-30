@@ -32,7 +32,7 @@ function trainNetwork(data){
 	network.train(newTestData,{
 		log: true,
 		logPeriod: 1,
-		iterations: 3
+		iterations: 5
 	});
 	process.send({msg:'testResponse', 'value':{replyTo:data.command, result:'Training Completed'}});
 	trained = true;
