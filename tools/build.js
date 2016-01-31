@@ -10,7 +10,7 @@ var paths = {
 		test : './client/test/',
 		live : './client/live/'
 	};
-	
+
 /** exec
 	exec is a peice of the node child_process library. It is used for running CLI applications.
 */	
@@ -30,6 +30,10 @@ var fileSys = require('fs');
 	minify is a compiler created by google that takes the clientside JS and minifies it to create smaller file transfers.
 */
 var minify = require('closurecompiler');
+
+/**
+*/
+var logging = require('./toolsLogging.js');
 
 /** buildVersion
 	buildVersion is the current iteration since using the build script.
@@ -55,21 +59,23 @@ var buildJS = {
 	'test' : testJS
 	};
 
-	commands += process.argv.slice(2).join('');
-	
+	commands += process.argv[2];
 	if(commands.indexOf('test') >= 0)
 		work.push('test');
 	if(commands.indexOf('live') >= 0)
 		work.push('live');
+	match = commands.match(/\d/g) || 0;
+	logging = logging(match);
 
-for(var i in work)
-	build(work[i]);
-	
+	for(var i in work)
+		build(work[i]);
+return 'finished';
+
 /** build
 	build takes the environment and the relative paths to create a function for further processing
 */	
 function build(environment){
-	console.log('beginning build: ' + environment);
+	logging.trace('beginning build for ' + environment);
 	buildJS[environment](paths['src']+'javaScript/', paths[environment]+'javaScript/');
 }
 /** testJS
@@ -77,11 +83,11 @@ function build(environment){
 */
 function testJS(fromPath, toPath){
 	var jsFiles = [];
-	console.log('building JS: ' + fromPath + ': ' + toPath);
+	logging.trace('building JS ' + fromPath + ':' + toPath);
 	fileSys.readdir(fromPath, function(error, files){
 		for(var i = 0; i < files.length; i++){//copy each JS file over one at a time
 			jsFiles.push(files[i].match(/\d*-(\D*)/)[1]);
-			copyFile(fromPath+files[i], toPath+files[i].match(/\d*-(\D*)/)[1]);
+			copyJS(fromPath, toPath, files[i]);
 		}
 		testCSS(fromPath.replace('javaScript/','styleSheets/'), toPath.replace('javaScript/','styleSheets/'), jsFiles);
 	});
@@ -92,8 +98,7 @@ function testJS(fromPath, toPath){
 */
 function testCSS(fromPath, toPath, jsFiles){
 	var cssFiles = [];
-	var totalSCSS = '';
-	console.log('building CSS: ' + fromPath + ': ' + toPath);
+	logging.trace('building CSS ' + fromPath + ':' + toPath);
 	fileSys.readdir(fromPath, function(error, files){
 		for(var i = 0; i < files.length; i++){//parse each SCSS file over one at a time
 			if(files[i] == 'mobileStyle.scss')//don't add to list to insert into index.html
@@ -110,17 +115,16 @@ function testCSS(fromPath, toPath, jsFiles){
 	getBuildVersion reads the current build version number from a file, increments it, and then puts that number back in the same file. The build version number will be used elsewhere in the program.
 */
 function getBuildVersion(fromPath, toPath){
-	fileSys.readFile('./buildVersion.txt', function(error, versionNum){
+	fileSys.readFile('.tools/buildVersion.txt', function(error, versionNum){
 		buildVersion = parseInt(versionNum);
 		buildVersion++;
-		fileSys.writeFile('./buildVersion.txt', buildVersion, function(error, written){
+		fileSys.writeFile('.tools/buildVersion.txt', buildVersion, function(error, written){
 			if(!error){
-				console.log('build version: ' + buildVersion);
+				logging.trace('build version: ' + buildVersion);
 				liveJS(fromPath, toPath)
 			}
 			else{
-				console.log('Error: ' + error);
-				console.log('Build aborted');
+				logging.error('Error: ' + error + ' Build aborted');
 			}
 		});
 	});
@@ -132,7 +136,8 @@ function getBuildVersion(fromPath, toPath){
 function liveJS(fromPath, toPath){
 	var jsFiles = [];
 	var append = [];
-	console.log('building JS: ' + fromPath + ': ' + toPath);
+	logging.trace('building JS ' + fromPath + ':' + toPath);
+
 	fileSys.readdir(fromPath, function(error, files){
 		for(var i = 0; i < files.length; i++){
 			jsFiles.push(fromPath + files[i]);
@@ -148,7 +153,7 @@ function liveJS(fromPath, toPath){
 function liveCSS(fromPath, toPath, jsFiles){
 	var cssFiles = [];
 	var totalSCSS = '';
-	console.log('building CSS: ' + fromPath + ': ' + toPath);
+	logging.trace('building CSS ' + fromPath + ':' + toPath);
 	fileSys.readdir(fromPath, function(error, files){
 		for(var i = 0; i < files.length; i++){//copy each JS file over one at a time
 			if(files[i] == 'mobileStyle.scss')
@@ -166,13 +171,13 @@ function liveCSS(fromPath, toPath, jsFiles){
 	rootDir finishes assembling the index.html from all of the different files being used by this version of the client.
 */
 function rootDir(fromPath, toPath, jsFiles, cssFiles){
-	console.log('building HTML: ' + fromPath + ': ' + toPath);
+	logging.trace('building HTML ' + fromPath + ':' + toPath);
 	fileSys.readdir(fromPath, function(error, files){
 		for(var i = 0; i < files.length; i++){
 			if(files[i] == 'index.html')
 				buildHTML(fromPath, toPath, jsFiles, cssFiles);
 			else
-				copyFile(fromPath+files[i], toPath+files[i]);
+				copyFile(fromPath, toPath, files[i]);
 		}
 	});
 	moveStuff(fromPath+'images/', toPath+'images/');
@@ -184,40 +189,37 @@ function rootDir(fromPath, toPath, jsFiles, cssFiles){
 	moveStuff takes a file name and a destination and just copies the file over to the new destination.
 */
 function moveStuff(fromPath, toPath){
-	console.log('moving file: ' + fromPath + ': ' + toPath);
-	var moveFiles = {};
-	fileSys.readdir(toPath, function(error, files){
-		if(!error) {
-			fileSys.readdir(fromPath, function(error, files){
-				for(var i = 0; i < files.length; i++)
-				copyFile(fromPath + files[i], toPath + files[i]);
-			});
-		} else {
-			fileSys.mkdir(toPath, function(error){
-				if(error) {
-					console.log('error creating directory: ' + toPath);
-				} else {
-					moveStuff(fromPath, toPath);
-				}
-			});
-		}
+	logging.files('moving file ' + fromPath + ':' + toPath);
+	fileSys.readdir(fromPath, function(error, files){
+		for(var i = 0; i < files.length; i++)
+			copyFile(fromPath, toPath, files[i]);
 	});
-
-
 }
 
 /** copyFile
 	copyFile is a small helper function around the actual file copy process
 */
-function copyFile(from, to){
-	fileSys.readFile(from, function(error, data){
-		if(!error){
-			console.log('\tfile: ' + to);
-			fileSys.writeFile(to, data);
-		}
+function copyFile(fromPath, toPath, fileName){
+	logging.files('copying file ' + fromPath + ':' + toPath);
+	ensureDirectory(toPath, function(){
+		fileSys.readFile(fromPath + fileName, function (error, data) {
+			if (!error) {
+				fileSys.writeFile(toPath + fileName, data);
+			}
+		});
 	});
 }
 
+function copyJS(fromPath, toPath, fileName){
+	logging.files('copying file ' + fromPath + ':' + toPath);
+	ensureDirectory(toPath, function(){
+		fileSys.readFile(fromPath + fileName, function (error, data) {
+			if (!error) {
+				fileSys.writeFile(toPath + (fileName.replace(/\d-/g, '')), data);
+			}
+		});
+	});
+}
 /**	buildHTML
 	buildHTML writes all of the included filenames into the index.html before capping it with the meta tags.
 */
@@ -246,12 +248,14 @@ function parseSass(data, toPath, fileName){
 			outFile: toPath + fileName,
 		}, function(error, result){
 			if (error) {
-				console.log('error creating css file: ' + fileName);
+				logging.files('error creating css file: ' + fileName);
 			} else {
-				fileSys.writeFile(toPath + fileName, result.css, function(error){
-					if (error) {
-						console.log('error putting css file: ' + error);
-					}
+				ensureDirectory(toPath, function(){
+					fileSys.writeFile(toPath + fileName, result.css, function(error){
+						if (error) {
+							logging.error('error putting css file: ' + error);
+						}
+					});
 				});
 			}
 		});
@@ -262,11 +266,11 @@ function parseSass(data, toPath, fileName){
 			outFile: toPath + fileName,
 		}, function(error, result){
 			if (error) {
-				console.log('error creating css file: ' + fileName);
+				logging.error('error creating css file: ' + fileName);
 			} else {
 				fileSys.writeFile(toPath + fileName, result.css, function(error){
 					if (error) {
-						console.log('error putting css file: ' + error);
+						logging.error('error putting css file: ' + error);
 					}
 				});
 			}
@@ -281,13 +285,32 @@ function parseSass(data, toPath, fileName){
 function compileJS(files, toPath){
 	minify.compile(files,{}, function(error, result){
 		if(error){
-			console.log('Error in compileJS:' + error);
-			console.log('\tfile: ' + toPath + 'min' + buildVersion + '.js : NOT CREATED');
+			logging.error('Error in compileJS: ' + error);
+			logging.error('\tfile: ' + toPath + 'min' + buildVersion + '.js NOT CREATED');
 		}
 		else{
-			console.log('\tfile: ' + toPath + 'min' + buildVersion + '.js');
-			fileSys.writeFile(toPath + 'min' + buildVersion + '.js', result);
+			logging.files('created file: ' + toPath + 'min' + buildVersion + '.js');
+			ensureDirectory(toPath, function(){
+				fileSys.writeFile(toPath + 'min' + buildVersion + '.js', result);
+			});
+
 		}
 	});
 	return 'min' + buildVersion + '.js';
+}
+
+/**
+*/
+function ensureDirectory(toPath, callBack) {
+	if (toPath.indexOf('/') != toPath.length-1) {
+		toPath.replace(/\\.+$/, '\\');
+	}
+	fileSys.mkdir(toPath, function (error) {
+		if (error && error.code !== 'EEXIST') {
+			logging.error('error creating directory ' + toPath + ':' + error);
+		} else {
+			logging.files('directory ' + toPath + ' created');
+			callBack();
+		}
+	});
 }

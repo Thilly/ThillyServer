@@ -1,0 +1,4 @@
+Client/live/
+Client/test/
+node_modules/
+.idea*
